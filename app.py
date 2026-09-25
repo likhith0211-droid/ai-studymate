@@ -2,14 +2,13 @@ import streamlit as st
 
 st.set_page_config(
     page_title="AI StudyMate",
-    page_icon="🎓",
-    layout="wide"
+    page_icon="🤖",
+    layout="centered"
 )
 
 # -----------------------------
 # SESSION STATE
 # -----------------------------
-
 if "started" not in st.session_state:
     st.session_state.started = False
 
@@ -22,158 +21,291 @@ if "diagnostic_completed" not in st.session_state:
 if "topic_scores" not in st.session_state:
     st.session_state.topic_scores = {}
 
+if "current_topic" not in st.session_state:
+    st.session_state.current_topic = None
+
+if "tutor_started" not in st.session_state:
+    st.session_state.tutor_started = False
+
 
 # -----------------------------
-# QUESTIONS
+# TOPIC LESSONS
 # -----------------------------
+lessons = {
+    "AI Fundamentals": {
+        "title": "Understanding Artificial Intelligence",
+        "lesson": """
+Artificial Intelligence (AI) is the field of creating computer systems
+that can perform tasks that normally require human intelligence.
 
-questions = [
-    {
-        "topic": "AI Fundamentals",
-        "question": "What does AI stand for?",
-        "options": [
-            "Automated Internet",
-            "Artificial Intelligence",
-            "Advanced Information",
-            "Artificial Internet"
-        ],
-        "answer": "Artificial Intelligence"
+Examples include:
+- Understanding language
+- Recognizing objects in images
+- Making predictions
+- Recommending content
+- Making decisions from data
+
+Think of AI as a system that receives information, processes it,
+and produces an intelligent output.
+""",
+        "question": "In your own words, what is Artificial Intelligence?",
+        "keywords": ["computer", "machine", "intelligence", "human", "task"]
     },
-    {
-        "topic": "AI Fundamentals",
-        "question": "Which of these is an example of AI?",
-        "options": [
-            "A calculator doing 2 + 2",
-            "A system recognizing objects in images",
-            "A USB drive",
-            "A keyboard"
-        ],
-        "answer": "A system recognizing objects in images"
+
+    "Python": {
+        "title": "Python Basics for AI",
+        "lesson": """
+Python is one of the most commonly used programming languages in AI.
+
+Important Python concepts for AI include:
+- Variables
+- Data types
+- Conditions
+- Loops
+- Functions
+- Lists and dictionaries
+
+For example:
+
+x = 10
+
+Here, x is a variable containing the value 10.
+""",
+        "question": "Why is Python useful when learning Artificial Intelligence?",
+        "keywords": ["simple", "easy", "ai", "machine", "libraries", "programming"]
     },
-    {
-        "topic": "Python",
-        "question": "Which symbol is used to create a comment in Python?",
-        "options": [
-            "//",
-            "#",
-            "<!-- -->",
-            "/* */"
-        ],
-        "answer": "#"
+
+    "Machine Learning": {
+        "title": "Introduction to Machine Learning",
+        "lesson": """
+Machine Learning (ML) is a branch of AI where computers learn patterns
+from data.
+
+For example, instead of manually programming a system to recognize cats,
+we can provide many examples of images containing cats.
+
+The model learns patterns from those examples and can then make
+predictions on new data.
+""",
+        "question": "What does a machine learning model learn from?",
+        "keywords": ["data", "examples", "patterns", "training"]
     },
-    {
-        "topic": "Python",
-        "question": "Which data type stores True or False?",
-        "options": [
-            "String",
-            "Integer",
-            "Boolean",
-            "List"
-        ],
-        "answer": "Boolean"
+
+    "Generative AI": {
+        "title": "Understanding Generative AI",
+        "lesson": """
+Generative AI refers to AI systems that can create new content.
+
+They can generate:
+- Text
+- Images
+- Audio
+- Video
+- Code
+
+Large Language Models (LLMs) are an important example of Generative AI.
+They can generate and transform text based on the input they receive.
+""",
+        "question": "What makes Generative AI different from a system that only classifies information?",
+        "keywords": ["create", "generate", "new", "content", "text", "image"]
     },
-    {
-        "topic": "Machine Learning",
-        "question": "What is supervised learning?",
-        "options": [
-            "Learning with labelled examples",
-            "Learning without data",
-            "Learning only from images",
-            "Learning without a model"
-        ],
-        "answer": "Learning with labelled examples"
+
+    "RAG": {
+        "title": "Understanding RAG",
+        "lesson": """
+RAG stands for Retrieval-Augmented Generation.
+
+A RAG system retrieves relevant information from a knowledge source
+and provides that information to a language model before generating
+an answer.
+
+A simple flow is:
+
+Question → Retrieve information → Generate answer
+""",
+        "question": "What is the main purpose of retrieving information in a RAG system?",
+        "keywords": ["information", "context", "knowledge", "answer", "relevant"]
     },
-    {
-        "topic": "Machine Learning",
-        "question": "What is a training dataset?",
-        "options": [
-            "Data used to teach a model",
-            "A computer program",
-            "A password",
-            "A web browser"
-        ],
-        "answer": "Data used to teach a model"
-    },
-    {
-        "topic": "Generative AI",
-        "question": "What can a generative AI model do?",
-        "options": [
-            "Only store files",
-            "Generate new content",
-            "Only calculate numbers",
-            "Only browse websites"
-        ],
-        "answer": "Generate new content"
-    },
-    {
-        "topic": "Generative AI",
-        "question": "What is an LLM?",
-        "options": [
-            "Large Language Model",
-            "Long Learning Machine",
-            "Large Logic Machine",
-            "Language Learning Method"
-        ],
-        "answer": "Large Language Model"
-    },
-    {
-        "topic": "RAG",
-        "question": "What does RAG commonly stand for in AI?",
-        "options": [
-            "Retrieval-Augmented Generation",
-            "Random AI Generation",
-            "Rapid Answer Generation",
-            "Recursive Agent Gateway"
-        ],
-        "answer": "Retrieval-Augmented Generation"
-    },
-    {
-        "topic": "AI Agents",
-        "question": "What is an AI agent designed to do?",
-        "options": [
-            "Only display text",
-            "Perceive information and take actions toward a goal",
-            "Only store information",
-            "Only generate images"
-        ],
-        "answer": "Perceive information and take actions toward a goal"
+
+    "AI Agents": {
+        "title": "Introduction to AI Agents",
+        "lesson": """
+An AI agent is a system designed to perceive information and take
+actions toward a goal.
+
+A simple agent workflow can be:
+
+Observe → Think → Act → Observe again
+
+For example, an AI agent could receive a user's goal, decide what
+steps are needed, use available tools, and then return the result.
+""",
+        "question": "What is one important difference between an AI agent and a simple chatbot?",
+        "keywords": ["action", "goal", "tools", "steps", "act", "autonomous"]
     }
-]
+}
 
 
 # -----------------------------
 # HEADER
 # -----------------------------
+st.title("🤖 AI StudyMate")
+st.caption("Your Personalized AI Tutor")
 
-st.title("🎓 AI StudyMate")
-st.subheader("Your personalised AI tutor for learning AI")
 
-st.write(
-    "Learn AI at your own level. "
-    "AI StudyMate understands what you already know, "
-    "creates a learning path for you, and adapts as you learn."
-)
+# -----------------------------
+# TUTOR SCREEN
+# -----------------------------
+if st.session_state.tutor_started:
 
-st.divider()
+    topic = st.session_state.current_topic
+
+    if topic not in lessons:
+        st.error("No lesson is available for this topic.")
+        st.stop()
+
+    lesson = lessons[topic]
+
+    st.success(f"🎯 Personalized lesson selected: **{topic}**")
+
+    st.header(f"📚 {lesson['title']}")
+
+    st.write(lesson["lesson"])
+
+    st.divider()
+
+    st.subheader("🧠 Check Your Understanding")
+
+    st.write(lesson["question"])
+
+    answer = st.text_area(
+        "Write your answer in your own words:",
+        height=150,
+        placeholder="Type your answer here..."
+    )
+
+    if st.button("✅ Check My Understanding"):
+
+        if not answer.strip():
+            st.warning("Please write an answer first.")
+        else:
+            answer_lower = answer.lower()
+
+            matched = 0
+
+            for keyword in lesson["keywords"]:
+                if keyword in answer_lower:
+                    matched += 1
+
+            if matched >= 2:
+                st.success(
+                    "🎉 Good job! Your answer shows that you understand "
+                    "the main idea."
+                )
+
+                st.write(
+                    "### 🌟 Tutor Feedback"
+                )
+
+                st.write(
+                    "You identified important concepts correctly. "
+                    "Let's increase the difficulty slightly in the next activity."
+                )
+
+                st.session_state.mastery = "Improving"
+
+            elif matched == 1:
+                st.info(
+                    "👍 You're on the right track, but your answer could "
+                    "include a little more detail."
+                )
+
+                st.write(
+                    "💡 **Hint:** Review the lesson above and mention "
+                    "the main concept in your answer."
+                )
+
+                st.session_state.mastery = "Needs Practice"
+
+            else:
+                st.error(
+                    "Let's try that again. Your answer doesn't yet show "
+                    "the main concept."
+                )
+
+                st.write(
+                    "💡 **Tutor Hint:** Read the lesson once more and "
+                    "answer using your own words."
+                )
+
+                st.session_state.mastery = "Needs Review"
+
+    st.divider()
+
+    st.subheader("📈 Your Current Learning Status")
+
+    if "mastery" in st.session_state:
+
+        if st.session_state.mastery == "Improving":
+            st.success("🟢 Mastery Status: Improving")
+
+        elif st.session_state.mastery == "Needs Practice":
+            st.warning("🟡 Mastery Status: Needs Practice")
+
+        else:
+            st.error("🔴 Mastery Status: Needs Review")
+
+    if st.button("⬅️ Back to Personalized Path"):
+        st.session_state.tutor_started = False
+        st.rerun()
+
+    st.stop()
+
+
+# -----------------------------
+# WELCOME SCREEN
+# -----------------------------
+if not st.session_state.started:
+
+    st.subheader("Learn AI at your own pace.")
+
+    st.write(
+        "AI StudyMate first understands what you already know, "
+        "then creates a personalized learning experience."
+    )
+
+    st.write("### What your AI tutor will do")
+
+    st.write("🔎 Assess your current knowledge")
+    st.write("🎯 Identify your weakest topics")
+    st.write("🛣️ Create a personalized learning path")
+    st.write("🤖 Teach concepts step by step")
+    st.write("📈 Track your improvement")
+
+    if st.button("🚀 Start Learning"):
+
+        st.session_state.started = True
+        st.rerun()
+
+    st.stop()
 
 
 # -----------------------------
 # PROFILE
 # -----------------------------
+if not st.session_state.profile:
 
-if not st.session_state.started:
+    st.header("👤 Tell Me About Yourself")
 
-    st.header("🚀 Start Your Learning Journey")
-
-    name = st.text_input("👤 Your Name")
+    name = st.text_input("Your Name")
 
     level = st.selectbox(
-        "📚 What is your current AI level?",
+        "Current AI Experience",
         ["Beginner", "Intermediate", "Advanced"]
     )
 
     goal = st.selectbox(
-        "🎯 What is your main goal?",
+        "What do you want to achieve?",
         [
             "Learn AI fundamentals",
             "Build AI projects",
@@ -184,18 +316,15 @@ if not st.session_state.started:
     )
 
     study_time = st.selectbox(
-        "⏱️ How much time can you study each day?",
-        [
-            "15 minutes",
-            "30 minutes",
-            "1 hour",
-            "2+ hours"
-        ]
+        "How much time can you study each day?",
+        ["15 minutes", "30 minutes", "1 hour", "2+ hours"]
     )
 
-    if st.button("✨ Create My Learning Path", type="primary"):
+    if st.button("Continue →"):
 
-        if name.strip():
+        if not name.strip():
+            st.warning("Please enter your name.")
+        else:
 
             st.session_state.profile = {
                 "name": name,
@@ -204,192 +333,177 @@ if not st.session_state.started:
                 "study_time": study_time
             }
 
-            st.session_state.started = True
             st.rerun()
 
-        else:
-            st.warning("Please enter your name first.")
+    st.stop()
 
 
 # -----------------------------
-# LEARNING AREA
+# DIAGNOSTIC TEST
 # -----------------------------
+if not st.session_state.diagnostic_completed:
 
-else:
+    st.header("🧠 AI Knowledge Diagnostic")
 
-    profile = st.session_state.profile
+    st.write(
+        f"Hi **{st.session_state.profile['name']}**! "
+        "Let's quickly understand what you already know."
+    )
 
-    st.success(f"Welcome, {profile['name']}! 🎉")
+    st.write(
+        "There are 10 questions. Answer honestly — "
+        "the goal is to personalize your learning path."
+    )
 
+    questions = [
+        ("AI Fundamentals", "What does AI stand for?",
+         ["Artificial Intelligence", "Automated Internet", "Advanced Information", "Artificial Interface"],
+         "Artificial Intelligence"),
 
-    # -------------------------
-    # DIAGNOSTIC
-    # -------------------------
+        ("AI Fundamentals", "Which is an example of AI?",
+         ["A calculator", "A system recognizing objects in images", "A light bulb", "A keyboard"],
+         "A system recognizing objects in images"),
 
-    if not st.session_state.diagnostic_completed:
+        ("Python", "Which symbol is commonly used to write a comment in Python?",
+         ["//", "#", "<!--", "**"],
+         "#"),
 
-        st.header("🧠 AI Knowledge Diagnostic")
+        ("Python", "Which Python data type represents True or False?",
+         ["String", "Integer", "Boolean", "List"],
+         "Boolean"),
 
-        st.write(
-            "Let's understand what you already know "
-            "before creating your learning path."
+        ("Machine Learning", "What is supervised learning?",
+         ["Learning without data", "Learning from labelled examples",
+          "Only writing rules manually", "Deleting incorrect data"],
+         "Learning from labelled examples"),
+
+        ("Machine Learning", "What is a training dataset?",
+         ["Data used to teach a model",
+          "A programming language", "A computer", "A user interface"],
+         "Data used to teach a model"),
+
+        ("Generative AI", "What can a generative AI model do?",
+         ["Only classify data", "Generate new content",
+          "Only store files", "Only calculate numbers"],
+         "Generate new content"),
+
+        ("Generative AI", "What does LLM stand for?",
+         ["Large Language Model", "Long Learning Machine",
+          "Logical Language Method", "Large Logic Machine"],
+         "Large Language Model"),
+
+        ("RAG", "What does RAG stand for?",
+         ["Retrieval-Augmented Generation",
+          "Random AI Generation",
+          "Rapid Automated Guidance",
+          "Retrieved AI Graph"],
+         "Retrieval-Augmented Generation"),
+
+        ("AI Agents", "What are AI agents designed to do?",
+         ["Only answer fixed questions",
+          "Perceive information and take actions toward a goal",
+          "Only store data",
+          "Only generate images"],
+         "Perceive information and take actions toward a goal")
+    ]
+
+    answers = []
+
+    for i, (topic, question, options, correct) in enumerate(questions):
+
+        st.subheader(f"Question {i + 1}")
+
+        answer = st.radio(
+            question,
+            options,
+            key=f"question_{i}"
         )
 
-        answers = {}
+        answers.append((topic, answer, correct))
 
-        for i, q in enumerate(questions):
+    if st.button("📊 Generate My Personalized Path"):
 
-            st.markdown(f"### Question {i + 1}")
+        topic_scores = {}
 
-            answers[i] = st.radio(
-                q["question"],
-                q["options"],
-                key=f"question_{i}"
+        for topic, answer, correct in answers:
+
+            if topic not in topic_scores:
+                topic_scores[topic] = {
+                    "correct": 0,
+                    "total": 0
+                }
+
+            topic_scores[topic]["total"] += 1
+
+            if answer == correct:
+                topic_scores[topic]["correct"] += 1
+
+        for topic in topic_scores:
+
+            correct = topic_scores[topic]["correct"]
+            total = topic_scores[topic]["total"]
+
+            topic_scores[topic]["percentage"] = int(
+                correct / total * 100
             )
 
-        if st.button(
-            "📊 Calculate My AI Knowledge",
-            type="primary"
-        ):
+        st.session_state.topic_scores = topic_scores
+        st.session_state.diagnostic_completed = True
 
-            topic_scores = {}
+        st.rerun()
 
-            for i, q in enumerate(questions):
-
-                topic = q["topic"]
-
-                if topic not in topic_scores:
-                    topic_scores[topic] = {
-                        "correct": 0,
-                        "total": 0
-                    }
-
-                topic_scores[topic]["total"] += 1
-
-                if answers[i] == q["answer"]:
-                    topic_scores[topic]["correct"] += 1
-
-            st.session_state.topic_scores = topic_scores
-            st.session_state.diagnostic_completed = True
-
-            st.rerun()
+    st.stop()
 
 
-    # -------------------------
-    # PERSONALIZED PATH
-    # -------------------------
+# -----------------------------
+# PERSONALIZED PATH
+# -----------------------------
+st.header("🛣️ Your Personalized Learning Path")
 
+st.write(
+    f"Based on your diagnostic assessment, "
+    f"here is the learning path created for **"
+    f"{st.session_state.profile['name']}**."
+)
+
+scores = st.session_state.topic_scores
+
+ordered_topics = sorted(
+    scores.keys(),
+    key=lambda topic: scores[topic]["percentage"]
+)
+
+for position, topic in enumerate(ordered_topics, start=1):
+
+    percentage = scores[topic]["percentage"]
+
+    if percentage >= 80:
+        status = "🟢 Strong"
+    elif percentage >= 50:
+        status = "🟡 Practice More"
     else:
+        status = "🔴 Priority"
 
-        scores = {}
+    st.write(
+        f"**{position}. {topic}** — {percentage}% — {status}"
+    )
 
-        for topic, result in st.session_state.topic_scores.items():
+    st.progress(percentage / 100)
 
-            percentage = int(
-                result["correct"] /
-                result["total"] *
-                100
-            )
+weakest_topic = ordered_topics[0]
 
-            scores[topic] = percentage
+st.session_state.current_topic = weakest_topic
 
+st.divider()
 
-        st.header("📊 Your AI Knowledge Profile")
+st.subheader("🎯 Your Recommended Focus")
 
-        columns = st.columns(len(scores))
+st.info(
+    f"Your tutor recommends starting with **{weakest_topic}** "
+    "because this is currently your weakest area."
+)
 
-        for column, (topic, score) in zip(
-            columns,
-            scores.items()
-        ):
+if st.button("🤖 Start My Personalized Lesson"):
 
-            with column:
-
-                st.metric(
-                    topic,
-                    f"{score}%"
-                )
-
-                st.progress(score / 100)
-
-
-        st.divider()
-
-        st.header("🗺️ Your Personalized Learning Path")
-
-        st.write(
-            "Your learning path is based on your diagnostic results."
-        )
-
-
-        # Sort topics from weakest to strongest
-
-        sorted_topics = sorted(
-            scores.items(),
-            key=lambda item: item[1]
-        )
-
-
-        for index, (topic, score) in enumerate(sorted_topics):
-
-            if score >= 80:
-
-                status = "✅ Strong"
-
-            elif score >= 50:
-
-                status = "📘 Practice More"
-
-            else:
-
-                status = "🔴 Priority"
-
-
-            col1, col2, col3 = st.columns([1, 4, 2])
-
-            with col1:
-                st.write(f"**{index + 1}**")
-
-            with col2:
-                st.write(f"### {topic}")
-
-            with col3:
-                st.write(status)
-
-
-            st.progress(score / 100)
-
-
-        st.divider()
-
-
-        # Weakest topic
-
-        weakest_topic = sorted_topics[0][0]
-        weakest_score = sorted_topics[0][1]
-
-
-        st.subheader("🎯 Your Recommended Focus")
-
-        st.warning(
-            f"Your current priority is **{weakest_topic}** "
-            f"with a starting mastery of **{weakest_score}%**."
-        )
-
-
-        st.info(
-            "AI StudyMate will give you targeted lessons "
-            "and practice questions for this topic."
-        )
-
-
-        if st.button(
-            "🤖 Start My Personalized Lesson",
-            type="primary"
-        ):
-
-            st.session_state.current_topic = weakest_topic
-
-            st.success(
-                f"Great! Let's start learning **{weakest_topic}**."
-            )
+    st.session_state.tutor_started = True
+    st.rerun()
