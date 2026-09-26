@@ -8,7 +8,8 @@ import random
 st.set_page_config(
     page_title="AI StudyMate",
     page_icon="🎓",
-    layout="wide"
+    layout="centered",
+    initial_sidebar_state="expanded",
 )
 
 # ============================================================
@@ -20,27 +21,24 @@ SUBJECTS = [
     "Mathematics & Statistics",
     "Machine Learning",
     "Deep Learning",
-    "Generative AI"
+    "Generative AI",
 ]
 
 # ============================================================
 # SESSION STATE
 # ============================================================
 
-DEFAULTS = {
+DEFAULT_STATE = {
     "page": "home",
     "profile": {},
-    "questions": [],
-    "current_question": 0,
-    "answers": [],
-    "diagnostic_complete": False,
-    "domain_scores": {},
+    "diagnostic_questions": [],
+    "diagnostic_answers": [],
+    "diagnostic_index": 0,
+    "scores": {},
     "roadmap": [],
-    "used_question_ids": set(),
-    "attempt_number": 0
 }
 
-for key, value in DEFAULTS.items():
+for key, value in DEFAULT_STATE.items():
     if key not in st.session_state:
         st.session_state[key] = value
 
@@ -48,1119 +46,1017 @@ for key, value in DEFAULTS.items():
 # ============================================================
 # QUESTION BANK
 # ============================================================
+# Each question has:
+# subject
+# level
+# question
+# options
+# answer -> correct option index
+#
+# The diagnostic uses 3 randomly selected questions per subject.
+# ============================================================
 
-QUESTION_BANK = {
+QUESTION_BANK = [
 
     # ========================================================
-    # PYTHON
+    # PYTHON - BEGINNER
     # ========================================================
 
-    "Python": {
-
-        "Beginner": [
-
-            {
-                "id": "py_b1",
-                "question": "Which symbol is used to create a comment in Python?",
-                "options": ["#", "//", "/*", "--"],
-                "answer": "#"
-            },
-
-            {
-                "id": "py_b2",
-                "question": "Which of the following is a Python data type?",
-                "options": ["list", "table", "recordset", "document"],
-                "answer": "list"
-            },
-
-            {
-                "id": "py_b3",
-                "question": "What is the output type of the expression 10 > 5?",
-                "options": ["Boolean", "String", "Integer", "List"],
-                "answer": "Boolean"
-            },
-
-            {
-                "id": "py_b4",
-                "question": "Which keyword is used to define a function in Python?",
-                "options": ["def", "function", "fun", "define"],
-                "answer": "def"
-            },
-
-            {
-                "id": "py_b5",
-                "question": "Which collection stores multiple values in an ordered and changeable form?",
-                "options": ["List", "Tuple", "Set", "Dictionary"],
-                "answer": "List"
-            },
-
-            {
-                "id": "py_b6",
-                "question": "Which function is commonly used to display output in Python?",
-                "options": ["print()", "display()", "show()", "output()"],
-                "answer": "print()"
-            },
-
-            {
-                "id": "py_b7",
-                "question": "Which operator is used for exponentiation in Python?",
-                "options": ["**", "^", "//", "%%"],
-                "answer": "**"
-            },
-
-            {
-                "id": "py_b8",
-                "question": "Which value represents the absence of a value in Python?",
-                "options": ["None", "NullValue", "Empty", "Void"],
-                "answer": "None"
-            },
-
-            {
-                "id": "py_b9",
-                "question": "Which statement is used to repeat code while a condition remains true?",
-                "options": ["while", "repeat", "loop", "during"],
-                "answer": "while"
-            },
-
-            {
-                "id": "py_b10",
-                "question": "Which brackets are used to create a Python list?",
-                "options": ["[]", "{}", "()", "<>"],
-                "answer": "[]"
-            }
-        ],
-
-        "Intermediate": [
-
-            {
-                "id": "py_i1",
-                "question": "What does a Python dictionary primarily store?",
-                "options": [
-                    "Key-value pairs",
-                    "Only numbers",
-                    "Only strings",
-                    "Ordered functions"
-                ],
-                "answer": "Key-value pairs"
-            },
-
-            {
-                "id": "py_i2",
-                "question": "What does list comprehension provide?",
-                "options": [
-                    "A concise way to create lists",
-                    "A way to define classes",
-                    "Database connectivity",
-                    "Exception handling"
-                ],
-                "answer": "A concise way to create lists"
-            },
-
-            {
-                "id": "py_i3",
-                "question": "What is the purpose of try/except?",
-                "options": [
-                    "Handle exceptions",
-                    "Create loops",
-                    "Define variables",
-                    "Import modules"
-                ],
-                "answer": "Handle exceptions"
-            },
-
-            {
-                "id": "py_i4",
-                "question": "Which Python structure is immutable?",
-                "options": ["Tuple", "List", "Dictionary", "Set"],
-                "answer": "Tuple"
-            },
-
-            {
-                "id": "py_i5",
-                "question": "What does *args allow a function to accept?",
-                "options": [
-                    "Variable positional arguments",
-                    "Only keyword arguments",
-                    "Only integers",
-                    "A single list"
-                ],
-                "answer": "Variable positional arguments"
-            },
-
-            {
-                "id": "py_i6",
-                "question": "What is the purpose of a Python virtual environment?",
-                "options": [
-                    "Isolate project dependencies",
-                    "Increase CPU speed",
-                    "Replace Python",
-                    "Store databases"
-                ],
-                "answer": "Isolate project dependencies"
-            },
-
-            {
-                "id": "py_i7",
-                "question": "What does the map() function generally do?",
-                "options": [
-                    "Apply a function to elements of an iterable",
-                    "Create a dictionary",
-                    "Sort a list",
-                    "Remove duplicates"
-                ],
-                "answer": "Apply a function to elements of an iterable"
-            },
-
-            {
-                "id": "py_i8",
-                "question": "What is a lambda in Python?",
-                "options": [
-                    "An anonymous function",
-                    "A database",
-                    "A loop",
-                    "A package manager"
-                ],
-                "answer": "An anonymous function"
-            },
-
-            {
-                "id": "py_i9",
-                "question": "What does inheritance allow in object-oriented Python?",
-                "options": [
-                    "A class to derive behavior from another class",
-                    "A list to become a tuple",
-                    "A function to become a module",
-                    "A variable to become immutable"
-                ],
-                "answer": "A class to derive behavior from another class"
-            },
-
-            {
-                "id": "py_i10",
-                "question": "Which library is primarily used for numerical arrays in Python?",
-                "options": ["NumPy", "Flask", "Requests", "BeautifulSoup"],
-                "answer": "NumPy"
-            }
-        ],
-
-        "Advanced": [
-
-            {
-                "id": "py_a1",
-                "question": "What is the key difference between a shallow copy and a deep copy?",
-                "options": [
-                    "A shallow copy can share nested objects, while a deep copy recursively copies them",
-                    "A deep copy only copies primitive values",
-                    "A shallow copy always duplicates every nested object",
-                    "There is no difference"
-                ],
-                "answer": "A shallow copy can share nested objects, while a deep copy recursively copies them"
-            },
-
-            {
-                "id": "py_a2",
-                "question": "What problem can mutable default function arguments cause in Python?",
-                "options": [
-                    "The same mutable object can persist across function calls",
-                    "The function cannot return values",
-                    "The function becomes asynchronous",
-                    "Python automatically deletes the argument"
-                ],
-                "answer": "The same mutable object can persist across function calls"
-            },
-
-            {
-                "id": "py_a3",
-                "question": "What is the main purpose of a generator?",
-                "options": [
-                    "Produce values lazily instead of storing them all at once",
-                    "Create classes automatically",
-                    "Compile Python to C",
-                    "Encrypt variables"
-                ],
-                "answer": "Produce values lazily instead of storing them all at once"
-            },
-
-            {
-                "id": "py_a4",
-                "question": "What does the Python GIL primarily affect?",
-                "options": [
-                    "Execution of Python bytecode by multiple threads in the standard CPython implementation",
-                    "Disk storage",
-                    "Database indexing",
-                    "Network routing"
-                ],
-                "answer": "Execution of Python bytecode by multiple threads in the standard CPython implementation"
-            },
-
-            {
-                "id": "py_a5",
-                "question": "What is a decorator commonly used for?",
-                "options": [
-                    "Modify or extend function or class behavior without changing its core definition",
-                    "Create database tables",
-                    "Allocate GPU memory",
-                    "Convert Python into Java"
-                ],
-                "answer": "Modify or extend function or class behavior without changing its core definition"
-            }
-        ]
+    {
+        "subject": "Python",
+        "level": "Beginner",
+        "question": "Which symbol is used to start a comment in Python?",
+        "options": ["//", "#", "<!--", "/*"],
+        "answer": 1,
+    },
+    {
+        "subject": "Python",
+        "level": "Beginner",
+        "question": "Which Python data type stores True or False values?",
+        "options": ["String", "Boolean", "List", "Integer"],
+        "answer": 1,
+    },
+    {
+        "subject": "Python",
+        "level": "Beginner",
+        "question": "Which function is commonly used to display output in Python?",
+        "options": ["display()", "show()", "print()", "output()"],
+        "answer": 2,
+    },
+    {
+        "subject": "Python",
+        "level": "Beginner",
+        "question": "Which collection is ordered and changeable in Python?",
+        "options": ["Tuple", "List", "Set", "Frozen set"],
+        "answer": 1,
+    },
+    {
+        "subject": "Python",
+        "level": "Beginner",
+        "question": "What is the result of 3 + 4 * 2 in Python?",
+        "options": ["14", "11", "10", "9"],
+        "answer": 1,
     },
 
-
     # ========================================================
-    # MATHEMATICS & STATISTICS
+    # PYTHON - INTERMEDIATE
     # ========================================================
 
-    "Mathematics & Statistics": {
-
-        "Beginner": [
-
-            {
-                "id": "math_b1",
-                "question": "What is the mean of 2, 4, and 6?",
-                "options": ["4", "3", "6", "12"],
-                "answer": "4"
-            },
-
-            {
-                "id": "math_b2",
-                "question": "What does probability measure?",
-                "options": [
-                    "The likelihood of an event",
-                    "The size of a dataset",
-                    "The average value",
-                    "The maximum value"
-                ],
-                "answer": "The likelihood of an event"
-            },
-
-            {
-                "id": "math_b3",
-                "question": "What is the median?",
-                "options": [
-                    "The middle value after sorting",
-                    "The largest value",
-                    "The average of all values",
-                    "The smallest value"
-                ],
-                "answer": "The middle value after sorting"
-            },
-
-            {
-                "id": "math_b4",
-                "question": "What does variance measure?",
-                "options": [
-                    "How spread out values are",
-                    "The middle value",
-                    "The number of rows",
-                    "The maximum value"
-                ],
-                "answer": "How spread out values are"
-            },
-
-            {
-                "id": "math_b5",
-                "question": "What is the value of 2²?",
-                "options": ["4", "2", "6", "8"],
-                "answer": "4"
-            }
+    {
+        "subject": "Python",
+        "level": "Intermediate",
+        "question": "What does a Python list comprehension primarily provide?",
+        "options": [
+            "A concise way to create lists",
+            "A way to define classes",
+            "A method for connecting databases",
+            "A way to compile Python"
         ],
-
-        "Intermediate": [
-
-            {
-                "id": "math_i1",
-                "question": "What does standard deviation represent?",
-                "options": [
-                    "The typical spread of values around the mean",
-                    "The number of observations",
-                    "The maximum value",
-                    "The median"
-                ],
-                "answer": "The typical spread of values around the mean"
-            },
-
-            {
-                "id": "math_i2",
-                "question": "What is correlation used to describe?",
-                "options": [
-                    "The strength and direction of association between variables",
-                    "The exact causal relationship between variables",
-                    "The number of observations",
-                    "The median"
-                ],
-                "answer": "The strength and direction of association between variables"
-            },
-
-            {
-                "id": "math_i3",
-                "question": "What does a probability of 0 represent?",
-                "options": [
-                    "An impossible event",
-                    "A certain event",
-                    "An average event",
-                    "A negative event"
-                ],
-                "answer": "An impossible event"
-            },
-
-            {
-                "id": "math_i4",
-                "question": "What does a normal distribution typically look like?",
-                "options": [
-                    "Bell-shaped and symmetric",
-                    "Always flat",
-                    "Always increasing",
-                    "Random with no structure"
-                ],
-                "answer": "Bell-shaped and symmetric"
-            },
-
-            {
-                "id": "math_i5",
-                "question": "What is the purpose of a derivative?",
-                "options": [
-                    "Measure the rate of change",
-                    "Calculate only averages",
-                    "Count observations",
-                    "Sort data"
-                ],
-                "answer": "Measure the rate of change"
-            }
+        "answer": 0,
+    },
+    {
+        "subject": "Python",
+        "level": "Intermediate",
+        "question": "What is the main purpose of a Python dictionary?",
+        "options": [
+            "Store values using key-value mappings",
+            "Store only numbers",
+            "Store only ordered strings",
+            "Execute functions automatically"
         ],
-
-        "Advanced": [
-
-            {
-                "id": "math_a1",
-                "question": "Why is the gradient important in machine learning optimization?",
-                "options": [
-                    "It indicates the direction of greatest increase of a function",
-                    "It always gives the final model",
-                    "It removes all noise from data",
-                    "It replaces the loss function"
-                ],
-                "answer": "It indicates the direction of greatest increase of a function"
-            },
-
-            {
-                "id": "math_a2",
-                "question": "What does a covariance matrix describe?",
-                "options": [
-                    "Variances and pairwise covariances among variables",
-                    "Only the mean of each variable",
-                    "Only categorical labels",
-                    "Only missing values"
-                ],
-                "answer": "Variances and pairwise covariances among variables"
-            },
-
-            {
-                "id": "math_a3",
-                "question": "What is the intuition behind Bayes' theorem?",
-                "options": [
-                    "Update a probability using new evidence",
-                    "Remove all uncertainty",
-                    "Guarantee causation",
-                    "Calculate only averages"
-                ],
-                "answer": "Update a probability using new evidence"
-            },
-
-            {
-                "id": "math_a4",
-                "question": "What does an eigenvector represent in linear algebra?",
-                "options": [
-                    "A direction that is scaled by a matrix transformation",
-                    "A guaranteed zero vector",
-                    "A probability distribution",
-                    "A scalar loss value"
-                ],
-                "answer": "A direction that is scaled by a matrix transformation"
-            },
-
-            {
-                "id": "math_a5",
-                "question": "Why can a high-dimensional feature space be problematic for some algorithms?",
-                "options": [
-                    "Distance and data sparsity can become problematic",
-                    "Models automatically become perfect",
-                    "All features become identical",
-                    "Probability becomes zero"
-                ],
-                "answer": "Distance and data sparsity can become problematic"
-            }
-        ]
+        "answer": 0,
+    },
+    {
+        "subject": "Python",
+        "level": "Intermediate",
+        "question": "What does `len([10, 20, 30])` return?",
+        "options": ["2", "3", "30", "60"],
+        "answer": 1,
+    },
+    {
+        "subject": "Python",
+        "level": "Intermediate",
+        "question": "What is the purpose of a function in Python?",
+        "options": [
+            "To group reusable logic",
+            "To permanently store files",
+            "To install packages",
+            "To create an operating system"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Python",
+        "level": "Intermediate",
+        "question": "Which keyword is used to define a function?",
+        "options": ["function", "define", "def", "func"],
+        "answer": 2,
     },
 
-
     # ========================================================
-    # MACHINE LEARNING
+    # PYTHON - ADVANCED
     # ========================================================
 
-    "Machine Learning": {
-
-        "Beginner": [
-
-            {
-                "id": "ml_b1",
-                "question": "What is supervised learning?",
-                "options": [
-                    "Learning from labelled examples",
-                    "Learning without data",
-                    "Only clustering data",
-                    "Manually writing every prediction"
-                ],
-                "answer": "Learning from labelled examples"
-            },
-
-            {
-                "id": "ml_b2",
-                "question": "What is a training dataset used for?",
-                "options": [
-                    "Teaching a model patterns from data",
-                    "Only displaying results",
-                    "Deleting the model",
-                    "Creating hardware"
-                ],
-                "answer": "Teaching a model patterns from data"
-            },
-
-            {
-                "id": "ml_b3",
-                "question": "Which is a classification task?",
-                "options": [
-                    "Predicting whether an email is spam",
-                    "Predicting house price",
-                    "Calculating average temperature",
-                    "Sorting numbers"
-                ],
-                "answer": "Predicting whether an email is spam"
-            },
-
-            {
-                "id": "ml_b4",
-                "question": "Which is a regression task?",
-                "options": [
-                    "Predicting house price",
-                    "Detecting spam/non-spam",
-                    "Grouping customers",
-                    "Generating clusters"
-                ],
-                "answer": "Predicting house price"
-            },
-
-            {
-                "id": "ml_b5",
-                "question": "Why do we split data into training and testing sets?",
-                "options": [
-                    "To evaluate generalization on unseen data",
-                    "To increase the number of features",
-                    "To remove the model",
-                    "To make every prediction correct"
-                ],
-                "answer": "To evaluate generalization on unseen data"
-            }
+    {
+        "subject": "Python",
+        "level": "Advanced",
+        "question": "What is the main purpose of a Python generator?",
+        "options": [
+            "To produce values lazily using iteration",
+            "To automatically parallelize all code",
+            "To convert Python into machine code",
+            "To prevent all memory allocation"
         ],
-
-        "Intermediate": [
-
-            {
-                "id": "ml_i1",
-                "question": "What is overfitting?",
-                "options": [
-                    "When a model learns training data too closely and performs poorly on new data",
-                    "When a model has no parameters",
-                    "When data contains no features",
-                    "When training is impossible"
-                ],
-                "answer": "When a model learns training data too closely and performs poorly on new data"
-            },
-
-            {
-                "id": "ml_i2",
-                "question": "What is cross-validation used for?",
-                "options": [
-                    "Estimate model performance across different data splits",
-                    "Generate labels automatically",
-                    "Replace preprocessing",
-                    "Remove all features"
-                ],
-                "answer": "Estimate model performance across different data splits"
-            },
-
-            {
-                "id": "ml_i3",
-                "question": "What does feature scaling help with?",
-                "options": [
-                    "Putting numeric features on comparable scales",
-                    "Creating labels",
-                    "Deleting observations",
-                    "Increasing dataset size"
-                ],
-                "answer": "Putting numeric features on comparable scales"
-            },
-
-            {
-                "id": "ml_i4",
-                "question": "What does regularization generally do?",
-                "options": [
-                    "Penalizes model complexity",
-                    "Adds unlimited features",
-                    "Guarantees zero error",
-                    "Removes the training set"
-                ],
-                "answer": "Penalizes model complexity"
-            },
-
-            {
-                "id": "ml_i5",
-                "question": "What is precision in classification?",
-                "options": [
-                    "The fraction of predicted positives that are actually positive",
-                    "The fraction of all samples that are positive",
-                    "The number of training epochs",
-                    "The size of the feature vector"
-                ],
-                "answer": "The fraction of predicted positives that are actually positive"
-            }
+        "answer": 0,
+    },
+    {
+        "subject": "Python",
+        "level": "Advanced",
+        "question": "What does a decorator generally allow you to do?",
+        "options": [
+            "Modify or extend function behavior",
+            "Delete Python modules",
+            "Convert lists into databases",
+            "Disable exceptions"
         ],
-
-        "Advanced": [
-
-            {
-                "id": "ml_a1",
-                "question": "A model has very low training error but high validation error. What is the most likely issue?",
-                "options": [
-                    "Overfitting",
-                    "Underfitting",
-                    "Perfect generalization",
-                    "Insufficient labels only"
-                ],
-                "answer": "Overfitting"
-            },
-
-            {
-                "id": "ml_a2",
-                "question": "Why can data leakage produce misleadingly strong validation results?",
-                "options": [
-                    "Information unavailable at prediction time leaks into training or validation",
-                    "The model receives too few parameters",
-                    "The dataset becomes smaller",
-                    "The loss function becomes zero automatically"
-                ],
-                "answer": "Information unavailable at prediction time leaks into training or validation"
-            },
-
-            {
-                "id": "ml_a3",
-                "question": "What is the bias-variance tradeoff concerned with?",
-                "options": [
-                    "Balancing systematic error and sensitivity to training data",
-                    "Balancing CPU and RAM",
-                    "Balancing labels and features",
-                    "Balancing training and deployment servers"
-                ],
-                "answer": "Balancing systematic error and sensitivity to training data"
-            },
-
-            {
-                "id": "ml_a4",
-                "question": "Why might accuracy be misleading for a highly imbalanced classification dataset?",
-                "options": [
-                    "A model can achieve high accuracy by mostly predicting the majority class",
-                    "Accuracy ignores every prediction",
-                    "Accuracy only works for regression",
-                    "Accuracy always equals recall"
-                ],
-                "answer": "A model can achieve high accuracy by mostly predicting the majority class"
-            },
-
-            {
-                "id": "ml_a5",
-                "question": "What does ROC-AUC generally measure?",
-                "options": [
-                    "How well a classifier ranks positive examples above negative examples",
-                    "The number of features",
-                    "Training time",
-                    "The amount of missing data"
-                ],
-                "answer": "How well a classifier ranks positive examples above negative examples"
-            }
-        ]
+        "answer": 0,
+    },
+    {
+        "subject": "Python",
+        "level": "Advanced",
+        "question": "Which concept allows a class to inherit behavior from another class?",
+        "options": ["Encapsulation", "Inheritance", "Iteration", "Serialization"],
+        "answer": 1,
+    },
+    {
+        "subject": "Python",
+        "level": "Advanced",
+        "question": "What is the benefit of using a context manager with `with`?",
+        "options": [
+            "It helps manage setup and cleanup resources",
+            "It automatically makes code asynchronous",
+            "It prevents every possible exception",
+            "It converts Python to C++"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Python",
+        "level": "Advanced",
+        "question": "What does `*args` allow in a Python function?",
+        "options": [
+            "An arbitrary number of positional arguments",
+            "An arbitrary number of classes",
+            "Only keyword arguments",
+            "Only one required argument"
+        ],
+        "answer": 0,
     },
 
-
     # ========================================================
-    # DEEP LEARNING
+    # MATHEMATICS & STATISTICS - BEGINNER
     # ========================================================
 
-    "Deep Learning": {
-
-        "Beginner": [
-
-            {
-                "id": "dl_b1",
-                "question": "What is an artificial neural network inspired by?",
-                "options": [
-                    "Networks of biological neurons",
-                    "Database tables",
-                    "Operating systems",
-                    "Sorting algorithms"
-                ],
-                "answer": "Networks of biological neurons"
-            },
-
-            {
-                "id": "dl_b2",
-                "question": "What is an activation function used for?",
-                "options": [
-                    "Introduce non-linearity",
-                    "Store datasets",
-                    "Create labels",
-                    "Download models"
-                ],
-                "answer": "Introduce non-linearity"
-            },
-
-            {
-                "id": "dl_b3",
-                "question": "What is a neural network weight?",
-                "options": [
-                    "A parameter learned during training",
-                    "A dataset row",
-                    "A class label",
-                    "A file name"
-                ],
-                "answer": "A parameter learned during training"
-            },
-
-            {
-                "id": "dl_b4",
-                "question": "What is an epoch?",
-                "options": [
-                    "One complete pass through the training dataset",
-                    "One neuron",
-                    "One feature",
-                    "One prediction"
-                ],
-                "answer": "One complete pass through the training dataset"
-            },
-
-            {
-                "id": "dl_b5",
-                "question": "What is a loss function?",
-                "options": [
-                    "A measure of prediction error",
-                    "A dataset format",
-                    "A neural network layer",
-                    "A programming language"
-                ],
-                "answer": "A measure of prediction error"
-            }
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Beginner",
+        "question": "What is the mean of 2, 4, and 6?",
+        "options": ["3", "4", "5", "6"],
+        "answer": 1,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Beginner",
+        "question": "What does probability measure?",
+        "options": [
+            "The likelihood of an event",
+            "The size of a dataset",
+            "The average of values",
+            "The number of features"
         ],
-
-        "Intermediate": [
-
-            {
-                "id": "dl_i1",
-                "question": "What does backpropagation compute?",
-                "options": [
-                    "Gradients of the loss with respect to model parameters",
-                    "Only predictions",
-                    "Dataset labels",
-                    "File sizes"
-                ],
-                "answer": "Gradients of the loss with respect to model parameters"
-            },
-
-            {
-                "id": "dl_i2",
-                "question": "Why are CNNs effective for many image tasks?",
-                "options": [
-                    "They exploit local spatial patterns using convolution",
-                    "They ignore spatial information",
-                    "They only process text",
-                    "They require no training"
-                ],
-                "answer": "They exploit local spatial patterns using convolution"
-            },
-
-            {
-                "id": "dl_i3",
-                "question": "What does dropout help reduce?",
-                "options": [
-                    "Overfitting",
-                    "Dataset size",
-                    "Number of labels",
-                    "GPU memory to zero"
-                ],
-                "answer": "Overfitting"
-            },
-
-            {
-                "id": "dl_i4",
-                "question": "What is the role of an optimizer such as Adam?",
-                "options": [
-                    "Update model parameters using gradients",
-                    "Create training labels",
-                    "Store images",
-                    "Measure accuracy only"
-                ],
-                "answer": "Update model parameters using gradients"
-            },
-
-            {
-                "id": "dl_i5",
-                "question": "What is vanishing gradient?",
-                "options": [
-                    "Gradients become extremely small during backpropagation",
-                    "The dataset disappears",
-                    "The model loses all layers",
-                    "The optimizer stops permanently"
-                ],
-                "answer": "Gradients become extremely small during backpropagation"
-            }
+        "answer": 0,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Beginner",
+        "question": "Which value represents the middle of an ordered dataset?",
+        "options": ["Mean", "Median", "Variance", "Range"],
+        "answer": 1,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Beginner",
+        "question": "What is 10% of 200?",
+        "options": ["10", "20", "30", "40"],
+        "answer": 1,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Beginner",
+        "question": "What does the range of a dataset represent?",
+        "options": [
+            "Maximum minus minimum",
+            "Mean divided by median",
+            "Number of observations",
+            "Average of all values"
         ],
-
-        "Advanced": [
-
-            {
-                "id": "dl_a1",
-                "question": "Why can residual connections help very deep neural networks?",
-                "options": [
-                    "They provide shorter paths for information and gradient flow",
-                    "They eliminate the need for training",
-                    "They remove all parameters",
-                    "They convert images into labels automatically"
-                ],
-                "answer": "They provide shorter paths for information and gradient flow"
-            },
-
-            {
-                "id": "dl_a2",
-                "question": "What is the purpose of batch normalization?",
-                "options": [
-                    "Normalize intermediate activations to improve training behavior",
-                    "Create new labels",
-                    "Remove the output layer",
-                    "Replace backpropagation"
-                ],
-                "answer": "Normalize intermediate activations to improve training behavior"
-            },
-
-            {
-                "id": "dl_a3",
-                "question": "Why can softmax be used for multiclass classification?",
-                "options": [
-                    "It converts logits into normalized class probabilities",
-                    "It removes all classes",
-                    "It performs regression",
-                    "It guarantees correct predictions"
-                ],
-                "answer": "It converts logits into normalized class probabilities"
-            },
-
-            {
-                "id": "dl_a4",
-                "question": "What problem can an excessively large learning rate cause?",
-                "options": [
-                    "Training can overshoot useful regions and fail to converge",
-                    "The model always becomes perfect",
-                    "The dataset becomes larger",
-                    "The loss is guaranteed to be zero"
-                ],
-                "answer": "Training can overshoot useful regions and fail to converge"
-            },
-
-            {
-                "id": "dl_a5",
-                "question": "What is attention designed to help a model do?",
-                "options": [
-                    "Weight the relevance of different input elements when computing representations",
-                    "Delete training data",
-                    "Guarantee causality",
-                    "Replace all neural network layers"
-                ],
-                "answer": "Weight the relevance of different input elements when computing representations"
-            }
-        ]
+        "answer": 0,
     },
 
+    # ========================================================
+    # MATHEMATICS & STATISTICS - INTERMEDIATE
+    # ========================================================
+
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Intermediate",
+        "question": "What does variance measure?",
+        "options": [
+            "Spread of values around the mean",
+            "The middle value",
+            "The maximum value",
+            "The number of features"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Intermediate",
+        "question": "What is the purpose of a correlation coefficient?",
+        "options": [
+            "Measure the strength and direction of a relationship",
+            "Calculate a neural network layer",
+            "Remove all outliers",
+            "Count categorical variables"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Intermediate",
+        "question": "If two events are independent, what is generally true?",
+        "options": [
+            "One event does not change the probability of the other",
+            "They must always happen together",
+            "Their probabilities must be equal",
+            "Both events must have probability zero"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Intermediate",
+        "question": "What does standard deviation represent?",
+        "options": [
+            "A measure of data spread",
+            "The dataset size",
+            "The largest observation",
+            "The number of classes"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Intermediate",
+        "question": "What is a normal distribution commonly characterized by?",
+        "options": [
+            "A bell-shaped symmetric distribution",
+            "Only positive integer values",
+            "A distribution with no mean",
+            "A distribution containing only zeros"
+        ],
+        "answer": 0,
+    },
 
     # ========================================================
-    # GENERATIVE AI
+    # MATHEMATICS & STATISTICS - ADVANCED
     # ========================================================
 
-    "Generative AI": {
-
-        "Beginner": [
-
-            {
-                "id": "gen_b1",
-                "question": "What does Generative AI primarily do?",
-                "options": [
-                    "Generate new content",
-                    "Only store data",
-                    "Only sort files",
-                    "Only calculate averages"
-                ],
-                "answer": "Generate new content"
-            },
-
-            {
-                "id": "gen_b2",
-                "question": "What does LLM stand for?",
-                "options": [
-                    "Large Language Model",
-                    "Long Learning Machine",
-                    "Language Logic Module",
-                    "Large Logic Machine"
-                ],
-                "answer": "Large Language Model"
-            },
-
-            {
-                "id": "gen_b3",
-                "question": "What is a prompt?",
-                "options": [
-                    "An instruction or input given to an AI model",
-                    "A database table",
-                    "A programming compiler",
-                    "A neural network weight"
-                ],
-                "answer": "An instruction or input given to an AI model"
-            },
-
-            {
-                "id": "gen_b4",
-                "question": "What is an AI chatbot designed to do?",
-                "options": [
-                    "Interact with users using natural language",
-                    "Only store passwords",
-                    "Only compress files",
-                    "Only run databases"
-                ],
-                "answer": "Interact with users using natural language"
-            },
-
-            {
-                "id": "gen_b5",
-                "question": "What is an embedding?",
-                "options": [
-                    "A numerical representation of information",
-                    "A database password",
-                    "A web page",
-                    "A programming loop"
-                ],
-                "answer": "A numerical representation of information"
-            }
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Advanced",
+        "question": "Why is the gradient important in machine learning optimization?",
+        "options": [
+            "It indicates the direction of greatest increase of a function",
+            "It directly labels training examples",
+            "It removes categorical features",
+            "It determines the number of rows in a dataset"
         ],
-
-        "Intermediate": [
-
-            {
-                "id": "gen_i1",
-                "question": "What is RAG?",
-                "options": [
-                    "Retrieval-Augmented Generation",
-                    "Random AI Generation",
-                    "Recursive Answer Generation",
-                    "Rapid AI Grouping"
-                ],
-                "answer": "Retrieval-Augmented Generation"
-            },
-
-            {
-                "id": "gen_i2",
-                "question": "Why are embeddings useful in semantic search?",
-                "options": [
-                    "They represent meaning in a numerical space",
-                    "They guarantee factual answers",
-                    "They remove the need for data",
-                    "They replace all language models"
-                ],
-                "answer": "They represent meaning in a numerical space"
-            },
-
-            {
-                "id": "gen_i3",
-                "question": "What is tokenization?",
-                "options": [
-                    "Breaking text into tokens processed by a model",
-                    "Encrypting a database",
-                    "Training a GPU",
-                    "Creating a Python package"
-                ],
-                "answer": "Breaking text into tokens processed by a model"
-            },
-
-            {
-                "id": "gen_i4",
-                "question": "What is context in an LLM interaction?",
-                "options": [
-                    "Information provided to help the model generate a response",
-                    "The model's GPU",
-                    "A database index",
-                    "A Python variable"
-                ],
-                "answer": "Information provided to help the model generate a response"
-            },
-
-            {
-                "id": "gen_i5",
-                "question": "What is fine-tuning?",
-                "options": [
-                    "Further training a pretrained model on a specific dataset or task",
-                    "Deleting a model",
-                    "Only changing the UI",
-                    "Increasing internet speed"
-                ],
-                "answer": "Further training a pretrained model on a specific dataset or task"
-            }
+        "answer": 0,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Advanced",
+        "question": "What does a covariance matrix describe?",
+        "options": [
+            "Variances and pairwise covariances among variables",
+            "Only the mean of each variable",
+            "Only class labels",
+            "The number of neural network layers"
         ],
+        "answer": 0,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Advanced",
+        "question": "Why are eigenvectors useful in dimensionality reduction?",
+        "options": [
+            "They can identify important directions of variation",
+            "They automatically create labels",
+            "They replace every missing value",
+            "They eliminate the need for training data"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Advanced",
+        "question": "What does a derivative describe locally?",
+        "options": [
+            "Rate of change",
+            "Number of observations",
+            "Probability of a class",
+            "Dataset size"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Mathematics & Statistics",
+        "level": "Advanced",
+        "question": "What is Bayes' theorem primarily used to calculate?",
+        "options": [
+            "A conditional probability using prior information",
+            "The mean of a dataset",
+            "The number of neural network neurons",
+            "The dimensionality of an image"
+        ],
+        "answer": 0,
+    },
 
-        "Advanced": [
+    # ========================================================
+    # MACHINE LEARNING - BEGINNER
+    # ========================================================
 
-            {
-                "id": "gen_a1",
-                "question": "Why can an LLM hallucinate?",
-                "options": [
-                    "It can generate plausible text without having a guaranteed mechanism for factual verification",
-                    "It always has access to every database",
-                    "It only outputs stored sentences",
-                    "It cannot generate new text"
-                ],
-                "answer": "It can generate plausible text without having a guaranteed mechanism for factual verification"
-            },
+    {
+        "subject": "Machine Learning",
+        "level": "Beginner",
+        "question": "What is supervised learning?",
+        "options": [
+            "Learning from labelled examples",
+            "Learning without any data",
+            "Only clustering data",
+            "Manually writing every prediction rule"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Beginner",
+        "question": "What is a training dataset used for?",
+        "options": [
+            "Teaching a model patterns from data",
+            "Displaying the final website",
+            "Deleting model parameters",
+            "Writing documentation"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Beginner",
+        "question": "Which is an example of classification?",
+        "options": [
+            "Predicting whether an email is spam",
+            "Predicting house price",
+            "Grouping customers without labels",
+            "Reducing image dimensions"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Beginner",
+        "question": "Which is an example of regression?",
+        "options": [
+            "Predicting a house price",
+            "Detecting spam vs not spam",
+            "Grouping similar customers",
+            "Finding image edges"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Beginner",
+        "question": "Why do we evaluate a machine learning model?",
+        "options": [
+            "To measure how well it performs",
+            "To increase the dataset size automatically",
+            "To remove the need for training",
+            "To turn all problems into classification"
+        ],
+        "answer": 0,
+    },
 
-            {
-                "id": "gen_a2",
-                "question": "What is the key idea behind transformer self-attention?",
-                "options": [
-                    "Each token can assign different importance to other tokens when forming representations",
-                    "Every token is processed independently with no interaction",
-                    "Only the first token is used",
-                    "The model removes positional information completely"
-                ],
-                "answer": "Each token can assign different importance to other tokens when forming representations"
-            },
+    # ========================================================
+    # MACHINE LEARNING - INTERMEDIATE
+    # ========================================================
 
-            {
-                "id": "gen_a3",
-                "question": "Why does RAG often improve factual grounding?",
-                "options": [
-                    "The model can condition generation on retrieved external information",
-                    "It permanently changes the model weights",
-                    "It guarantees every retrieved document is correct",
-                    "It removes the need for prompts"
-                ],
-                "answer": "The model can condition generation on retrieved external information"
-            },
+    {
+        "subject": "Machine Learning",
+        "level": "Intermediate",
+        "question": "What is overfitting?",
+        "options": [
+            "A model learns training data too specifically and generalizes poorly",
+            "A model has no parameters",
+            "A model has no training data",
+            "A model always performs perfectly"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Intermediate",
+        "question": "Why is a validation set useful?",
+        "options": [
+            "For evaluating choices during model development",
+            "For permanently replacing training data",
+            "For removing all features",
+            "For converting regression into clustering"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Intermediate",
+        "question": "What is feature scaling used for?",
+        "options": [
+            "Putting numerical features on comparable scales",
+            "Adding labels to unlabeled data",
+            "Deleting the target variable",
+            "Increasing the number of classes"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Intermediate",
+        "question": "What is clustering?",
+        "options": [
+            "Grouping similar observations without predefined labels",
+            "Predicting a continuous target",
+            "Training only on labelled images",
+            "Removing every numerical feature"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Intermediate",
+        "question": "What is precision in classification?",
+        "options": [
+            "The proportion of predicted positives that are actually positive",
+            "The proportion of all samples predicted correctly",
+            "The proportion of actual positives detected",
+            "The number of training examples"
+        ],
+        "answer": 0,
+    },
 
-            {
-                "id": "gen_a4",
-                "question": "What is temperature commonly used for in text generation?",
-                "options": [
-                    "Control the randomness of token selection",
-                    "Increase model parameter count",
-                    "Change the training dataset",
-                    "Reduce context length to zero"
-                ],
-                "answer": "Control the randomness of token selection"
-            },
+    # ========================================================
+    # MACHINE LEARNING - ADVANCED
+    # ========================================================
 
-            {
-                "id": "gen_a5",
-                "question": "What is the main purpose of a system prompt?",
-                "options": [
-                    "Provide high-level instructions that guide model behavior",
-                    "Store model weights",
-                    "Train the model from scratch",
-                    "Create a database"
-                ],
-                "answer": "Provide high-level instructions that guide model behavior"
-            }
-        ]
-    }
-}
+    {
+        "subject": "Machine Learning",
+        "level": "Advanced",
+        "question": "Why can data leakage produce misleadingly strong validation results?",
+        "options": [
+            "Information unavailable at prediction time has influenced model development",
+            "The model has too few parameters",
+            "The training dataset is always too small",
+            "The model uses gradient descent"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Advanced",
+        "question": "What is the bias-variance tradeoff concerned with?",
+        "options": [
+            "Balancing underfitting and sensitivity to training data",
+            "Choosing between Python and Java",
+            "Increasing storage capacity",
+            "Selecting a database engine"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Advanced",
+        "question": "Why might cross-validation be used?",
+        "options": [
+            "To estimate generalization performance across multiple data splits",
+            "To guarantee zero test error",
+            "To eliminate the target variable",
+            "To make every model linear"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Advanced",
+        "question": "What does regularization generally encourage?",
+        "options": [
+            "Simpler model parameters to reduce overfitting",
+            "More training labels",
+            "Larger datasets automatically",
+            "Removal of the validation set"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Machine Learning",
+        "level": "Advanced",
+        "question": "Why is class imbalance important in classification?",
+        "options": [
+            "Accuracy can hide poor performance on minority classes",
+            "It always makes training impossible",
+            "It guarantees overfitting",
+            "It removes the need for evaluation metrics"
+        ],
+        "answer": 0,
+    },
+
+    # ========================================================
+    # DEEP LEARNING - BEGINNER
+    # ========================================================
+
+    {
+        "subject": "Deep Learning",
+        "level": "Beginner",
+        "question": "What is a neural network?",
+        "options": [
+            "A model made of interconnected computational units",
+            "A database table",
+            "A programming language",
+            "A file compression format"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Beginner",
+        "question": "What is an activation function used for?",
+        "options": [
+            "Introducing nonlinear behavior into a neural network",
+            "Storing datasets",
+            "Deleting model weights",
+            "Downloading Python"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Beginner",
+        "question": "What is an epoch?",
+        "options": [
+            "One complete pass through the training dataset",
+            "One feature in a dataset",
+            "One neuron",
+            "One test example"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Beginner",
+        "question": "What are neural network weights?",
+        "options": [
+            "Learnable parameters used to transform inputs",
+            "Dataset filenames",
+            "Class labels only",
+            "Python packages"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Beginner",
+        "question": "What is a loss function used for?",
+        "options": [
+            "Measuring how far predictions are from desired outputs",
+            "Increasing image resolution",
+            "Creating database tables",
+            "Removing all parameters"
+        ],
+        "answer": 0,
+    },
+
+    # ========================================================
+    # DEEP LEARNING - INTERMEDIATE
+    # ========================================================
+
+    {
+        "subject": "Deep Learning",
+        "level": "Intermediate",
+        "question": "What is backpropagation used for?",
+        "options": [
+            "Computing gradients used to update network parameters",
+            "Creating training labels",
+            "Compressing images",
+            "Selecting database rows"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Intermediate",
+        "question": "What does a convolutional neural network commonly excel at?",
+        "options": [
+            "Learning spatial patterns in data such as images",
+            "Managing operating system processes",
+            "Writing SQL queries",
+            "Sorting Python lists"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Intermediate",
+        "question": "What is the purpose of an optimizer?",
+        "options": [
+            "Update model parameters using information from gradients",
+            "Create new labels",
+            "Remove the loss function",
+            "Store images permanently"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Intermediate",
+        "question": "Why can ReLU help deep networks?",
+        "options": [
+            "It provides a simple nonlinear activation and can help gradient flow",
+            "It removes all neurons",
+            "It guarantees no overfitting",
+            "It converts images into labels"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Intermediate",
+        "question": "What is dropout commonly used for?",
+        "options": [
+            "Reducing over-reliance on particular neurons during training",
+            "Increasing the number of labels",
+            "Replacing the optimizer",
+            "Converting regression to classification"
+        ],
+        "answer": 0,
+    },
+
+    # ========================================================
+    # DEEP LEARNING - ADVANCED
+    # ========================================================
+
+    {
+        "subject": "Deep Learning",
+        "level": "Advanced",
+        "question": "Why can very deep networks suffer from vanishing gradients?",
+        "options": [
+            "Gradients can become extremely small as they propagate backward",
+            "The dataset contains too many rows",
+            "The optimizer always increases gradients",
+            "Neural networks cannot use activation functions"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Advanced",
+        "question": "What is the key idea behind residual connections?",
+        "options": [
+            "Allow layers to learn a residual transformation while providing a shortcut path",
+            "Remove all nonlinearities",
+            "Prevent training entirely",
+            "Replace every convolution with pooling"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Advanced",
+        "question": "What does batch normalization primarily do?",
+        "options": [
+            "Normalizes activations within training batches",
+            "Creates new training examples",
+            "Deletes network parameters",
+            "Converts classification into clustering"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Advanced",
+        "question": "Why are attention mechanisms useful in sequence modeling?",
+        "options": [
+            "They allow the model to weight different parts of the input when producing an output",
+            "They eliminate all parameters",
+            "They only work with numerical tables",
+            "They guarantee perfect predictions"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Deep Learning",
+        "level": "Advanced",
+        "question": "What is the purpose of a learning rate?",
+        "options": [
+            "Control the size of parameter updates during optimization",
+            "Determine the number of training examples",
+            "Set the number of classes automatically",
+            "Measure model accuracy"
+        ],
+        "answer": 0,
+    },
+
+    # ========================================================
+    # GENERATIVE AI - BEGINNER
+    # ========================================================
+
+    {
+        "subject": "Generative AI",
+        "level": "Beginner",
+        "question": "What is Generative AI designed to do?",
+        "options": [
+            "Generate new content based on learned patterns",
+            "Only store files",
+            "Only calculate averages",
+            "Only sort data"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Beginner",
+        "question": "What does LLM stand for?",
+        "options": [
+            "Large Language Model",
+            "Logical Learning Machine",
+            "Large Logic Memory",
+            "Language Learning Method"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Beginner",
+        "question": "What is a prompt?",
+        "options": [
+            "Instructions or input given to an AI model",
+            "A model's database",
+            "A hardware component",
+            "A Python compiler"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Beginner",
+        "question": "What can a text-generating AI model produce?",
+        "options": [
+            "Text based on its learned patterns and instructions",
+            "Only numerical spreadsheets",
+            "Only computer hardware",
+            "Only database indexes"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Beginner",
+        "question": "What is an AI chatbot?",
+        "options": [
+            "A system that interacts with users using conversational responses",
+            "A database engine",
+            "A graphics card",
+            "A programming language"
+        ],
+        "answer": 0,
+    },
+
+    # ========================================================
+    # GENERATIVE AI - INTERMEDIATE
+    # ========================================================
+
+    {
+        "subject": "Generative AI",
+        "level": "Intermediate",
+        "question": "What are tokens in language models?",
+        "options": [
+            "Units of text processed by the model",
+            "Database passwords",
+            "Training computers",
+            "Neural network layers"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Intermediate",
+        "question": "What is an embedding?",
+        "options": [
+            "A numerical representation of information in a vector space",
+            "A type of database password",
+            "A hardware component",
+            "A Python exception"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Intermediate",
+        "question": "What is RAG?",
+        "options": [
+            "Retrieval-Augmented Generation",
+            "Random AI Generation",
+            "Recursive Answer Generator",
+            "Rapid Automated Grading"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Intermediate",
+        "question": "Why can RAG be useful?",
+        "options": [
+            "It can provide a model with relevant retrieved information",
+            "It removes the need for any data",
+            "It guarantees every generated answer is correct",
+            "It replaces all neural networks"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Intermediate",
+        "question": "What does temperature commonly control in text generation?",
+        "options": [
+            "The randomness of token selection",
+            "The model's memory size",
+            "The number of training examples",
+            "The number of GPUs"
+        ],
+        "answer": 0,
+    },
+
+    # ========================================================
+    # GENERATIVE AI - ADVANCED
+    # ========================================================
+
+    {
+        "subject": "Generative AI",
+        "level": "Advanced",
+        "question": "What is the central idea of self-attention in Transformers?",
+        "options": [
+            "Each token can assign different importance to other tokens when forming representations",
+            "Every token must be treated identically",
+            "The model removes token order entirely",
+            "The model only processes one token in total"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Advanced",
+        "question": "Why are vector embeddings useful for semantic search?",
+        "options": [
+            "Semantically related items can be represented near each other in vector space",
+            "They guarantee factual correctness",
+            "They eliminate the need for documents",
+            "They directly produce human-readable answers"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Advanced",
+        "question": "What is fine-tuning generally used for?",
+        "options": [
+            "Adapting a pretrained model to a specific task or dataset",
+            "Deleting pretrained knowledge",
+            "Increasing internet bandwidth",
+            "Replacing tokenization"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Advanced",
+        "question": "What is a hallucination in an LLM?",
+        "options": [
+            "A generated response that presents unsupported or incorrect information",
+            "A GPU hardware failure",
+            "A training dataset format",
+            "A tokenization algorithm"
+        ],
+        "answer": 0,
+    },
+    {
+        "subject": "Generative AI",
+        "level": "Advanced",
+        "question": "Why does context-window size matter for an LLM application?",
+        "options": [
+            "It limits how much input context the model can process in one interaction",
+            "It determines the model's physical memory chip",
+            "It guarantees factual accuracy",
+            "It determines the number of users"
+        ],
+        "answer": 0,
+    },
+]
 
 
 # ============================================================
-# STATUS
+# HELPER FUNCTIONS
 # ============================================================
 
 def get_status(score):
+    """Return a learner-friendly status based on score."""
 
     if score < 40:
         return "Needs Foundation"
-
     elif score < 70:
         return "Developing"
-
     elif score < 100:
         return "Intermediate"
-
     else:
         return "Strong"
 
 
-# ============================================================
-# CREATE DIAGNOSTIC
-# ============================================================
-
-def create_new_diagnostic(level):
+def create_diagnostic(level):
+    """
+    Create exactly 3 random questions for each subject
+    based on the learner's selected level.
+    """
 
     selected_questions = []
 
     for subject in SUBJECTS:
 
-        available = QUESTION_BANK[subject][level]
-
-        unused = [
-            q for q in available
-            if q["id"] not in st.session_state.used_question_ids
+        available = [
+            q
+            for q in QUESTION_BANK
+            if q["subject"] == subject
+            and q["level"] == level
         ]
 
-        if len(unused) >= 3:
-            chosen = random.sample(unused, 3)
-        else:
-            chosen = random.sample(available, 3)
+        selected = random.sample(
+            available,
+            min(3, len(available))
+        )
 
-        for question in chosen:
+        # Randomize answer choices while preserving correct answer.
+        for question in selected:
 
-            st.session_state.used_question_ids.add(
-                question["id"]
+            original_options = question["options"]
+            original_answer = question["answer"]
+
+            option_pairs = [
+                (option, index == original_answer)
+                for index, option in enumerate(original_options)
+            ]
+
+            random.shuffle(option_pairs)
+
+            new_options = [
+                item[0]
+                for item in option_pairs
+            ]
+
+            new_answer = next(
+                index
+                for index, item in enumerate(option_pairs)
+                if item[1]
             )
 
-            question_copy = question.copy()
-
-            question_copy["subject"] = subject
-
-            shuffled_options = question_copy["options"].copy()
-
-            random.shuffle(shuffled_options)
-
-            question_copy["options"] = shuffled_options
-            question_copy["selected"] = None
-
-            selected_questions.append(question_copy)
+            selected_questions.append(
+                {
+                    "subject": question["subject"],
+                    "level": question["level"],
+                    "question": question["question"],
+                    "options": new_options,
+                    "answer": new_answer,
+                }
+            )
 
     random.shuffle(selected_questions)
 
-    st.session_state.questions = selected_questions
-    st.session_state.current_question = 0
-    st.session_state.answers = []
-    st.session_state.diagnostic_complete = False
-    st.session_state.domain_scores = {}
-    st.session_state.roadmap = []
-    st.session_state.attempt_number += 1
+    return selected_questions
 
-
-# ============================================================
-# CALCULATE SCORES
-# ============================================================
 
 def calculate_scores():
 
@@ -1169,23 +1065,28 @@ def calculate_scores():
     for subject in SUBJECTS:
 
         subject_questions = [
-            q for q in st.session_state.questions
+            q
+            for q in st.session_state.diagnostic_questions
             if q["subject"] == subject
         ]
 
         correct = 0
 
-        for question in subject_questions:
+        for question, selected_answer in zip(
+            st.session_state.diagnostic_questions,
+            st.session_state.diagnostic_answers
+        ):
 
-            if question["selected"] == question["answer"]:
+            if (
+                question["subject"] == subject
+                and selected_answer == question["answer"]
+            ):
                 correct += 1
 
-        if len(subject_questions) > 0:
-
+        if subject_questions:
             score = round(
                 (correct / len(subject_questions)) * 100
             )
-
         else:
             score = 0
 
@@ -1194,26 +1095,29 @@ def calculate_scores():
     return scores
 
 
-# ============================================================
-# CREATE ROADMAP
-# ============================================================
-
 def create_roadmap(scores):
 
     sorted_subjects = sorted(
         scores.items(),
-        key=lambda x: x[1]
+        key=lambda item: item[1]
     )
 
     roadmap = []
 
-    for subject, score in sorted_subjects:
+    for position, (subject, score) in enumerate(sorted_subjects):
+
+        if position == 0:
+            priority = "High Priority"
+        elif position == 1:
+            priority = "Priority"
+        else:
+            priority = "Continue"
 
         roadmap.append(
             {
                 "subject": subject,
                 "score": score,
-                "status": get_status(score)
+                "priority": priority,
             }
         )
 
@@ -1227,49 +1131,31 @@ def create_roadmap(scores):
 def home_page():
 
     # --------------------------------------------------------
-    # HERO SECTION
+    # HERO
     # --------------------------------------------------------
 
     st.markdown(
-        """
-        <div style="
-            text-align:center;
-            padding:45px 10px 30px 10px;
-        ">
+        "<div style='text-align:center; font-size:58px;'>🎓</div>",
+        unsafe_allow_html=True
+    )
 
-            <div style="
-                font-size:56px;
-                margin-bottom:10px;
-            ">
-                🎓
-            </div>
+    st.markdown(
+        "<h1 style='text-align:center; margin-bottom:4px;'>AI StudyMate</h1>",
+        unsafe_allow_html=True
+    )
 
-            <h1 style="
-                font-size:42px;
-                margin:0;
-                padding:0;
-            ">
-                AI StudyMate
-            </h1>
+    st.markdown(
+        "<p style='text-align:center; font-size:20px; margin-top:0;'>"
+        "Personalised AI Tutor for Learning AI"
+        "</p>",
+        unsafe_allow_html=True
+    )
 
-            <p style="
-                font-size:20px;
-                margin-top:10px;
-                margin-bottom:8px;
-            ">
-                Personalised AI Tutor for Learning AI
-            </p>
-
-            <p style="
-                font-size:16px;
-                margin-top:0;
-            ">
-                Learn AI through a personalised learning journey
-                designed around your current knowledge and goals.
-            </p>
-
-        </div>
-        """,
+    st.markdown(
+        "<p style='text-align:center; font-size:16px;'>"
+        "Learn AI through a personalised learning journey "
+        "designed around your current knowledge and goals."
+        "</p>",
         unsafe_allow_html=True
     )
 
@@ -1283,10 +1169,8 @@ def home_page():
 
     name = st.text_input(
         "Your Name",
-        value=st.session_state.profile.get(
-            "name",
-            ""
-        )
+        value=st.session_state.profile.get("name", ""),
+        placeholder="Enter your name"
     )
 
     level = st.selectbox(
@@ -1315,7 +1199,7 @@ def home_page():
             "Build AI projects",
             "Prepare for a job",
             "Learn Generative AI",
-            "Learn AI Agents"
+            "Learn AI Agents",
         ]
     )
 
@@ -1325,7 +1209,7 @@ def home_page():
             "15 minutes",
             "30 minutes",
             "1 hour",
-            "2+ hours"
+            "2+ hours",
         ]
     )
 
@@ -1337,20 +1221,36 @@ def home_page():
 
     if st.button(
         "🚀 Start AI Journey",
-        use_container_width=True
+        use_container_width=True,
+        type="primary"
     ):
 
+        if not name.strip():
+
+            st.warning(
+                "Please enter your name before starting."
+            )
+            return
+
         st.session_state.profile = {
-            "name": name,
+            "name": name.strip(),
             "level": level,
             "goal": goal,
-            "study_time": study_time
+            "study_time": study_time,
         }
 
-        # Start a fresh diagnostic
-        st.session_state.used_question_ids = set()
+        # Create fresh diagnostic
+        st.session_state.diagnostic_questions = (
+            create_diagnostic(level)
+        )
 
-        create_new_diagnostic(level)
+        st.session_state.diagnostic_answers = []
+
+        st.session_state.diagnostic_index = 0
+
+        st.session_state.scores = {}
+
+        st.session_state.roadmap = []
 
         st.session_state.page = "diagnostic"
 
@@ -1363,96 +1263,126 @@ def home_page():
 
 def diagnostic_page():
 
-    questions = st.session_state.questions
+    questions = st.session_state.diagnostic_questions
 
+    total_questions = len(questions)
+
+    current_index = st.session_state.diagnostic_index
+
+    # Safety check
     if not questions:
 
         st.session_state.page = "home"
-
         st.rerun()
-
-    current_index = st.session_state.current_question
-
-    current_question = questions[current_index]
+        return
 
     # --------------------------------------------------------
     # HEADER
     # --------------------------------------------------------
 
-    st.title("🧠 AI Diagnostic")
+    st.title("🧠 AI Knowledge Diagnostic")
 
     st.write(
-        f"Level selected: "
-        f"**{st.session_state.profile.get('level', 'Beginner')}**"
+        f"Hello **{st.session_state.profile.get('name', 'Learner')}**!"
     )
+
+    st.write(
+        "This diagnostic will help AI StudyMate understand "
+        "your current knowledge and create your personalised roadmap."
+    )
+
+    st.info(
+        f"Your selected level: **{st.session_state.profile.get('level', 'Beginner')}**"
+    )
+
+    # --------------------------------------------------------
+    # PROGRESS
+    # --------------------------------------------------------
+
+    progress = current_index / total_questions
+
+    st.progress(progress)
 
     st.caption(
-        f"Question {current_index + 1} "
-        f"of {len(questions)}"
+        f"Question {current_index + 1} of {total_questions}"
     )
-
-    progress_value = (
-        (current_index + 1) /
-        len(questions)
-    )
-
-    st.progress(progress_value)
-
-    st.divider()
 
     # --------------------------------------------------------
-    # QUESTION
+    # CURRENT QUESTION
     # --------------------------------------------------------
 
-    st.subheader(
-        current_question["question"]
+    current_question = questions[current_index]
+
+    st.markdown(
+        f"### {current_question['subject']}"
     )
 
-    selected = st.radio(
-        "Choose one answer:",
+    st.markdown(
+        f"**{current_question['question']}**"
+    )
+
+    # --------------------------------------------------------
+    # ANSWER
+    # --------------------------------------------------------
+
+    answer = st.radio(
+        "Select your answer:",
         current_question["options"],
+        key=f"diagnostic_answer_{current_index}",
         index=None,
-        key=f"question_{current_index}"
     )
 
     st.write("")
 
     # --------------------------------------------------------
-    # NEXT BUTTON
+    # NEXT QUESTION
     # --------------------------------------------------------
 
     if st.button(
         "Next Question →",
         use_container_width=True,
-        disabled=selected is None
+        type="primary"
     ):
 
-        # Save answer silently
-        current_question["selected"] = selected
+        if answer is None:
 
-        st.session_state.answers.append(
-            selected
+            st.warning(
+                "Please select an answer before continuing."
+            )
+
+            return
+
+        selected_answer_index = (
+            current_question["options"].index(answer)
         )
 
-        # More questions remain
-        if current_index + 1 < len(questions):
+        st.session_state.diagnostic_answers.append(
+            selected_answer_index
+        )
 
-            st.session_state.current_question += 1
+        # ----------------------------------------------------
+        # MORE QUESTIONS
+        # ----------------------------------------------------
+
+        if current_index < total_questions - 1:
+
+            st.session_state.diagnostic_index += 1
 
             st.rerun()
 
-        # Diagnostic finished
+        # ----------------------------------------------------
+        # DIAGNOSTIC COMPLETE
+        # ----------------------------------------------------
+
         else:
 
             scores = calculate_scores()
 
-            st.session_state.domain_scores = scores
+            st.session_state.scores = scores
 
             st.session_state.roadmap = create_roadmap(
                 scores
             )
-
-            st.session_state.diagnostic_complete = True
 
             st.session_state.page = "score_card"
 
@@ -1465,151 +1395,89 @@ def diagnostic_page():
 
 def score_card_page():
 
-    scores = st.session_state.domain_scores
+    scores = st.session_state.scores
 
     if not scores:
 
         st.session_state.page = "home"
-
         st.rerun()
+        return
 
     # --------------------------------------------------------
-    # OVERALL SCORE
+    # CALCULATE OVERALL
     # --------------------------------------------------------
-
-    valid_scores = list(scores.values())
 
     overall_score = round(
-        sum(valid_scores) /
-        len(valid_scores)
+        sum(scores.values()) / len(scores)
     )
-
-    # --------------------------------------------------------
-    # WEAKEST SUBJECT
-    # --------------------------------------------------------
 
     weakest_subject = min(
         scores,
         key=scores.get
     )
 
-    weakest_score = scores[
-        weakest_subject
-    ]
+    weakest_score = scores[weakest_subject]
 
     # --------------------------------------------------------
-    # SCORE CARD HEADER
+    # HEADER
     # --------------------------------------------------------
 
     st.markdown(
-        f"""
-        <div style="
-            text-align:center;
-            padding:35px 20px;
-            border-radius:18px;
-            border:1px solid rgba(128,128,128,0.25);
-            margin-bottom:30px;
-        ">
-
-            <div style="
-                font-size:32px;
-                font-weight:700;
-            ">
-                🎓 YOUR AI LEARNING SCORE CARD
-            </div>
-
-            <div style="
-                font-size:16px;
-                margin-top:8px;
-            ">
-                Your current AI knowledge profile
-            </div>
-
-            <div style="
-                font-size:52px;
-                font-weight:700;
-                margin-top:15px;
-            ">
-                {overall_score}%
-            </div>
-
-            <div style="
-                font-size:15px;
-            ">
-                Overall Score
-            </div>
-
-        </div>
-        """,
+        "<div style='text-align:center;'>"
+        "<div style='font-size:48px;'>🎓</div>"
+        "<h1>Your AI Learning Score Card</h1>"
+        "<p>Here is your current AI knowledge profile.</p>"
+        "</div>",
         unsafe_allow_html=True
     )
 
+    st.divider()
+
     # --------------------------------------------------------
-    # SUBJECT PERFORMANCE
+    # OVERALL SCORE
     # --------------------------------------------------------
 
-    st.subheader("📊 Subject Performance")
+    st.markdown(
+        "<div style='text-align:center;'>"
+        "<p style='font-size:18px;'>Overall Score</p>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f"<h1 style='text-align:center; font-size:64px;'>"
+        f"{overall_score}%"
+        f"</h1>",
+        unsafe_allow_html=True
+    )
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # SUBJECT SCORES
+    # --------------------------------------------------------
+
+    st.subheader("📚 Subject Scores")
 
     for subject in SUBJECTS:
 
-        score = scores.get(
-            subject,
-            0
-        )
+        score = scores.get(subject, 0)
 
         status = get_status(score)
 
         st.markdown(
-            f"""
-            <div style="
-                margin-top:20px;
-                margin-bottom:15px;
-            ">
-
-                <div style="
-                    font-size:20px;
-                    font-weight:600;
-                ">
-                    {subject}
-                </div>
-
-                <div style="
-                    font-size:15px;
-                    margin-top:5px;
-                ">
-                    {score}%
-                </div>
-
-                <div style="
-                    width:100%;
-                    height:12px;
-                    background:#e5e7eb;
-                    border-radius:10px;
-                    margin-top:8px;
-                    overflow:hidden;
-                ">
-
-                    <div style="
-                        width:{score}%;
-                        height:100%;
-                        background:#4f46e5;
-                        border-radius:10px;
-                    ">
-                    </div>
-
-                </div>
-
-                <div style="
-                    font-size:14px;
-                    margin-top:6px;
-                ">
-                    Status: <b>{status}</b>
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
+            f"**{subject}**"
         )
+
+        st.progress(
+            score / 100
+        )
+
+        st.caption(
+            f"{score}%  •  {status}"
+        )
+
+        st.write("")
 
     # --------------------------------------------------------
     # RECOMMENDED STARTING POINT
@@ -1617,48 +1485,73 @@ def score_card_page():
 
     st.divider()
 
-    st.markdown(
-        """
-        <div style="
-            font-size:24px;
-            font-weight:700;
-            margin-top:15px;
-            margin-bottom:12px;
-        ">
-            🎯 Recommended Starting Point
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.subheader("🎯 Recommended Starting Point")
 
     st.markdown(
-        f"""
-        <div style="
-            border:1px solid rgba(128,128,128,0.25);
-            padding:22px;
-            border-radius:14px;
-            margin-bottom:20px;
-        ">
-
-            <div style="
-                font-size:24px;
-                font-weight:700;
-            ">
-                {weakest_subject} — {weakest_score}%
-            </div>
-
-            <div style="
-                font-size:16px;
-                margin-top:10px;
-            ">
-                Build your foundation here before moving
-                to more advanced topics.
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+        f"### {weakest_subject} — {weakest_score}%"
     )
+
+    if weakest_score < 40:
+
+        st.write(
+            f"Build your foundation in **{weakest_subject}** "
+            "before moving into more advanced topics."
+        )
+
+    elif weakest_score < 70:
+
+        st.write(
+            f"Strengthen your **{weakest_subject}** skills "
+            "with focused lessons and practice."
+        )
+
+    else:
+
+        st.write(
+            f"You have a solid foundation in **{weakest_subject}**. "
+            "Continue with targeted practice to strengthen mastery."
+        )
+
+    # --------------------------------------------------------
+    # PROFILE SUMMARY
+    # --------------------------------------------------------
+
+    st.divider()
+
+    st.subheader("👤 Your Learning Profile")
+
+    profile = st.session_state.profile
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.metric(
+            "AI Level",
+            profile.get("level", "Beginner")
+        )
+
+        st.metric(
+            "Daily Study Time",
+            profile.get("study_time", "30 minutes")
+        )
+
+    with col2:
+
+        st.metric(
+            "Learning Goal",
+            profile.get(
+                "goal",
+                "Learn AI fundamentals"
+            )
+        )
+
+        st.metric(
+            "Subjects Assessed",
+            "5"
+        )
+
+    st.write("")
 
     # --------------------------------------------------------
     # ACTION BUTTONS
@@ -1669,8 +1562,9 @@ def score_card_page():
     with col1:
 
         if st.button(
-            "🗺️ View My Personalised Roadmap",
-            use_container_width=True
+            "🗺️ View Personalised Roadmap",
+            use_container_width=True,
+            type="primary"
         ):
 
             st.session_state.page = "roadmap"
@@ -1684,12 +1578,22 @@ def score_card_page():
             use_container_width=True
         ):
 
-            level = st.session_state.profile.get(
+            level = profile.get(
                 "level",
                 "Beginner"
             )
 
-            create_new_diagnostic(level)
+            st.session_state.diagnostic_questions = (
+                create_diagnostic(level)
+            )
+
+            st.session_state.diagnostic_answers = []
+
+            st.session_state.diagnostic_index = 0
+
+            st.session_state.scores = {}
+
+            st.session_state.roadmap = []
 
             st.session_state.page = "diagnostic"
 
@@ -1697,74 +1601,117 @@ def score_card_page():
 
 
 # ============================================================
-# PERSONALIZED ROADMAP
+# ROADMAP PAGE
 # ============================================================
 
 def roadmap_page():
 
-    st.title("🗺️ Your Personalised Roadmap")
+    scores = st.session_state.scores
+
+    if not scores:
+
+        st.session_state.page = "home"
+        st.rerun()
+        return
+
+    st.title("🗺️ Your Personalised AI Roadmap")
 
     st.write(
-        "Your learning journey is arranged from the areas "
-        "that currently need the most improvement."
+        "AI StudyMate has ordered your learning journey "
+        "from areas that need the most attention to areas "
+        "where you already have stronger knowledge."
     )
 
     st.divider()
 
-    for index, item in enumerate(
-        st.session_state.roadmap,
-        start=1
-    ):
+    roadmap = st.session_state.roadmap
+
+    # --------------------------------------------------------
+    # ROADMAP
+    # --------------------------------------------------------
+
+    for index, item in enumerate(roadmap):
 
         subject = item["subject"]
-
         score = item["score"]
-
-        status = item["status"]
+        priority = item["priority"]
 
         st.markdown(
-            f"""
-            <div style="
-                padding:20px;
-                border:1px solid rgba(128,128,128,0.25);
-                border-radius:14px;
-                margin-bottom:15px;
-            ">
-
-                <div style="
-                    font-size:22px;
-                    font-weight:700;
-                ">
-                    {index}. {subject}
-                </div>
-
-                <div style="
-                    font-size:16px;
-                    margin-top:7px;
-                ">
-                    Current Score: <b>{score}%</b>
-                </div>
-
-                <div style="
-                    font-size:15px;
-                    margin-top:5px;
-                ">
-                    Status: <b>{status}</b>
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
+            f"### {index + 1}. {subject}"
         )
 
-    st.write("")
+        st.progress(
+            score / 100
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.write(
+                f"Current score: **{score}%**"
+            )
+
+        with col2:
+
+            st.write(
+                f"Priority: **{priority}**"
+            )
+
+        # ----------------------------------------------------
+        # LEARNING RECOMMENDATION
+        # ----------------------------------------------------
+
+        if score < 40:
+
+            recommendation = (
+                "Start with the fundamentals. "
+                "Focus on concepts, terminology, simple examples, "
+                "and guided practice."
+            )
+
+        elif score < 70:
+
+            recommendation = (
+                "Build stronger understanding through intermediate "
+                "concepts, worked examples, and practice questions."
+            )
+
+        else:
+
+            recommendation = (
+                "Continue toward advanced concepts, projects, "
+                "and application-based practice."
+            )
+
+        st.info(
+            recommendation
+        )
+
+        st.divider()
+
+    # --------------------------------------------------------
+    # NEXT STEP
+    # --------------------------------------------------------
+
+    st.subheader("🚀 Next Step")
+
+    st.write(
+        f"Your first recommended learning area is "
+        f"**{roadmap[0]['subject']}**."
+    )
+
+    st.write(
+        "The next version of AI StudyMate will turn this roadmap "
+        "into adaptive lessons, practice tasks, and mastery tracking."
+    )
 
     if st.button(
-        "← Back to Score Card",
+        "🏠 Back to Home",
         use_container_width=True
     ):
 
-        st.session_state.page = "score_card"
+        st.session_state.page = "home"
 
         st.rerun()
 
@@ -1776,40 +1723,14 @@ def roadmap_page():
 with st.sidebar:
 
     st.markdown(
-        """
-        <div style="
-            text-align:center;
-            font-size:24px;
-            font-weight:700;
-            padding:10px;
-        ">
-            🎓 AI StudyMate
-        </div>
-        """,
-        unsafe_allow_html=True
+        "## 🎓 AI StudyMate"
+    )
+
+    st.caption(
+        "Personalised AI Tutor for Learning AI"
     )
 
     st.divider()
-
-    if st.session_state.diagnostic_complete:
-
-        if st.button(
-            "📊 Score Card",
-            use_container_width=True
-        ):
-
-            st.session_state.page = "score_card"
-
-            st.rerun()
-
-        if st.button(
-            "🗺️ Personalised Roadmap",
-            use_container_width=True
-        ):
-
-            st.session_state.page = "roadmap"
-
-            st.rerun()
 
     if st.button(
         "🏠 Home",
@@ -1819,6 +1740,34 @@ with st.sidebar:
         st.session_state.page = "home"
 
         st.rerun()
+
+    if st.button(
+        "📊 Score Card",
+        use_container_width=True,
+        disabled=not bool(st.session_state.scores)
+    ):
+
+        st.session_state.page = "score_card"
+
+        st.rerun()
+
+    if st.button(
+        "🗺️ Roadmap",
+        use_container_width=True,
+        disabled=not bool(st.session_state.scores)
+    ):
+
+        st.session_state.page = "roadmap"
+
+        st.rerun()
+
+    st.divider()
+
+    st.caption(
+        "AI StudyMate helps learners discover what they know, "
+        "identify knowledge gaps, and follow a personalised "
+        "AI learning journey."
+    )
 
 
 # ============================================================
@@ -1840,3 +1789,9 @@ elif st.session_state.page == "score_card":
 elif st.session_state.page == "roadmap":
 
     roadmap_page()
+
+else:
+
+    st.session_state.page = "home"
+
+    home_page()
