@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 import os
+import base64
 
 
 # ============================================================
@@ -16,8 +17,12 @@ st.set_page_config(
 
 
 # ============================================================
-# SUBJECTS
+# APP SETTINGS
 # ============================================================
+
+APP_NAME = "AI Learn"
+
+LOGO_FILE = "0f6577fe444ba6b1365cd00394ee581e.jpg"
 
 SUBJECTS = [
     "Python",
@@ -32,17 +37,20 @@ SUBJECTS = [
 # SESSION STATE
 # ============================================================
 
-DEFAULT_STATE = {
+DEFAULTS = {
     "page": "home",
     "profile": {},
     "diagnostic_questions": [],
     "diagnostic_answers": [],
     "scores": {},
     "roadmap": [],
+    "seen_questions": set(),
 }
 
-for key, value in DEFAULT_STATE.items():
+for key, value in DEFAULTS.items():
+
     if key not in st.session_state:
+
         st.session_state[key] = value
 
 
@@ -54,9 +62,9 @@ st.markdown(
     """
     <style>
 
-    /* -------------------------------------------------------
-       MAIN APP
-    ------------------------------------------------------- */
+    /* ======================================================
+       GENERAL
+    ====================================================== */
 
     .stApp {
         background: #ffffff;
@@ -68,25 +76,21 @@ st.markdown(
         padding-bottom: 3rem;
     }
 
-    /* -------------------------------------------------------
-       REMOVE DEFAULT STREAMLIT HEADER SPACE
-    ------------------------------------------------------- */
-
     header[data-testid="stHeader"] {
         background: transparent;
     }
 
-    /* -------------------------------------------------------
+    /* ======================================================
        HEADER
-    ------------------------------------------------------- */
+    ====================================================== */
 
     .ai-header {
-        height: 72px;
-        border-bottom: 1px solid #e8edf2;
+        height: 76px;
+        border-bottom: 1px solid #e7ebef;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 8px;
+        padding: 0 4px;
         margin-bottom: 0;
     }
 
@@ -96,24 +100,18 @@ st.markdown(
         gap: 12px;
     }
 
-    .brand-name {
-        font-size: 25px;
-        font-weight: 700;
-        color: #17202a;
-        letter-spacing: -0.5px;
+    .brand-logo {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+        border-radius: 8px;
     }
 
-    .brand-mark {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        background: #111111;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 22px;
-        font-weight: 800;
+    .brand-name {
+        font-size: 26px;
+        font-weight: 750;
+        color: #25313c;
+        letter-spacing: -0.5px;
     }
 
     .header-actions {
@@ -125,64 +123,46 @@ st.markdown(
     .gift-box {
         width: 44px;
         height: 44px;
-        border: 1px solid #e2e7ec;
+        border: 1px solid #e1e6eb;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 20px;
-        background: white;
+        background: #ffffff;
     }
 
     .login-button {
-        border: 1px solid #34495e;
+        border: 1px solid #344454;
         border-radius: 8px;
-        padding: 12px 28px;
-        color: #17202a;
-        background: white;
+        padding: 12px 27px;
+        color: #25313c;
+        background: #ffffff;
         font-weight: 600;
         font-size: 15px;
     }
 
     .join-button {
         border-radius: 8px;
-        padding: 13px 24px;
-        color: white;
+        padding: 13px 23px;
+        color: #ffffff;
         background: #344454;
         font-weight: 700;
         font-size: 15px;
     }
 
-    /* -------------------------------------------------------
+    /* ======================================================
        HERO
-    ------------------------------------------------------- */
-
-    .hero {
-        min-height: 520px;
-        display: flex;
-        align-items: center;
-        padding: 45px 0 35px 0;
-    }
-
-    .hero-left {
-        width: 53%;
-        padding-right: 50px;
-    }
-
-    .hero-right {
-        width: 47%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+    ====================================================== */
 
     .hero-title {
-        font-size: 54px;
+        font-size: 56px;
         line-height: 1.08;
-        font-weight: 750;
+        font-weight: 800;
         letter-spacing: -2px;
         color: #35424f;
-        margin: 0 0 18px 0;
+        margin-top: 45px;
+        margin-bottom: 18px;
     }
 
     .hero-title span {
@@ -193,28 +173,58 @@ st.markdown(
         font-size: 20px;
         line-height: 1.55;
         color: #566573;
-        max-width: 580px;
-        margin-bottom: 25px;
+        max-width: 590px;
+        margin-bottom: 20px;
     }
 
     .hero-highlight {
         font-size: 16px;
-        color: #34495e;
-        margin-bottom: 28px;
+        line-height: 1.6;
+        color: #566573;
+        max-width: 590px;
+        margin-bottom: 25px;
     }
 
     .hero-highlight strong {
         color: #10a37f;
     }
 
-    /* -------------------------------------------------------
+    /* ======================================================
+       PROFILE CARD
+    ====================================================== */
+
+    .profile-card {
+        background: #ffffff;
+        border: 1px solid #e1e7ec;
+        border-radius: 12px;
+        padding: 22px;
+        margin-top: 12px;
+        box-shadow: 0 8px 28px rgba(35, 50, 65, 0.06);
+    }
+
+    .profile-title {
+        font-size: 21px;
+        font-weight: 750;
+        color: #25313c;
+        margin-bottom: 7px;
+    }
+
+    .profile-description {
+        color: #687783;
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 15px;
+    }
+
+    /* ======================================================
        HERO VISUAL
-    ------------------------------------------------------- */
+    ====================================================== */
 
     .learning-visual {
         position: relative;
-        width: 480px;
-        height: 420px;
+        width: 490px;
+        height: 430px;
+        margin-top: 45px;
     }
 
     .visual-circle {
@@ -229,16 +239,16 @@ st.markdown(
     .circle-one {
         width: 190px;
         height: 190px;
-        left: 20px;
+        left: 15px;
         top: 20px;
         background: #e9f3ff;
-        font-size: 80px;
+        font-size: 78px;
     }
 
     .circle-two {
         width: 165px;
         height: 165px;
-        right: 25px;
+        right: 20px;
         top: 15px;
         background: #fff4cf;
         font-size: 65px;
@@ -247,7 +257,7 @@ st.markdown(
     .circle-three {
         width: 175px;
         height: 175px;
-        left: 125px;
+        left: 120px;
         bottom: 15px;
         background: #e8f8f3;
         font-size: 70px;
@@ -264,7 +274,7 @@ st.markdown(
 
     .floating-card {
         position: absolute;
-        background: white;
+        background: #ffffff;
         border: 1px solid #e7ebef;
         border-radius: 14px;
         padding: 13px 16px;
@@ -275,12 +285,12 @@ st.markdown(
 
     .card-ai {
         left: 145px;
-        top: 170px;
+        top: 175px;
     }
 
     .card-progress {
-        right: 90px;
-        top: 190px;
+        right: 80px;
+        top: 195px;
     }
 
     .card-python {
@@ -288,89 +298,80 @@ st.markdown(
         bottom: 105px;
     }
 
-    /* -------------------------------------------------------
-       FORM CARD
-    ------------------------------------------------------- */
-
-    .profile-card {
-        background: #ffffff;
-        border: 1px solid #e1e7ec;
-        border-radius: 12px;
-        padding: 22px;
-        box-shadow: 0 8px 30px rgba(35, 50, 65, 0.06);
-    }
-
-    .profile-title {
-        font-size: 21px;
-        font-weight: 700;
-        color: #25313c;
-        margin-bottom: 8px;
-    }
-
-    .profile-description {
-        color: #687783;
-        font-size: 14px;
-        margin-bottom: 15px;
-    }
-
-    /* -------------------------------------------------------
-       STREAMLIT INPUTS
-    ------------------------------------------------------- */
-
-    div[data-baseweb="input"] {
-        border-radius: 8px;
-    }
-
-    div[data-baseweb="select"] {
-        border-radius: 8px;
-    }
-
-    /* -------------------------------------------------------
-       PRIMARY BUTTON
-    ------------------------------------------------------- */
-
-    .stButton > button {
-        border-radius: 8px;
-        min-height: 48px;
-        font-weight: 700;
-    }
-
-    /* -------------------------------------------------------
-       SECTION
-    ------------------------------------------------------- */
+    /* ======================================================
+       FOUNDATION SECTION
+    ====================================================== */
 
     .section-title {
         text-align: center;
         font-size: 34px;
         color: #344454;
-        font-weight: 750;
-        margin-top: 40px;
+        font-weight: 800;
+        margin-top: 55px;
     }
 
     .section-description {
         text-align: center;
         color: #687783;
         font-size: 17px;
-        margin-bottom: 35px;
+        margin-bottom: 32px;
     }
 
-    /* -------------------------------------------------------
+    /* ======================================================
+       DIAGNOSTIC
+    ====================================================== */
+
+    .diagnostic-header {
+        background: #f7fafc;
+        border: 1px solid #e3e9ee;
+        border-radius: 16px;
+        padding: 25px;
+        margin-top: 25px;
+        margin-bottom: 25px;
+    }
+
+    .question-card {
+        background: #ffffff;
+        border: 1px solid #e2e7ec;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 18px;
+    }
+
+    .question-number {
+        color: #10a37f;
+        font-size: 14px;
+        font-weight: 750;
+        margin-bottom: 7px;
+    }
+
+    .question-text {
+        color: #26333e;
+        font-size: 18px;
+        line-height: 1.45;
+        font-weight: 650;
+    }
+
+    /* ======================================================
        SCORE CARD
-    ------------------------------------------------------- */
+    ====================================================== */
 
     .score-header {
         background: #f7fafc;
-        border: 1px solid #e4e9ee;
+        border: 1px solid #e3e9ee;
         border-radius: 18px;
         padding: 35px;
         text-align: center;
-        margin-bottom: 25px;
+        margin-top: 25px;
+        margin-bottom: 28px;
     }
 
     .score-number {
         font-size: 64px;
-        font-weight: 800;
+        line-height: 1;
+        font-weight: 850;
         color: #344454;
+        margin-top: 10px;
     }
 
     .score-label {
@@ -378,35 +379,35 @@ st.markdown(
         font-size: 16px;
     }
 
-    /* -------------------------------------------------------
+    .recommendation-card {
+        background: #f4faf8;
+        border: 1px solid #d8eee7;
+        border-radius: 14px;
+        padding: 22px;
+        margin-top: 15px;
+        margin-bottom: 25px;
+    }
+
+    /* ======================================================
        MOBILE
-    ------------------------------------------------------- */
+    ====================================================== */
 
     @media (max-width: 900px) {
-
-        .hero {
-            display: block;
-        }
-
-        .hero-left,
-        .hero-right {
-            width: 100%;
-            padding-right: 0;
-        }
-
-        .hero-title {
-            font-size: 40px;
-        }
-
-        .learning-visual {
-            transform: scale(0.85);
-            transform-origin: center;
-            margin: 0 auto;
-        }
 
         .header-actions {
             display: none;
         }
+
+        .hero-title {
+            font-size: 42px;
+        }
+
+        .learning-visual {
+            transform: scale(0.78);
+            transform-origin: top center;
+            margin: 0 auto;
+        }
+
     }
 
     </style>
@@ -416,221 +417,270 @@ st.markdown(
 
 
 # ============================================================
+# LOGO HELPER
+# ============================================================
+
+def get_logo_base64():
+
+    if not os.path.exists(LOGO_FILE):
+
+        return None
+
+    try:
+
+        with open(LOGO_FILE, "rb") as file:
+
+            encoded = base64.b64encode(
+                file.read()
+            ).decode()
+
+        return encoded
+
+    except Exception:
+
+        return None
+
+
+# ============================================================
 # QUESTION BANK
+#
+# 5 questions per level per subject.
+# The diagnostic selects 3 from the learner's level.
 # ============================================================
 
 QUESTION_BANK = [
 
     # ========================================================
-    # PYTHON
+    # PYTHON - BEGINNER
     # ========================================================
 
     {
+        "id": "py_b_01",
         "subject": "Python",
         "level": "Beginner",
-        "question": "Which symbol is used to start a comment in Python?",
-        "options": ["//", "#", "<!--", "/*"],
-        "answer": 1,
+        "question": "Which symbol starts a comment in Python?",
+        "options": ["//", "#", "/*", "<!--"],
+        "answer": "#",
     },
     {
+        "id": "py_b_02",
         "subject": "Python",
         "level": "Beginner",
-        "question": "Which Python data type stores True or False values?",
+        "question": "Which Python type represents True or False?",
         "options": ["String", "Boolean", "List", "Integer"],
-        "answer": 1,
+        "answer": "Boolean",
     },
     {
+        "id": "py_b_03",
         "subject": "Python",
         "level": "Beginner",
-        "question": "Which function displays output in Python?",
-        "options": ["display()", "show()", "print()", "output()"],
-        "answer": 2,
+        "question": "Which function prints text to the console?",
+        "options": ["show()", "display()", "print()", "write()"],
+        "answer": "print()",
     },
     {
+        "id": "py_b_04",
         "subject": "Python",
         "level": "Beginner",
         "question": "Which collection is ordered and changeable?",
         "options": ["Tuple", "List", "Set", "Frozen set"],
-        "answer": 1,
+        "answer": "List",
     },
     {
+        "id": "py_b_05",
         "subject": "Python",
         "level": "Beginner",
         "question": "What is the result of 3 + 4 * 2?",
         "options": ["14", "11", "10", "9"],
-        "answer": 1,
-    },
-    {
-        "subject": "Python",
-        "level": "Beginner",
-        "question": "Which keyword creates a conditional statement?",
-        "options": ["if", "when", "check", "condition"],
-        "answer": 0,
+        "answer": "11",
     },
 
+    # PYTHON - INTERMEDIATE
+
     {
+        "id": "py_i_01",
         "subject": "Python",
         "level": "Intermediate",
         "question": "What does a list comprehension provide?",
         "options": [
             "A concise way to create lists",
-            "A way to define classes",
             "A database connection",
             "A Python compiler",
+            "A way to define classes",
         ],
-        "answer": 0,
+        "answer": "A concise way to create lists",
     },
     {
+        "id": "py_i_02",
         "subject": "Python",
         "level": "Intermediate",
-        "question": "What is the main purpose of a dictionary?",
+        "question": "What does a Python dictionary primarily store?",
         "options": [
-            "Store values using key-value mappings",
-            "Store only numbers",
-            "Store only strings",
-            "Execute functions",
+            "Key-value mappings",
+            "Only numbers",
+            "Only strings",
+            "Functions only",
         ],
-        "answer": 0,
+        "answer": "Key-value mappings",
     },
     {
+        "id": "py_i_03",
         "subject": "Python",
         "level": "Intermediate",
         "question": "What does len([10, 20, 30]) return?",
         "options": ["2", "3", "30", "60"],
-        "answer": 1,
+        "answer": "3",
     },
     {
+        "id": "py_i_04",
+        "subject": "Python",
+        "level": "Intermediate",
+        "question": "Which keyword defines a function?",
+        "options": ["function", "define", "def", "func"],
+        "answer": "def",
+    },
+    {
+        "id": "py_i_05",
         "subject": "Python",
         "level": "Intermediate",
         "question": "What is the purpose of a function?",
         "options": [
             "Group reusable logic",
-            "Store files",
             "Install packages",
             "Create an operating system",
+            "Store files",
         ],
-        "answer": 0,
-    },
-    {
-        "subject": "Python",
-        "level": "Intermediate",
-        "question": "Which keyword defines a function?",
-        "options": ["function", "define", "def", "func"],
-        "answer": 2,
+        "answer": "Group reusable logic",
     },
 
+    # PYTHON - ADVANCED
+
     {
+        "id": "py_a_01",
         "subject": "Python",
         "level": "Advanced",
         "question": "What is the main purpose of a generator?",
         "options": [
             "Produce values lazily during iteration",
+            "Compile Python code",
             "Automatically parallelize code",
-            "Compile Python",
             "Prevent all memory allocation",
         ],
-        "answer": 0,
+        "answer": "Produce values lazily during iteration",
     },
     {
+        "id": "py_a_02",
         "subject": "Python",
         "level": "Advanced",
-        "question": "What does a decorator generally allow?",
+        "question": "What does a decorator generally allow you to do?",
         "options": [
             "Modify or extend function behavior",
             "Delete Python modules",
-            "Convert lists to databases",
             "Disable exceptions",
+            "Convert lists to databases",
         ],
-        "answer": 0,
+        "answer": "Modify or extend function behavior",
     },
     {
+        "id": "py_a_03",
         "subject": "Python",
         "level": "Advanced",
-        "question": "Which concept allows a class to inherit behavior?",
+        "question": "Which OOP concept allows a class to acquire behavior from another class?",
         "options": [
             "Encapsulation",
             "Inheritance",
             "Iteration",
             "Serialization",
         ],
-        "answer": 1,
+        "answer": "Inheritance",
     },
     {
+        "id": "py_a_04",
         "subject": "Python",
         "level": "Advanced",
-        "question": "What is the purpose of a context manager?",
+        "question": "What is a context manager commonly used for?",
         "options": [
-            "Manage setup and cleanup of resources",
-            "Automatically make code asynchronous",
-            "Prevent every exception",
-            "Convert Python to C++",
+            "Managing setup and cleanup of resources",
+            "Removing all exceptions",
+            "Automatically making code asynchronous",
+            "Converting Python to C++",
         ],
-        "answer": 0,
+        "answer": "Managing setup and cleanup of resources",
     },
     {
+        "id": "py_a_05",
         "subject": "Python",
         "level": "Advanced",
-        "question": "What does *args allow?",
+        "question": "What does *args allow in a function definition?",
         "options": [
             "An arbitrary number of positional arguments",
-            "An arbitrary number of classes",
             "Only keyword arguments",
-            "Only one required argument",
+            "Exactly one argument",
+            "An arbitrary number of classes",
         ],
-        "answer": 0,
+        "answer": "An arbitrary number of positional arguments",
     },
 
+
     # ========================================================
-    # MATH
+    # MATH - BEGINNER
     # ========================================================
 
     {
+        "id": "math_b_01",
         "subject": "Mathematics & Statistics",
         "level": "Beginner",
         "question": "What is the mean of 2, 4, and 6?",
         "options": ["3", "4", "5", "6"],
-        "answer": 1,
+        "answer": "4",
     },
     {
+        "id": "math_b_02",
         "subject": "Mathematics & Statistics",
         "level": "Beginner",
         "question": "What does probability measure?",
         "options": [
             "Likelihood of an event",
-            "Size of a dataset",
-            "Average of values",
+            "Dataset size",
+            "Average value",
             "Number of features",
         ],
-        "answer": 0,
+        "answer": "Likelihood of an event",
     },
     {
+        "id": "math_b_03",
         "subject": "Mathematics & Statistics",
         "level": "Beginner",
-        "question": "Which value represents the middle of an ordered dataset?",
+        "question": "Which measure represents the middle value of ordered data?",
         "options": ["Mean", "Median", "Variance", "Range"],
-        "answer": 1,
+        "answer": "Median",
     },
     {
+        "id": "math_b_04",
         "subject": "Mathematics & Statistics",
         "level": "Beginner",
         "question": "What is 10% of 200?",
         "options": ["10", "20", "30", "40"],
-        "answer": 1,
+        "answer": "20",
     },
     {
+        "id": "math_b_05",
         "subject": "Mathematics & Statistics",
         "level": "Beginner",
-        "question": "What does the range represent?",
+        "question": "What does the range of a dataset represent?",
         "options": [
             "Maximum minus minimum",
             "Mean divided by median",
             "Number of observations",
             "Average",
         ],
-        "answer": 0,
+        "answer": "Maximum minus minimum",
     },
 
+    # MATH - INTERMEDIATE
+
     {
+        "id": "math_i_01",
         "subject": "Mathematics & Statistics",
         "level": "Intermediate",
         "question": "What does variance measure?",
@@ -640,45 +690,49 @@ QUESTION_BANK = [
             "Maximum value",
             "Number of features",
         ],
-        "answer": 0,
+        "answer": "Spread around the mean",
     },
     {
+        "id": "math_i_02",
         "subject": "Mathematics & Statistics",
         "level": "Intermediate",
-        "question": "What does a correlation coefficient measure?",
+        "question": "What does a correlation coefficient describe?",
         "options": [
             "Strength and direction of a relationship",
-            "Neural network layers",
             "Number of outliers",
-            "Number of categorical variables",
+            "Number of features",
+            "Dataset size",
         ],
-        "answer": 0,
+        "answer": "Strength and direction of a relationship",
     },
     {
+        "id": "math_i_03",
         "subject": "Mathematics & Statistics",
         "level": "Intermediate",
-        "question": "What does standard deviation represent?",
+        "question": "What does standard deviation measure?",
         "options": [
-            "A measure of data spread",
-            "Dataset size",
+            "Spread of observations",
             "Largest observation",
             "Number of classes",
+            "Dataset size",
         ],
-        "answer": 0,
+        "answer": "Spread of observations",
     },
     {
+        "id": "math_i_04",
         "subject": "Mathematics & Statistics",
         "level": "Intermediate",
-        "question": "What is a sample in statistics?",
+        "question": "What is a statistical sample?",
         "options": [
             "A subset of a population",
             "The entire population",
             "A constant",
-            "A neural network layer",
+            "A neural network",
         ],
-        "answer": 0,
+        "answer": "A subset of a population",
     },
     {
+        "id": "math_i_05",
         "subject": "Mathematics & Statistics",
         "level": "Intermediate",
         "question": "What does negative correlation generally indicate?",
@@ -688,34 +742,39 @@ QUESTION_BANK = [
             "Variables are identical",
             "There is no variation",
         ],
-        "answer": 0,
+        "answer": "One variable tends to increase as the other decreases",
     },
 
+    # MATH - ADVANCED
+
     {
+        "id": "math_a_01",
         "subject": "Mathematics & Statistics",
         "level": "Advanced",
-        "question": "Why is the gradient important in optimization?",
+        "question": "Why is the gradient useful in optimization?",
         "options": [
             "It indicates the direction of greatest increase",
             "It labels training data",
             "It removes categorical features",
             "It determines dataset size",
         ],
-        "answer": 0,
+        "answer": "It indicates the direction of greatest increase",
     },
     {
+        "id": "math_a_02",
         "subject": "Mathematics & Statistics",
         "level": "Advanced",
-        "question": "What does a covariance matrix describe?",
+        "question": "What does a covariance matrix contain?",
         "options": [
             "Variances and pairwise covariances",
             "Only means",
-            "Only class labels",
-            "Neural network layers",
+            "Only labels",
+            "Only class counts",
         ],
-        "answer": 0,
+        "answer": "Variances and pairwise covariances",
     },
     {
+        "id": "math_a_03",
         "subject": "Mathematics & Statistics",
         "level": "Advanced",
         "question": "Why are eigenvectors useful in dimensionality reduction?",
@@ -725,9 +784,10 @@ QUESTION_BANK = [
             "They replace missing values",
             "They remove training data",
         ],
-        "answer": 0,
+        "answer": "They identify important directions of variation",
     },
     {
+        "id": "math_a_04",
         "subject": "Mathematics & Statistics",
         "level": "Advanced",
         "question": "What does a derivative describe locally?",
@@ -737,9 +797,10 @@ QUESTION_BANK = [
             "Class probability",
             "Dataset size",
         ],
-        "answer": 0,
+        "answer": "Rate of change",
     },
     {
+        "id": "math_a_05",
         "subject": "Mathematics & Statistics",
         "level": "Advanced",
         "question": "What is Bayes' theorem used to calculate?",
@@ -749,14 +810,16 @@ QUESTION_BANK = [
             "Number of neurons",
             "Image dimensions",
         ],
-        "answer": 0,
+        "answer": "Conditional probability using prior information",
     },
 
+
     # ========================================================
-    # MACHINE LEARNING
+    # MACHINE LEARNING - BEGINNER
     # ========================================================
 
     {
+        "id": "ml_b_01",
         "subject": "Machine Learning",
         "level": "Beginner",
         "question": "What is supervised learning?",
@@ -766,9 +829,10 @@ QUESTION_BANK = [
             "Only clustering",
             "Manually writing prediction rules",
         ],
-        "answer": 0,
+        "answer": "Learning from labelled examples",
     },
     {
+        "id": "ml_b_02",
         "subject": "Machine Learning",
         "level": "Beginner",
         "question": "What is a training dataset used for?",
@@ -778,9 +842,10 @@ QUESTION_BANK = [
             "Deleting parameters",
             "Writing documentation",
         ],
-        "answer": 0,
+        "answer": "Teaching a model patterns from data",
     },
     {
+        "id": "ml_b_03",
         "subject": "Machine Learning",
         "level": "Beginner",
         "question": "Which is a classification problem?",
@@ -790,9 +855,10 @@ QUESTION_BANK = [
             "Grouping customers",
             "Reducing image dimensions",
         ],
-        "answer": 0,
+        "answer": "Predicting whether an email is spam",
     },
     {
+        "id": "ml_b_04",
         "subject": "Machine Learning",
         "level": "Beginner",
         "question": "Which is a regression problem?",
@@ -802,9 +868,10 @@ QUESTION_BANK = [
             "Grouping customers",
             "Finding image edges",
         ],
-        "answer": 0,
+        "answer": "Predicting a house price",
     },
     {
+        "id": "ml_b_05",
         "subject": "Machine Learning",
         "level": "Beginner",
         "question": "What is a feature?",
@@ -814,10 +881,13 @@ QUESTION_BANK = [
             "The model filename",
             "The training computer",
         ],
-        "answer": 0,
+        "answer": "An input variable used by a model",
     },
 
+    # ML - INTERMEDIATE
+
     {
+        "id": "ml_i_01",
         "subject": "Machine Learning",
         "level": "Intermediate",
         "question": "What is overfitting?",
@@ -827,21 +897,23 @@ QUESTION_BANK = [
             "A model has no training data",
             "A model always performs perfectly",
         ],
-        "answer": 0,
+        "answer": "A model learns training data too specifically",
     },
     {
+        "id": "ml_i_02",
         "subject": "Machine Learning",
         "level": "Intermediate",
         "question": "Why is a validation set useful?",
         "options": [
             "For evaluating choices during development",
-            "For replacing training data permanently",
+            "For deleting training data",
             "For removing all features",
             "For converting regression to clustering",
         ],
-        "answer": 0,
+        "answer": "For evaluating choices during development",
     },
     {
+        "id": "ml_i_03",
         "subject": "Machine Learning",
         "level": "Intermediate",
         "question": "What is feature scaling used for?",
@@ -851,9 +923,10 @@ QUESTION_BANK = [
             "Deleting the target",
             "Increasing classes",
         ],
-        "answer": 0,
+        "answer": "Putting numerical features on comparable scales",
     },
     {
+        "id": "ml_i_04",
         "subject": "Machine Learning",
         "level": "Intermediate",
         "question": "What is clustering?",
@@ -863,9 +936,10 @@ QUESTION_BANK = [
             "Training on labelled images",
             "Removing numerical features",
         ],
-        "answer": 0,
+        "answer": "Grouping similar observations without predefined labels",
     },
     {
+        "id": "ml_i_05",
         "subject": "Machine Learning",
         "level": "Intermediate",
         "question": "What does recall measure?",
@@ -875,10 +949,13 @@ QUESTION_BANK = [
             "The number of parameters",
             "Dataset size",
         ],
-        "answer": 0,
+        "answer": "The proportion of actual positives correctly identified",
     },
 
+    # ML - ADVANCED
+
     {
+        "id": "ml_a_01",
         "subject": "Machine Learning",
         "level": "Advanced",
         "question": "Why can data leakage produce misleading validation results?",
@@ -888,9 +965,10 @@ QUESTION_BANK = [
             "The dataset is always too small",
             "The model uses gradient descent",
         ],
-        "answer": 0,
+        "answer": "Information unavailable at prediction time influenced development",
     },
     {
+        "id": "ml_a_02",
         "subject": "Machine Learning",
         "level": "Advanced",
         "question": "What is the bias-variance tradeoff concerned with?",
@@ -900,21 +978,23 @@ QUESTION_BANK = [
             "Increasing storage",
             "Selecting a database",
         ],
-        "answer": 0,
+        "answer": "Balancing underfitting and sensitivity to training data",
     },
     {
+        "id": "ml_a_03",
         "subject": "Machine Learning",
         "level": "Advanced",
         "question": "Why might cross-validation be used?",
         "options": [
-            "Estimate generalization across multiple data splits",
-            "Guarantee zero test error",
-            "Eliminate the target",
-            "Make every model linear",
+            "To estimate generalization across multiple data splits",
+            "To guarantee zero test error",
+            "To eliminate the target",
+            "To make every model linear",
         ],
-        "answer": 0,
+        "answer": "To estimate generalization across multiple data splits",
     },
     {
+        "id": "ml_a_04",
         "subject": "Machine Learning",
         "level": "Advanced",
         "question": "What does regularization generally encourage?",
@@ -924,9 +1004,10 @@ QUESTION_BANK = [
             "Larger datasets automatically",
             "Removal of validation data",
         ],
-        "answer": 0,
+        "answer": "Simpler model parameters to reduce overfitting",
     },
     {
+        "id": "ml_a_05",
         "subject": "Machine Learning",
         "level": "Advanced",
         "question": "Why is class imbalance important?",
@@ -936,14 +1017,16 @@ QUESTION_BANK = [
             "It guarantees overfitting",
             "It removes evaluation metrics",
         ],
-        "answer": 0,
+        "answer": "Accuracy can hide poor minority-class performance",
     },
 
+
     # ========================================================
-    # DEEP LEARNING
+    # DEEP LEARNING - BEGINNER
     # ========================================================
 
     {
+        "id": "dl_b_01",
         "subject": "Deep Learning",
         "level": "Beginner",
         "question": "What is a neural network?",
@@ -953,9 +1036,10 @@ QUESTION_BANK = [
             "A programming language",
             "A compression format",
         ],
-        "answer": 0,
+        "answer": "A model made of interconnected computational units",
     },
     {
+        "id": "dl_b_02",
         "subject": "Deep Learning",
         "level": "Beginner",
         "question": "What is an activation function used for?",
@@ -965,9 +1049,10 @@ QUESTION_BANK = [
             "Deleting weights",
             "Downloading Python",
         ],
-        "answer": 0,
+        "answer": "Introducing nonlinear behavior",
     },
     {
+        "id": "dl_b_03",
         "subject": "Deep Learning",
         "level": "Beginner",
         "question": "What is an epoch?",
@@ -977,9 +1062,10 @@ QUESTION_BANK = [
             "One neuron",
             "One test example",
         ],
-        "answer": 0,
+        "answer": "One complete pass through the training dataset",
     },
     {
+        "id": "dl_b_04",
         "subject": "Deep Learning",
         "level": "Beginner",
         "question": "What are neural network weights?",
@@ -989,22 +1075,26 @@ QUESTION_BANK = [
             "Class labels",
             "Python packages",
         ],
-        "answer": 0,
+        "answer": "Learnable parameters used to transform inputs",
     },
     {
+        "id": "dl_b_05",
         "subject": "Deep Learning",
         "level": "Beginner",
         "question": "What is a loss function used for?",
         "options": [
-            "Measure how far predictions are from desired outputs",
-            "Increase image resolution",
-            "Create database tables",
-            "Remove parameters",
+            "Measuring how far predictions are from desired outputs",
+            "Increasing image resolution",
+            "Creating database tables",
+            "Removing parameters",
         ],
-        "answer": 0,
+        "answer": "Measuring how far predictions are from desired outputs",
     },
 
+    # DL - INTERMEDIATE
+
     {
+        "id": "dl_i_01",
         "subject": "Deep Learning",
         "level": "Intermediate",
         "question": "What is backpropagation used for?",
@@ -1014,9 +1104,10 @@ QUESTION_BANK = [
             "Compressing images",
             "Selecting database rows",
         ],
-        "answer": 0,
+        "answer": "Computing gradients used to update parameters",
     },
     {
+        "id": "dl_i_02",
         "subject": "Deep Learning",
         "level": "Intermediate",
         "question": "What do convolutional neural networks commonly excel at?",
@@ -1026,21 +1117,23 @@ QUESTION_BANK = [
             "Writing SQL",
             "Sorting Python lists",
         ],
-        "answer": 0,
+        "answer": "Learning spatial patterns in data such as images",
     },
     {
+        "id": "dl_i_03",
         "subject": "Deep Learning",
         "level": "Intermediate",
         "question": "What is an optimizer used for?",
         "options": [
-            "Update model parameters using gradient information",
-            "Create labels",
-            "Remove the loss function",
-            "Store images",
+            "Updating model parameters using gradient information",
+            "Creating labels",
+            "Removing the loss function",
+            "Storing images",
         ],
-        "answer": 0,
+        "answer": "Updating model parameters using gradient information",
     },
     {
+        "id": "dl_i_04",
         "subject": "Deep Learning",
         "level": "Intermediate",
         "question": "Why can ReLU help deep networks?",
@@ -1050,9 +1143,10 @@ QUESTION_BANK = [
             "It guarantees no overfitting",
             "It converts images into labels",
         ],
-        "answer": 0,
+        "answer": "It provides nonlinear activation and can help gradient flow",
     },
     {
+        "id": "dl_i_05",
         "subject": "Deep Learning",
         "level": "Intermediate",
         "question": "What is dropout commonly used for?",
@@ -1062,10 +1156,13 @@ QUESTION_BANK = [
             "Replacing the optimizer",
             "Converting regression to classification",
         ],
-        "answer": 0,
+        "answer": "Reducing over-reliance on particular neurons during training",
     },
 
+    # DL - ADVANCED
+
     {
+        "id": "dl_a_01",
         "subject": "Deep Learning",
         "level": "Advanced",
         "question": "Why can very deep networks suffer from vanishing gradients?",
@@ -1075,9 +1172,10 @@ QUESTION_BANK = [
             "The optimizer always increases gradients",
             "Neural networks cannot use activation functions",
         ],
-        "answer": 0,
+        "answer": "Gradients can become extremely small during backward propagation",
     },
     {
+        "id": "dl_a_02",
         "subject": "Deep Learning",
         "level": "Advanced",
         "question": "What is the key idea behind residual connections?",
@@ -1087,9 +1185,10 @@ QUESTION_BANK = [
             "Prevent training",
             "Replace every convolution with pooling",
         ],
-        "answer": 0,
+        "answer": "Provide a shortcut path while learning a residual transformation",
     },
     {
+        "id": "dl_a_03",
         "subject": "Deep Learning",
         "level": "Advanced",
         "question": "What does batch normalization primarily do?",
@@ -1099,9 +1198,10 @@ QUESTION_BANK = [
             "Delete parameters",
             "Convert classification into clustering",
         ],
-        "answer": 0,
+        "answer": "Normalize activations within training batches",
     },
     {
+        "id": "dl_a_04",
         "subject": "Deep Learning",
         "level": "Advanced",
         "question": "Why are attention mechanisms useful in sequence modeling?",
@@ -1111,9 +1211,10 @@ QUESTION_BANK = [
             "They only work with tables",
             "They guarantee perfect predictions",
         ],
-        "answer": 0,
+        "answer": "They let the model weight different parts of the input",
     },
     {
+        "id": "dl_a_05",
         "subject": "Deep Learning",
         "level": "Advanced",
         "question": "What does learning rate control?",
@@ -1123,14 +1224,16 @@ QUESTION_BANK = [
             "The number of classes",
             "Model accuracy",
         ],
-        "answer": 0,
+        "answer": "The size of parameter updates during optimization",
     },
 
+
     # ========================================================
-    # GENERATIVE AI
+    # GENERATIVE AI - BEGINNER
     # ========================================================
 
     {
+        "id": "gen_b_01",
         "subject": "Generative AI",
         "level": "Beginner",
         "question": "What is Generative AI designed to do?",
@@ -1140,9 +1243,10 @@ QUESTION_BANK = [
             "Only calculate averages",
             "Only sort data",
         ],
-        "answer": 0,
+        "answer": "Generate new content based on learned patterns",
     },
     {
+        "id": "gen_b_02",
         "subject": "Generative AI",
         "level": "Beginner",
         "question": "What does LLM stand for?",
@@ -1152,9 +1256,10 @@ QUESTION_BANK = [
             "Large Logic Memory",
             "Language Learning Method",
         ],
-        "answer": 0,
+        "answer": "Large Language Model",
     },
     {
+        "id": "gen_b_03",
         "subject": "Generative AI",
         "level": "Beginner",
         "question": "What is a prompt?",
@@ -1164,9 +1269,10 @@ QUESTION_BANK = [
             "A hardware component",
             "A Python compiler",
         ],
-        "answer": 0,
+        "answer": "Instructions or input given to an AI model",
     },
     {
+        "id": "gen_b_04",
         "subject": "Generative AI",
         "level": "Beginner",
         "question": "What can a text-generating AI model produce?",
@@ -1176,9 +1282,10 @@ QUESTION_BANK = [
             "Only hardware",
             "Only database indexes",
         ],
-        "answer": 0,
+        "answer": "Text based on learned patterns and instructions",
     },
     {
+        "id": "gen_b_05",
         "subject": "Generative AI",
         "level": "Beginner",
         "question": "What is an AI chatbot?",
@@ -1188,10 +1295,13 @@ QUESTION_BANK = [
             "A graphics card",
             "A programming language",
         ],
-        "answer": 0,
+        "answer": "A system that interacts with users using conversational responses",
     },
 
+    # GENAI - INTERMEDIATE
+
     {
+        "id": "gen_i_01",
         "subject": "Generative AI",
         "level": "Intermediate",
         "question": "What are tokens in language models?",
@@ -1201,9 +1311,10 @@ QUESTION_BANK = [
             "Training computers",
             "Neural network layers",
         ],
-        "answer": 0,
+        "answer": "Units of text processed by the model",
     },
     {
+        "id": "gen_i_02",
         "subject": "Generative AI",
         "level": "Intermediate",
         "question": "What is an embedding?",
@@ -1213,9 +1324,10 @@ QUESTION_BANK = [
             "A hardware component",
             "A Python exception",
         ],
-        "answer": 0,
+        "answer": "A numerical representation of information in vector space",
     },
     {
+        "id": "gen_i_03",
         "subject": "Generative AI",
         "level": "Intermediate",
         "question": "What does RAG stand for?",
@@ -1225,9 +1337,10 @@ QUESTION_BANK = [
             "Recursive Answer Generator",
             "Rapid Automated Grading",
         ],
-        "answer": 0,
+        "answer": "Retrieval-Augmented Generation",
     },
     {
+        "id": "gen_i_04",
         "subject": "Generative AI",
         "level": "Intermediate",
         "question": "Why can RAG be useful?",
@@ -1237,22 +1350,26 @@ QUESTION_BANK = [
             "It guarantees correctness",
             "It replaces neural networks",
         ],
-        "answer": 0,
+        "answer": "It provides a model with relevant retrieved information",
     },
     {
+        "id": "gen_i_05",
         "subject": "Generative AI",
         "level": "Intermediate",
-        "question": "What does temperature commonly control?",
+        "question": "What does temperature commonly influence?",
         "options": [
             "Randomness of token selection",
             "Model memory size",
             "Training examples",
             "Number of GPUs",
         ],
-        "answer": 0,
+        "answer": "Randomness of token selection",
     },
 
+    # GENAI - ADVANCED
+
     {
+        "id": "gen_a_01",
         "subject": "Generative AI",
         "level": "Advanced",
         "question": "What is the central idea of self-attention in Transformers?",
@@ -1262,9 +1379,10 @@ QUESTION_BANK = [
             "Token order is removed",
             "Only one token is processed",
         ],
-        "answer": 0,
+        "answer": "Tokens can assign different importance to other tokens",
     },
     {
+        "id": "gen_a_02",
         "subject": "Generative AI",
         "level": "Advanced",
         "question": "Why are vector embeddings useful for semantic search?",
@@ -1274,9 +1392,10 @@ QUESTION_BANK = [
             "They eliminate documents",
             "They directly produce answers",
         ],
-        "answer": 0,
+        "answer": "Related items can be represented near each other in vector space",
     },
     {
+        "id": "gen_a_03",
         "subject": "Generative AI",
         "level": "Advanced",
         "question": "What is fine-tuning generally used for?",
@@ -1286,9 +1405,10 @@ QUESTION_BANK = [
             "Increasing internet bandwidth",
             "Replacing tokenization",
         ],
-        "answer": 0,
+        "answer": "Adapting a pretrained model to a specific task or dataset",
     },
     {
+        "id": "gen_a_04",
         "subject": "Generative AI",
         "level": "Advanced",
         "question": "What is an LLM hallucination?",
@@ -1298,9 +1418,10 @@ QUESTION_BANK = [
             "A dataset format",
             "A tokenization algorithm",
         ],
-        "answer": 0,
+        "answer": "A generated response containing unsupported or incorrect information",
     },
     {
+        "id": "gen_a_05",
         "subject": "Generative AI",
         "level": "Advanced",
         "question": "Why does context-window size matter?",
@@ -1310,69 +1431,18 @@ QUESTION_BANK = [
             "It guarantees factual accuracy",
             "It determines the number of users",
         ],
-        "answer": 0,
+        "answer": "It limits how much input context the model can process",
     },
 ]
 
 
 # ============================================================
-# HELPER FUNCTIONS
+# QUESTION CREATION
 # ============================================================
-
-def get_status(score):
-
-    if score < 40:
-        return "Needs Foundation"
-
-    elif score < 70:
-        return "Developing"
-
-    elif score < 100:
-        return "Intermediate"
-
-    return "Strong"
-
-
-def prepare_question(question):
-
-    pairs = []
-
-    for index, option in enumerate(
-        question["options"]
-    ):
-
-        pairs.append(
-            (
-                option,
-                index == question["answer"]
-            )
-        )
-
-    random.shuffle(pairs)
-
-    options = [
-        pair[0]
-        for pair in pairs
-    ]
-
-    correct_answer = next(
-        index
-        for index, pair in enumerate(pairs)
-        if pair[1]
-    )
-
-    return {
-        "subject": question["subject"],
-        "level": question["level"],
-        "question": question["question"],
-        "options": options,
-        "answer": correct_answer,
-    }
-
 
 def create_diagnostic(level):
 
-    selected = []
+    questions = []
 
     for subject in SUBJECTS:
 
@@ -1381,14 +1451,19 @@ def create_diagnostic(level):
             for q in QUESTION_BANK
             if q["subject"] == subject
             and q["level"] == level
+            and q["id"] not in st.session_state.seen_questions
         ]
 
+        # If previous questions have been exhausted,
+        # allow previously seen questions again.
         if len(available) < 3:
 
-            raise ValueError(
-                f"Not enough questions for "
-                f"{subject} at {level} level."
-            )
+            available = [
+                q
+                for q in QUESTION_BANK
+                if q["subject"] == subject
+                and q["level"] == level
+            ]
 
         chosen = random.sample(
             available,
@@ -1397,79 +1472,119 @@ def create_diagnostic(level):
 
         for question in chosen:
 
-            selected.append(
-                prepare_question(question)
+            copied = question.copy()
+
+            options = copied["options"].copy()
+
+            random.shuffle(options)
+
+            copied["options"] = options
+
+            questions.append(copied)
+
+            st.session_state.seen_questions.add(
+                copied["id"]
             )
 
-    random.shuffle(selected)
+    random.shuffle(questions)
 
-    return selected
+    return questions
 
+
+# ============================================================
+# SCORE CALCULATION
+# ============================================================
 
 def calculate_scores():
-
-    correct = {
-        subject: 0
-        for subject in SUBJECTS
-    }
-
-    total = {
-        subject: 0
-        for subject in SUBJECTS
-    }
-
-    for question, answer in zip(
-        st.session_state.diagnostic_questions,
-        st.session_state.diagnostic_answers
-    ):
-
-        subject = question["subject"]
-
-        total[subject] += 1
-
-        if answer == question["answer"]:
-
-            correct[subject] += 1
 
     scores = {}
 
     for subject in SUBJECTS:
 
-        if total[subject] == 0:
+        subject_questions = [
+            q
+            for q in st.session_state.diagnostic_questions
+            if q["subject"] == subject
+        ]
 
-            scores[subject] = 0
+        correct = 0
+
+        for index, question in enumerate(
+            st.session_state.diagnostic_questions
+        ):
+
+            if question["subject"] != subject:
+                continue
+
+            answer = st.session_state.diagnostic_answers[index]
+
+            if answer == question["answer"]:
+
+                correct += 1
+
+        if subject_questions:
+
+            scores[subject] = round(
+                correct
+                / len(subject_questions)
+                * 100
+            )
 
         else:
 
-            scores[subject] = round(
-                correct[subject]
-                / total[subject]
-                * 100
-            )
+            scores[subject] = 0
 
     return scores
 
 
+# ============================================================
+# STATUS
+# ============================================================
+
+def get_status(score):
+
+    if score < 40:
+
+        return "Needs Foundation"
+
+    if score < 70:
+
+        return "Developing"
+
+    if score < 100:
+
+        return "Intermediate"
+
+    return "Strong"
+
+
+# ============================================================
+# ROADMAP
+# ============================================================
+
 def create_roadmap(scores):
 
-    sorted_subjects = sorted(
+    ordered = sorted(
         scores.items(),
-        key=lambda item: item[1]
+        key=lambda x: x[1]
     )
 
     roadmap = []
 
-    for index, (subject, score) in enumerate(
-        sorted_subjects
+    for position, (subject, score) in enumerate(
+        ordered
     ):
 
-        if index == 0:
+        if position == 0:
+
             priority = "High Priority"
 
-        elif index == 1:
+        elif position == 1:
+
             priority = "Priority"
 
         else:
+
             priority = "Continue"
 
         roadmap.append(
@@ -1489,17 +1604,32 @@ def create_roadmap(scores):
 
 def render_header():
 
-    logo_path = "aillearn_logo.jpg"
+    logo = get_logo_base64()
+
+    if logo:
+
+        logo_html = (
+            f'<img class="brand-logo" '
+            f'src="data:image/jpeg;base64,{logo}">'
+        )
+
+    else:
+
+        logo_html = (
+            '<div class="brand-logo" '
+            'style="background:#111111; '
+            'display:flex;align-items:center;'
+            'justify-content:center;color:white;'
+            'font-weight:800;">AI</div>'
+        )
 
     st.markdown(
-        """
+        f"""
         <div class="ai-header">
 
             <div class="brand-area">
 
-                <div class="brand-mark">
-                    AI
-                </div>
+                {logo_html}
 
                 <div class="brand-name">
                     AI Learn
@@ -1537,54 +1667,36 @@ def home_page():
 
     render_header()
 
-    st.markdown(
-        "<div class='hero'>",
-        unsafe_allow_html=True,
-    )
-
     left, right = st.columns(
-        [1.05, 0.95],
-        gap="large",
+        [1.08, 0.92],
+        gap="large"
     )
 
     # --------------------------------------------------------
-    # LEFT SIDE
+    # LEFT
     # --------------------------------------------------------
 
     with left:
 
         st.markdown(
             """
-            <div class="hero-left">
-
-                <div class="hero-title">
-                    Learn AI.<br>
-                    <span>Your way.</span>
-                </div>
-
-                <div class="hero-subtitle">
-                    Build your AI skills with a personalised
-                    learning journey that adapts to your
-                    knowledge, goals and pace.
-                </div>
-
-                <div class="hero-highlight">
-                    <strong>AI Learn</strong> helps you discover
-                    what you know, identify what to learn next,
-                    and build practical AI skills step by step.
-                </div>
-
+            <div class="hero-title">
+                Learn AI.<br>
+                <span>Your way.</span>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
-        # ----------------------------------------------------
-        # PROFILE FORM
-        # ----------------------------------------------------
+            <div class="hero-subtitle">
+                Build your AI skills with a personalised
+                learning journey that adapts to your
+                knowledge, goals and pace.
+            </div>
 
-        st.markdown(
-            """
+            <div class="hero-highlight">
+                <strong>AI Learn</strong> helps you discover
+                what you know, identify what to learn next,
+                and build practical AI skills step by step.
+            </div>
+
             <div class="profile-card">
 
                 <div class="profile-title">
@@ -1607,7 +1719,7 @@ def home_page():
                 "name",
                 ""
             ),
-            placeholder="Enter your name",
+            placeholder="Enter your name"
         )
 
         level = st.selectbox(
@@ -1616,7 +1728,7 @@ def home_page():
                 "Beginner",
                 "Intermediate",
                 "Advanced",
-            ],
+            ]
         )
 
         goal = st.selectbox(
@@ -1627,7 +1739,7 @@ def home_page():
                 "Prepare for a job",
                 "Learn Generative AI",
                 "Learn AI Agents",
-            ],
+            ]
         )
 
         study_time = st.selectbox(
@@ -1637,7 +1749,7 @@ def home_page():
                 "30 minutes",
                 "1 hour",
                 "2+ hours",
-            ],
+            ]
         )
 
         st.write("")
@@ -1645,13 +1757,13 @@ def home_page():
         if st.button(
             "🚀 Start My AI Journey",
             use_container_width=True,
-            type="primary",
+            type="primary"
         ):
 
             if not name.strip():
 
                 st.warning(
-                    "Please enter your name before starting."
+                    "Please enter your name first."
                 )
 
             else:
@@ -1678,59 +1790,50 @@ def home_page():
                 st.rerun()
 
     # --------------------------------------------------------
-    # RIGHT SIDE VISUAL
+    # RIGHT VISUAL
     # --------------------------------------------------------
 
     with right:
 
         st.markdown(
             """
-            <div class="hero-right">
+            <div class="learning-visual">
 
-                <div class="learning-visual">
+                <div class="visual-circle circle-one">
+                    🧑‍💻
+                </div>
 
-                    <div class="visual-circle circle-one">
-                        🧑‍💻
-                    </div>
+                <div class="visual-circle circle-two">
+                    🤖
+                </div>
 
-                    <div class="visual-circle circle-two">
-                        🤖
-                    </div>
+                <div class="visual-circle circle-three">
+                    📚
+                </div>
 
-                    <div class="visual-circle circle-three">
-                        📚
-                    </div>
+                <div class="visual-circle circle-four">
+                    🧠
+                </div>
 
-                    <div class="visual-circle circle-four">
-                        🧠
-                    </div>
+                <div class="floating-card card-ai">
+                    ✨ AI Learning
+                </div>
 
-                    <div class="floating-card card-ai">
-                        ✨ AI Learning
-                    </div>
+                <div class="floating-card card-progress">
+                    📈 Progress
+                </div>
 
-                    <div class="floating-card card-progress">
-                        📈 Progress
-                    </div>
-
-                    <div class="floating-card card-python">
-                        🐍 Python
-                    </div>
-
+                <div class="floating-card card-python">
+                    🐍 Python
                 </div>
 
             </div>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
-    st.markdown(
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
     # --------------------------------------------------------
-    # BELOW HERO
+    # FOUNDATIONS
     # --------------------------------------------------------
 
     st.markdown(
@@ -1744,10 +1847,8 @@ def home_page():
             build and work with modern AI.
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
-
-    cols = st.columns(5)
 
     cards = [
         ("🐍", "Python"),
@@ -1757,12 +1858,14 @@ def home_page():
         ("✨", "Generative AI"),
     ]
 
-    for col, (icon, subject) in zip(
-        cols,
+    columns = st.columns(5)
+
+    for column, (icon, subject) in zip(
+        columns,
         cards
     ):
 
-        with col:
+        with column:
 
             st.markdown(
                 f"""
@@ -1770,7 +1873,7 @@ def home_page():
                     text-align:center;
                     border:1px solid #e5e9ed;
                     border-radius:14px;
-                    padding:20px 10px;
+                    padding:20px 8px;
                     background:white;
                     min-height:125px;
                 ">
@@ -1786,25 +1889,24 @@ def home_page():
                         font-size:14px;
                         font-weight:700;
                         color:#344454;
+                        line-height:1.3;
                     ">
                         {subject}
                     </div>
 
                 </div>
                 """,
-                unsafe_allow_html=True,
+                unsafe_allow_html=True
             )
 
 
 # ============================================================
-# DIAGNOSTIC
+# DIAGNOSTIC PAGE
 # ============================================================
 
 def diagnostic_page():
 
-    questions = (
-        st.session_state.diagnostic_questions
-    )
+    questions = st.session_state.diagnostic_questions
 
     if not questions:
 
@@ -1816,46 +1918,55 @@ def diagnostic_page():
 
     render_header()
 
-    st.title(
-        "🧠 AI Knowledge Diagnostic"
-    )
-
     learner_name = st.session_state.profile.get(
         "name",
-        "Learner",
+        "Learner"
     )
 
     learner_level = st.session_state.profile.get(
         "level",
-        "Beginner",
+        "Beginner"
+    )
+
+    st.markdown(
+        """
+        <div class="diagnostic-header">
+
+            <h1>
+                🧠 AI Knowledge Diagnostic
+            </h1>
+
+            <p>
+                Answer all 15 questions to help AI Learn
+                understand your current knowledge.
+            </p>
+
+            <p>
+                Your results will be shown only after
+                you submit the complete assessment.
+            </p>
+
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     st.write(
-        f"Hello **{learner_name}**."
+        f"Welcome, **{learner_name}**."
     )
-
-    st.write(
-        "Answer all 15 questions. Your answers will "
-        "remain hidden until you submit the complete diagnostic."
-    )
-
-    st.info(
-        f"Assessment level: **{learner_level}**"
-    )
-
-    st.progress(0.0)
 
     st.caption(
-        "15 questions • 3 questions from each learning area"
+        f"Assessment level: {learner_level} • "
+        "15 questions • 3 from each learning area"
     )
 
     st.divider()
 
-    answers = {}
+    answers = []
 
-    # --------------------------------------------------------
+    # ========================================================
     # ALL 15 QUESTIONS
-    # --------------------------------------------------------
+    # ========================================================
 
     for index, question in enumerate(
         questions
@@ -1864,49 +1975,58 @@ def diagnostic_page():
         question_number = index + 1
 
         st.markdown(
-            f"### Question {question_number}"
+            f"""
+            <div class="question-card">
+
+                <div class="question-number">
+                    QUESTION {question_number} OF 15
+                </div>
+
+                <div class="question-text">
+                    {question["question"]}
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
-        st.write(
-            question["question"]
-        )
-
-        answers[index] = st.radio(
-            "Choose one answer:",
+        selected = st.radio(
+            "Select one answer:",
             question["options"],
-            key=f"diagnostic_{index}",
             index=None,
+            key=f"diagnostic_answer_{index}",
+            label_visibility="collapsed"
         )
 
-        if question_number < 15:
+        answers.append(selected)
 
-            st.divider()
+        st.write("")
 
-    # --------------------------------------------------------
+    # ========================================================
     # SUBMIT
-    # --------------------------------------------------------
+    # ========================================================
 
     st.divider()
 
-    st.subheader(
-        "🎯 Ready to submit?"
-    )
+    unanswered = [
+        index + 1
+        for index, answer in enumerate(answers)
+        if answer is None
+    ]
 
-    st.write(
-        "Make sure all 15 questions are answered."
-    )
+    if unanswered:
+
+        st.info(
+            f"{len(unanswered)} question(s) still need "
+            "an answer before you can submit."
+        )
 
     if st.button(
         "🎯 Submit Diagnostic",
         use_container_width=True,
-        type="primary",
+        type="primary"
     ):
-
-        unanswered = [
-            index + 1
-            for index, answer in answers.items()
-            if answer is None
-        ]
 
         if unanswered:
 
@@ -1919,29 +2039,17 @@ def diagnostic_page():
                 f"Please answer question(s): {numbers}"
             )
 
-            return
+            st.stop()
 
-        final_answers = []
+        # ----------------------------------------------------
+        # Convert selected text into stored answers
+        # ----------------------------------------------------
 
-        for index, question in enumerate(
-            questions
-        ):
+        st.session_state.diagnostic_answers = answers
 
-            selected = answers[index]
-
-            selected_index = (
-                question["options"].index(
-                    selected
-                )
-            )
-
-            final_answers.append(
-                selected_index
-            )
-
-        st.session_state.diagnostic_answers = (
-            final_answers
-        )
+        # ----------------------------------------------------
+        # Calculate scores only now
+        # ----------------------------------------------------
 
         scores = calculate_scores()
 
@@ -1979,12 +2087,14 @@ def score_card_page():
         / len(scores)
     )
 
-    weakest = min(
+    weakest_subject = min(
         scores,
         key=scores.get
     )
 
-    weakest_score = scores[weakest]
+    weakest_score = scores[
+        weakest_subject
+    ]
 
     st.markdown(
         f"""
@@ -1995,11 +2105,11 @@ def score_card_page():
             </div>
 
             <h1>
-                Your AI Learning Score Card
+                YOUR AI LEARNING SCORE CARD
             </h1>
 
             <div class="score-label">
-                Your current AI knowledge profile
+                Current AI knowledge profile
             </div>
 
             <div class="score-number">
@@ -2012,7 +2122,7 @@ def score_card_page():
 
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
     st.subheader(
@@ -2024,7 +2134,7 @@ def score_card_page():
         score = scores[subject]
 
         st.markdown(
-            f"**{subject}**"
+            f"### {subject}"
         )
 
         st.progress(
@@ -2032,52 +2142,41 @@ def score_card_page():
         )
 
         st.caption(
-            f"{score}%  •  {get_status(score)}"
+            f"{score}% • {get_status(score)}"
         )
 
         st.write("")
 
-    st.divider()
-
-    st.subheader(
-        "🎯 Recommended Starting Point"
-    )
-
     st.markdown(
-        f"### {weakest} — {weakest_score}%"
+        f"""
+        <div class="recommendation-card">
+
+            <h3>
+                🎯 Recommended Starting Point
+            </h3>
+
+            <h2>
+                {weakest_subject} — {weakest_score}%
+            </h2>
+
+            <p>
+                AI Learn recommends focusing on this
+                area first based on your diagnostic result.
+            </p>
+
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-
-    if weakest_score < 40:
-
-        st.write(
-            f"Build your foundation in **{weakest}** "
-            "before moving into advanced topics."
-        )
-
-    elif weakest_score < 70:
-
-        st.write(
-            f"Strengthen your **{weakest}** knowledge "
-            "with focused lessons and practice."
-        )
-
-    else:
-
-        st.write(
-            f"Continue developing **{weakest}** through "
-            "advanced concepts and projects."
-        )
-
-    st.divider()
 
     col1, col2 = st.columns(2)
 
     with col1:
 
         if st.button(
-            "🗺️ View Personalised Roadmap",
+            "🗺️ View My Personalised Roadmap",
             use_container_width=True,
-            type="primary",
+            type="primary"
         ):
 
             st.session_state.page = "roadmap"
@@ -2088,12 +2187,12 @@ def score_card_page():
 
         if st.button(
             "🔄 Retake Diagnostic",
-            use_container_width=True,
+            use_container_width=True
         ):
 
             level = st.session_state.profile.get(
                 "level",
-                "Beginner",
+                "Beginner"
             )
 
             st.session_state.diagnostic_questions = (
@@ -2112,7 +2211,7 @@ def score_card_page():
 
 
 # ============================================================
-# ROADMAP
+# PERSONALIZED ROADMAP
 # ============================================================
 
 def roadmap_page():
@@ -2134,8 +2233,8 @@ def roadmap_page():
     )
 
     st.write(
-        "Your learning journey is arranged around "
-        "your current knowledge profile."
+        "Your learning path is arranged according to "
+        "your current diagnostic profile."
     )
 
     st.divider()
@@ -2147,11 +2246,13 @@ def roadmap_page():
     ):
 
         subject = item["subject"]
+
         score = item["score"]
+
         priority = item["priority"]
 
         st.markdown(
-            f"### {index + 1}. {subject}"
+            f"## {index + 1}. {subject}"
         )
 
         st.progress(
@@ -2163,21 +2264,21 @@ def roadmap_page():
         )
 
         st.write(
-            f"Priority: **{priority}**"
+            f"Learning priority: **{priority}**"
         )
 
         if score < 40:
 
             recommendation = (
-                "Start with the fundamentals, core terminology, "
-                "examples and guided practice."
+                "Start with the foundation concepts, "
+                "terminology, examples and guided practice."
             )
 
         elif score < 70:
 
             recommendation = (
-                "Strengthen your understanding through "
-                "intermediate concepts and practice."
+                "Strengthen your understanding with "
+                "intermediate concepts and practice tasks."
             )
 
         else:
@@ -2194,8 +2295,8 @@ def roadmap_page():
         st.divider()
 
     if st.button(
-        "🏠 Back to Home",
-        use_container_width=True,
+        "🏠 Back to AI Learn Home",
+        use_container_width=True
     ):
 
         st.session_state.page = "home"
@@ -2221,7 +2322,7 @@ with st.sidebar:
 
     if st.button(
         "🏠 Home",
-        use_container_width=True,
+        use_container_width=True
     ):
 
         st.session_state.page = "home"
@@ -2233,7 +2334,7 @@ with st.sidebar:
         use_container_width=True,
         disabled=not bool(
             st.session_state.scores
-        ),
+        )
     ):
 
         st.session_state.page = "score_card"
@@ -2245,7 +2346,7 @@ with st.sidebar:
         use_container_width=True,
         disabled=not bool(
             st.session_state.scores
-        ),
+        )
     ):
 
         st.session_state.page = "roadmap"
