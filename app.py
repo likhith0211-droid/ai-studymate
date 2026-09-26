@@ -1,4 +1,5 @@
 import streamlit as st
+import random
 
 
 # ============================================================
@@ -37,7 +38,9 @@ DEFAULTS = {
     "answers": [],
     "diagnostic_complete": False,
     "domain_scores": {},
-    "roadmap": []
+    "roadmap": [],
+    "used_question_ids": set(),
+    "attempt_number": 0
 }
 
 for key, value in DEFAULTS.items():
@@ -47,538 +50,2009 @@ for key, value in DEFAULTS.items():
 
 
 # ============================================================
-# QUESTION BANK
+# QUESTION CREATION
+# ============================================================
+#
+# We generate a large pool of questions.
+#
+# Every subject gets 100 possible questions for the
+# selected difficulty level.
+#
+# Only 3 are randomly selected for each attempt.
+#
 # ============================================================
 
-QUESTION_BANK = {
 
-    "Python": {
+def make_question(
+    question_id,
+    subject,
+    difficulty,
+    question,
+    options,
+    answer
+):
 
-        "Basic": [
-            {
-                "question": "Which symbol is used to write a comment in Python?",
-                "options": ["//", "#", "/*", "--"],
-                "answer": "#"
-            },
-            {
-                "question": "Which of these is a Python data type?",
-                "options": ["Integer", "Boolean", "Both Integer and Boolean", "Character only"],
-                "answer": "Both Integer and Boolean"
-            },
-            {
-                "question": "Which keyword is used to define a function in Python?",
-                "options": ["function", "def", "fun", "define"],
-                "answer": "def"
-            }
-        ],
+    return {
+        "id": question_id,
+        "subject": subject,
+        "difficulty": difficulty,
+        "question": question,
+        "options": options,
+        "answer": answer
+    }
 
-        "Intermediate": [
-            {
-                "question": "What is the output type of range(5) in Python?",
-                "options": ["List", "Range object", "Tuple", "Set"],
-                "answer": "Range object"
-            },
-            {
-                "question": "Which Python data structure stores key-value pairs?",
-                "options": ["List", "Tuple", "Dictionary", "Set"],
-                "answer": "Dictionary"
-            },
-            {
-                "question": "What does a Python class primarily define?",
-                "options": [
-                    "A database",
-                    "A blueprint for objects",
-                    "A loop",
-                    "A file"
-                ],
-                "answer": "A blueprint for objects"
-            }
-        ],
 
-        "Advanced": [
-            {
-                "question": "What is a Python decorator commonly used for?",
-                "options": [
-                    "Modifying or extending function behavior",
-                    "Creating databases",
-                    "Installing Python",
-                    "Deleting variables"
-                ],
-                "answer": "Modifying or extending function behavior"
-            },
-            {
-                "question": "What does list comprehension provide?",
-                "options": [
-                    "A concise way to create lists",
-                    "A database engine",
-                    "A debugging tool",
-                    "A package manager"
-                ],
-                "answer": "A concise way to create lists"
-            },
-            {
-                "question": "What is the main purpose of a generator in Python?",
-                "options": [
-                    "To produce values lazily",
-                    "To create classes",
-                    "To compile Python",
-                    "To install libraries"
-                ],
-                "answer": "To produce values lazily"
-            }
+# ============================================================
+# PYTHON QUESTION POOL
+# ============================================================
+
+def generate_python_questions(difficulty):
+
+    questions = []
+
+    # --------------------------------------------------------
+    # BASIC
+    # --------------------------------------------------------
+
+    if difficulty == "Basic":
+
+        templates = [
+
+            (
+                "Which symbol is used to write a comment in Python?",
+                ["//", "#", "/*", "--"],
+                "#"
+            ),
+
+            (
+                "Which keyword is used to define a function in Python?",
+                ["function", "def", "fun", "define"],
+                "def"
+            ),
+
+            (
+                "Which of these is a Boolean value in Python?",
+                ["Yes", "True", "1", "On"],
+                "True"
+            ),
+
+            (
+                "Which data structure stores items in an ordered collection?",
+                ["List", "Boolean", "Integer", "Function"],
+                "List"
+            ),
+
+            (
+                "Which brackets are normally used to create a Python list?",
+                ["{}", "[]", "()", "<>"],
+                "[]"
+            ),
+
+            (
+                "Which keyword is used to create a loop over a sequence?",
+                ["repeat", "for", "loop", "iterate"],
+                "for"
+            ),
+
+            (
+                "Which function displays output in Python?",
+                ["display()", "show()", "print()", "output()"],
+                "print()"
+            ),
+
+            (
+                "Which value represents the absence of a value in Python?",
+                ["None", "Empty", "NullValue", "Nothing"],
+                "None"
+            ),
+
+            (
+                "Which operator is used for equality comparison?",
+                ["=", "==", ":=", "!="],
+                "=="
+            ),
+
+            (
+                "Which Python type represents whole numbers?",
+                ["float", "str", "int", "bool"],
+                "int"
+            )
         ]
-    },
 
+    # --------------------------------------------------------
+    # INTERMEDIATE
+    # --------------------------------------------------------
 
-    "Mathematics & Statistics": {
+    elif difficulty == "Intermediate":
 
-        "Basic": [
-            {
-                "question": "What is the mean of 2, 4 and 6?",
-                "options": ["2", "4", "6", "12"],
-                "answer": "4"
-            },
-            {
-                "question": "What is probability used to measure?",
-                "options": [
-                    "The likelihood of an event",
-                    "The size of a dataset",
-                    "The number of variables",
-                    "The speed of a computer"
+        templates = [
+
+            (
+                "What does range(5) produce in Python?",
+                [
+                    "A list containing 1 through 5",
+                    "A range object representing 0 through 4",
+                    "A tuple containing 0 through 5",
+                    "A set containing five values"
                 ],
-                "answer": "The likelihood of an event"
-            },
-            {
-                "question": "What does the x-axis represent in a basic graph?",
-                "options": [
+                "A range object representing 0 through 4"
+            ),
+
+            (
+                "Which structure stores key-value pairs?",
+                [
+                    "List",
+                    "Tuple",
+                    "Dictionary",
+                    "Set"
+                ],
+                "Dictionary"
+            ),
+
+            (
+                "What does list[-1] normally return?",
+                [
+                    "The first item",
+                    "The last item",
+                    "An error",
+                    "The second item"
+                ],
+                "The last item"
+            ),
+
+            (
+                "What is a tuple generally known for?",
+                [
+                    "Being immutable",
+                    "Always containing strings",
+                    "Being unordered only",
+                    "Storing only numbers"
+                ],
+                "Being immutable"
+            ),
+
+            (
+                "What is the purpose of a class?",
+                [
+                    "To define a blueprint for objects",
+                    "To store only strings",
+                    "To replace loops",
+                    "To execute SQL"
+                ],
+                "To define a blueprint for objects"
+            ),
+
+            (
+                "What does len() return?",
+                [
+                    "The type of an object",
+                    "The length or number of elements",
+                    "The memory address",
+                    "The last element"
+                ],
+                "The length or number of elements"
+            ),
+
+            (
+                "Which keyword is used to handle exceptions?",
+                [
+                    "catch",
+                    "try",
+                    "except-only",
+                    "error"
+                ],
+                "try"
+            ),
+
+            (
+                "What does a dictionary key need to be?",
+                [
+                    "Hashable",
+                    "Always an integer",
+                    "Always a string",
+                    "A list"
+                ],
+                "Hashable"
+            ),
+
+            (
+                "What does `is` primarily test?",
+                [
+                    "Object identity",
+                    "String equality only",
+                    "Numerical addition",
+                    "Type conversion"
+                ],
+                "Object identity"
+            ),
+
+            (
+                "What is inheritance in Python?",
+                [
+                    "A class receiving behavior from another class",
+                    "Copying a file",
+                    "Repeating a loop",
+                    "Creating a dictionary"
+                ],
+                "A class receiving behavior from another class"
+            )
+        ]
+
+    # --------------------------------------------------------
+    # ADVANCED
+    # --------------------------------------------------------
+
+    else:
+
+        templates = [
+
+            (
+                "What is the main purpose of a decorator?",
+                [
+                    "Modify or extend function behavior",
+                    "Create a database",
+                    "Compile Python",
+                    "Delete variables"
+                ],
+                "Modify or extend function behavior"
+            ),
+
+            (
+                "What is a generator useful for?",
+                [
+                    "Producing values lazily",
+                    "Creating database tables",
+                    "Compiling C code",
+                    "Encrypting files"
+                ],
+                "Producing values lazily"
+            ),
+
+            (
+                "What does `yield` do inside a generator?",
+                [
+                    "Produces a value while preserving generator state",
+                    "Stops Python permanently",
+                    "Deletes the function",
+                    "Creates a class"
+                ],
+                "Produces a value while preserving generator state"
+            ),
+
+            (
+                "What is the purpose of `__init__` in a class?",
+                [
+                    "Initialize an object",
+                    "Destroy a module",
+                    "Create a loop",
+                    "Import a package"
+                ],
+                "Initialize an object"
+            ),
+
+            (
+                "What is method resolution order related to?",
+                [
+                    "The order Python searches classes for inherited methods",
+                    "The order files are saved",
+                    "The order list items are sorted",
+                    "The order packages are installed"
+                ],
+                "The order Python searches classes for inherited methods"
+            ),
+
+            (
+                "What is a closure?",
+                [
+                    "A function retaining access to variables from its enclosing scope",
+                    "A closed file",
+                    "A database connection",
+                    "A completed loop"
+                ],
+                "A function retaining access to variables from its enclosing scope"
+            ),
+
+            (
+                "What does `*args` allow a function to receive?",
+                [
+                    "A variable number of positional arguments",
+                    "Only keyword arguments",
+                    "Only strings",
+                    "Only dictionaries"
+                ],
+                "A variable number of positional arguments"
+            ),
+
+            (
+                "What does `**kwargs` allow a function to receive?",
+                [
+                    "A variable number of keyword arguments",
+                    "Only positional arguments",
+                    "Only lists",
+                    "Only integers"
+                ],
+                "A variable number of keyword arguments"
+            ),
+
+            (
+                "Why can mutable default arguments be dangerous?",
+                [
+                    "The same object can persist across function calls",
+                    "They always cause syntax errors",
+                    "They cannot contain numbers",
+                    "Python automatically deletes them"
+                ],
+                "The same object can persist across function calls"
+            ),
+
+            (
+                "What is duck typing?",
+                [
+                    "Using an object's behavior rather than requiring a specific type",
+                    "Converting every object to a string",
+                    "Checking memory addresses only",
+                    "Using only inheritance"
+                ],
+                "Using an object's behavior rather than requiring a specific type"
+            )
+        ]
+
+    return expand_templates(
+        "PY",
+        "Python",
+        difficulty,
+        templates
+    )
+
+
+# ============================================================
+# MATH QUESTION POOL
+# ============================================================
+
+def generate_math_questions(difficulty):
+
+    questions = []
+
+    if difficulty == "Basic":
+
+        templates = [
+
+            (
+                "What is the mean of 2, 4 and 6?",
+                ["2", "4", "6", "12"],
+                "4"
+            ),
+
+            (
+                "What does probability measure?",
+                [
+                    "Likelihood of an event",
+                    "Dataset size",
+                    "Computer speed",
+                    "Number of variables"
+                ],
+                "Likelihood of an event"
+            ),
+
+            (
+                "What is the median of 2, 5 and 9?",
+                ["2", "5", "9", "16"],
+                "5"
+            ),
+
+            (
+                "What does the x-axis normally represent?",
+                [
                     "Horizontal values",
                     "Vertical values",
                     "Only percentages",
                     "Only categories"
                 ],
-                "answer": "Horizontal values"
-            }
-        ],
+                "Horizontal values"
+            ),
 
-        "Intermediate": [
-            {
-                "question": "What does standard deviation measure?",
-                "options": [
-                    "Data spread",
-                    "Dataset size",
-                    "Number of columns",
-                    "Model accuracy only"
+            (
+                "What is 10% of 100?",
+                ["1", "5", "10", "20"],
+                "10"
+            ),
+
+            (
+                "What is the probability of a certain event?",
+                ["0", "0.5", "1", "2"],
+                "1"
+            ),
+
+            (
+                "What is 3 squared?",
+                ["6", "9", "12", "27"],
+                "9"
+            ),
+
+            (
+                "What is the range of 3, 7 and 10?",
+                ["3", "7", "10", "7"],
+                "7"
+            ),
+
+            (
+                "Which value represents no chance?",
+                ["0", "0.5", "1", "100"],
+                "0"
+            ),
+
+            (
+                "What does a fraction represent?",
+                [
+                    "A relationship between quantities",
+                    "Only a whole number",
+                    "Only a percentage",
+                    "A programming loop"
                 ],
-                "answer": "Data spread"
-            },
-            {
-                "question": "What is the median?",
-                "options": [
-                    "The middle value when data is ordered",
-                    "The largest value",
-                    "The smallest value",
-                    "The average of all values always"
-                ],
-                "answer": "The middle value when data is ordered"
-            },
-            {
-                "question": "What does correlation measure?",
-                "options": [
-                    "Relationship between variables",
+                "A relationship between quantities"
+            )
+        ]
+
+    elif difficulty == "Intermediate":
+
+        templates = [
+
+            (
+                "What does standard deviation measure?",
+                [
+                    "Spread of data",
                     "Number of observations",
-                    "CPU usage",
+                    "Number of features",
+                    "Model type"
+                ],
+                "Spread of data"
+            ),
+
+            (
+                "What does correlation describe?",
+                [
+                    "Relationship between variables",
+                    "Number of rows",
+                    "Memory usage",
                     "File size"
                 ],
-                "answer": "Relationship between variables"
-            }
-        ],
+                "Relationship between variables"
+            ),
 
-        "Advanced": [
-            {
-                "question": "What does a gradient represent mathematically?",
-                "options": [
-                    "Direction and rate of greatest increase",
-                    "Only the average",
-                    "Only the variance",
-                    "Number of samples"
+            (
+                "What is variance related to?",
+                [
+                    "Squared deviations from the mean",
+                    "Only the median",
+                    "Only the maximum",
+                    "Number of columns"
                 ],
-                "answer": "Direction and rate of greatest increase"
-            },
-            {
-                "question": "What is a derivative primarily used to describe?",
-                "options": [
-                    "Rate of change",
-                    "Number of classes",
-                    "Dataset size",
-                    "Probability only"
+                "Squared deviations from the mean"
+            ),
+
+            (
+                "What is a normal distribution typically shaped like?",
+                [
+                    "Bell curve",
+                    "Perfect square",
+                    "Straight vertical line",
+                    "Triangle"
                 ],
-                "answer": "Rate of change"
-            },
-            {
-                "question": "In probability, what does conditional probability describe?",
-                "options": [
+                "Bell curve"
+            ),
+
+            (
+                "What is conditional probability?",
+                [
                     "Probability of an event given another event",
-                    "Probability of nothing happening",
-                    "Only independent events",
-                    "Dataset size"
+                    "Probability without data",
+                    "Probability of every event",
+                    "Probability that is always zero"
                 ],
-                "answer": "Probability of an event given another event"
-            }
+                "Probability of an event given another event"
+            ),
+
+            (
+                "What does covariance indicate?",
+                [
+                    "How two variables vary together",
+                    "The number of classes",
+                    "The median value",
+                    "The dataset size"
+                ],
+                "How two variables vary together"
+            ),
+
+            (
+                "What does a confidence interval estimate?",
+                [
+                    "A range for an unknown population parameter",
+                    "Exact value of every observation",
+                    "The number of rows",
+                    "The model architecture"
+                ],
+                "A range for an unknown population parameter"
+            ),
+
+            (
+                "What does a p-value help evaluate?",
+                [
+                    "Evidence against a null hypothesis",
+                    "Neural network depth",
+                    "Dataset storage size",
+                    "Number of features"
+                ],
+                "Evidence against a null hypothesis"
+            ),
+
+            (
+                "What does an outlier represent?",
+                [
+                    "An unusually distant observation",
+                    "The average observation",
+                    "The first observation",
+                    "A missing column"
+                ],
+                "An unusually distant observation"
+            ),
+
+            (
+                "What is a sample?",
+                [
+                    "A subset of a population",
+                    "The entire universe of observations",
+                    "Only one variable",
+                    "A mathematical constant"
+                ],
+                "A subset of a population"
+            )
         ]
-    },
 
+    else:
 
-    "Machine Learning": {
+        templates = [
 
-        "Basic": [
-            {
-                "question": "What is machine learning?",
-                "options": [
-                    "A way for computers to learn patterns from data",
-                    "A programming language",
-                    "A type of database",
-                    "A computer operating system"
+            (
+                "What does a gradient represent?",
+                [
+                    "Direction and rate of greatest increase",
+                    "Only the mean",
+                    "Dataset size",
+                    "Number of classes"
                 ],
-                "answer": "A way for computers to learn patterns from data"
-            },
-            {
-                "question": "What is a training dataset?",
-                "options": [
+                "Direction and rate of greatest increase"
+            ),
+
+            (
+                "What is a derivative primarily used to describe?",
+                [
+                    "Rate of change",
+                    "Dataset size",
+                    "Probability only",
+                    "Number of variables"
+                ],
+                "Rate of change"
+            ),
+
+            (
+                "What does Bayes' theorem provide?",
+                [
+                    "A way to update probability using evidence",
+                    "A sorting algorithm",
+                    "A neural network",
+                    "A database"
+                ],
+                "A way to update probability using evidence"
+            ),
+
+            (
+                "What is a covariance matrix commonly used to represent?",
+                [
+                    "Variances and covariances among variables",
+                    "Only means",
+                    "Only medians",
+                    "Only class labels"
+                ],
+                "Variances and covariances among variables"
+            ),
+
+            (
+                "What does eigenvector information capture in linear algebra?",
+                [
+                    "Directions preserved by a linear transformation",
+                    "Only dataset size",
+                    "Only probability",
+                    "Only scalar averages"
+                ],
+                "Directions preserved by a linear transformation"
+            ),
+
+            (
+                "Why is matrix multiplication important in machine learning?",
+                [
+                    "It efficiently represents many linear transformations",
+                    "It replaces probability",
+                    "It removes all nonlinearity",
+                    "It stores passwords"
+                ],
+                "It efficiently represents many linear transformations"
+            ),
+
+            (
+                "What is partial differentiation used for?",
+                [
+                    "Finding change with respect to one variable while holding others conceptually fixed",
+                    "Sorting variables",
+                    "Counting rows",
+                    "Creating databases"
+                ],
+                "Finding change with respect to one variable while holding others conceptually fixed"
+            ),
+
+            (
+                "What is maximum likelihood estimation trying to do?",
+                [
+                    "Find parameters that make observed data most likely",
+                    "Minimize dataset size",
+                    "Delete outliers automatically",
+                    "Maximize number of features"
+                ],
+                "Find parameters that make observed data most likely"
+            ),
+
+            (
+                "What is entropy in information theory associated with?",
+                [
+                    "Uncertainty",
+                    "CPU temperature",
+                    "File size only",
+                    "Number of rows"
+                ],
+                "Uncertainty"
+            ),
+
+            (
+                "Why are logarithms useful in probability and machine learning?",
+                [
+                    "They convert products into sums and improve numerical handling",
+                    "They always increase probabilities",
+                    "They remove all randomness",
+                    "They create labels"
+                ],
+                "They convert products into sums and improve numerical handling"
+            )
+        ]
+
+    return expand_templates(
+        "MATH",
+        "Mathematics & Statistics",
+        difficulty,
+        templates
+    )
+
+
+# ============================================================
+# MACHINE LEARNING QUESTION POOL
+# ============================================================
+
+def generate_ml_questions(difficulty):
+
+    if difficulty == "Basic":
+
+        templates = [
+
+            (
+                "What is machine learning?",
+                [
+                    "Learning patterns from data",
+                    "A database",
+                    "A programming language",
+                    "An operating system"
+                ],
+                "Learning patterns from data"
+            ),
+
+            (
+                "What is supervised learning?",
+                [
+                    "Learning from labelled examples",
+                    "Learning without data",
+                    "Deleting labels",
+                    "Only clustering"
+                ],
+                "Learning from labelled examples"
+            ),
+
+            (
+                "What is a training dataset?",
+                [
                     "Data used to teach a model",
-                    "Data used only for storage",
+                    "Only test data",
                     "A programming language",
                     "A visualization"
                 ],
-                "answer": "Data used to teach a model"
-            },
-            {
-                "question": "Which is an example of supervised learning?",
-                "options": [
-                    "Learning from labelled examples",
-                    "Learning without any data",
-                    "Deleting data",
-                    "Sorting files"
-                ],
-                "answer": "Learning from labelled examples"
-            }
-        ],
+                "Data used to teach a model"
+            ),
 
-        "Intermediate": [
-            {
-                "question": "What is overfitting?",
-                "options": [
-                    "When a model learns training data too closely",
-                    "When a model has no data",
-                    "When a model is always correct",
-                    "When a dataset is deleted"
+            (
+                "Which is a classification task?",
+                [
+                    "Predicting whether an email is spam",
+                    "Grouping customers without labels",
+                    "Calculating an average",
+                    "Sorting filenames"
                 ],
-                "answer": "When a model learns training data too closely"
-            },
-            {
-                "question": "Which metric is commonly used for classification?",
-                "options": [
-                    "Accuracy",
-                    "File size",
-                    "CPU speed",
-                    "Memory capacity"
-                ],
-                "answer": "Accuracy"
-            },
-            {
-                "question": "What is feature engineering?",
-                "options": [
-                    "Creating or transforming useful input features",
-                    "Deleting the model",
-                    "Creating a database",
-                    "Installing Python"
-                ],
-                "answer": "Creating or transforming useful input features"
-            }
-        ],
+                "Predicting whether an email is spam"
+            ),
 
-        "Advanced": [
-            {
-                "question": "What is regularization used for?",
-                "options": [
-                    "Reducing overfitting",
-                    "Increasing dataset size only",
-                    "Deleting features automatically",
-                    "Increasing file size"
+            (
+                "Which is a regression task?",
+                [
+                    "Predicting house price",
+                    "Detecting spam/not spam",
+                    "Grouping customers",
+                    "Finding clusters"
                 ],
-                "answer": "Reducing overfitting"
-            },
-            {
-                "question": "What is cross-validation commonly used for?",
-                "options": [
-                    "Estimating model performance",
-                    "Writing Python comments",
-                    "Creating neural networks only",
-                    "Compressing datasets"
+                "Predicting house price"
+            ),
+
+            (
+                "What is a model?",
+                [
+                    "A learned representation used to make predictions",
+                    "A database table",
+                    "A programming editor",
+                    "A computer cable"
                 ],
-                "answer": "Estimating model performance"
-            },
-            {
-                "question": "What is the purpose of a loss function?",
-                "options": [
-                    "Measure how far predictions are from desired outputs",
-                    "Store training data",
-                    "Create a user interface",
-                    "Install libraries"
+                "A learned representation used to make predictions"
+            ),
+
+            (
+                "What is a feature?",
+                [
+                    "An input variable",
+                    "Only the target",
+                    "A model error",
+                    "A database"
                 ],
-                "answer": "Measure how far predictions are from desired outputs"
-            }
+                "An input variable"
+            ),
+
+            (
+                "What is a label?",
+                [
+                    "The target value in supervised learning",
+                    "A Python package",
+                    "A database",
+                    "A feature transformation only"
+                ],
+                "The target value in supervised learning"
+            ),
+
+            (
+                "What does a test set help evaluate?",
+                [
+                    "Performance on unseen data",
+                    "Python syntax",
+                    "Database speed",
+                    "File size"
+                ],
+                "Performance on unseen data"
+            ),
+
+            (
+                "What is clustering?",
+                [
+                    "Grouping similar observations",
+                    "Predicting labels from labelled data",
+                    "Sorting files",
+                    "Deleting data"
+                ],
+                "Grouping similar observations"
+            )
         ]
-    },
+
+    elif difficulty == "Intermediate":
+
+        templates = [
+
+            (
+                "What is overfitting?",
+                [
+                    "Learning training data too closely",
+                    "Having no training data",
+                    "Always improving generalization",
+                    "Using no features"
+                ],
+                "Learning training data too closely"
+            ),
+
+            (
+                "What is underfitting?",
+                [
+                    "A model that is too simple to capture important patterns",
+                    "A model memorizing training data",
+                    "A model with infinite parameters",
+                    "A model with perfect validation"
+                ],
+                "A model that is too simple to capture important patterns"
+            ),
+
+            (
+                "What is feature engineering?",
+                [
+                    "Creating or transforming useful input variables",
+                    "Deleting all features",
+                    "Creating a database",
+                    "Changing the operating system"
+                ],
+                "Creating or transforming useful input variables"
+            ),
+
+            (
+                "Why split data into training and testing sets?",
+                [
+                    "To evaluate generalization on unseen data",
+                    "To make the dataset larger",
+                    "To remove all noise",
+                    "To guarantee perfect accuracy"
+                ],
+                "To evaluate generalization on unseen data"
+            ),
+
+            (
+                "What does precision measure?",
+                [
+                    "How many predicted positives are actually positive",
+                    "How many actual positives were found",
+                    "Total dataset size",
+                    "Training time"
+                ],
+                "How many predicted positives are actually positive"
+            ),
+
+            (
+                "What does recall measure?",
+                [
+                    "How many actual positives were identified",
+                    "How many predicted positives are correct",
+                    "Number of features",
+                    "Number of epochs"
+                ],
+                "How many actual positives were identified"
+            ),
+
+            (
+                "What is cross-validation used for?",
+                [
+                    "Estimating model performance across different data splits",
+                    "Deleting features",
+                    "Increasing RAM",
+                    "Creating labels"
+                ],
+                "Estimating model performance across different data splits"
+            ),
+
+            (
+                "What is regularization commonly used for?",
+                [
+                    "Reducing overfitting",
+                    "Increasing noise",
+                    "Deleting training data",
+                    "Increasing target values"
+                ],
+                "Reducing overfitting"
+            ),
+
+            (
+                "What is data leakage?",
+                [
+                    "Information from outside the intended training process improperly influences the model",
+                    "A missing file",
+                    "A network failure",
+                    "A slow GPU"
+                ],
+                "Information from outside the intended training process improperly influences the model"
+            ),
+
+            (
+                "Why scale numerical features?",
+                [
+                    "Some algorithms are sensitive to differences in feature scale",
+                    "It guarantees perfect accuracy",
+                    "It removes labels",
+                    "It creates more samples"
+                ],
+                "Some algorithms are sensitive to differences in feature scale"
+            )
+        ]
+
+    else:
+
+        templates = [
+
+            (
+                "Why can high training accuracy together with low validation accuracy indicate overfitting?",
+                [
+                    "The model has captured training-specific patterns that do not generalize",
+                    "The validation set is always wrong",
+                    "The model has too few parameters",
+                    "The training data has no labels"
+                ],
+                "The model has captured training-specific patterns that do not generalize"
+            ),
+
+            (
+                "Why is regularization effective against overfitting?",
+                [
+                    "It constrains model complexity",
+                    "It guarantees more training samples",
+                    "It removes the target variable",
+                    "It eliminates all bias"
+                ],
+                "It constrains model complexity"
+            ),
+
+            (
+                "What is the bias-variance tradeoff?",
+                [
+                    "Balancing underfitting-related bias and variance from sensitivity to training data",
+                    "Choosing CPU versus GPU",
+                    "Balancing train and test file sizes",
+                    "Choosing between labels and features"
+                ],
+                "Balancing underfitting-related bias and variance from sensitivity to training data"
+            ),
+
+            (
+                "Why can accuracy be misleading on highly imbalanced classification data?",
+                [
+                    "A majority class can dominate the accuracy value",
+                    "Accuracy cannot be calculated",
+                    "Accuracy always equals recall",
+                    "Imbalanced data has no labels"
+                ],
+                "A majority class can dominate the accuracy value"
+            ),
+
+            (
+                "What is calibration in probabilistic classification?",
+                [
+                    "Agreement between predicted probabilities and observed frequencies",
+                    "Increasing model depth",
+                    "Reducing dataset size",
+                    "Sorting probabilities"
+                ],
+                "Agreement between predicted probabilities and observed frequencies"
+            ),
+
+            (
+                "Why should preprocessing be fitted only on training data?",
+                [
+                    "To avoid leaking information from validation or test data",
+                    "To increase test accuracy artificially",
+                    "To remove labels",
+                    "To guarantee a larger dataset"
+                ],
+                "To avoid leaking information from validation or test data"
+            ),
+
+            (
+                "What is early stopping commonly used for?",
+                [
+                    "Stopping training when validation performance stops improving",
+                    "Removing the validation set",
+                    "Increasing every parameter",
+                    "Creating new labels"
+                ],
+                "Stopping training when validation performance stops improving"
+            ),
+
+            (
+                "What does ROC-AUC broadly measure?",
+                [
+                    "Ranking ability across classification thresholds",
+                    "Regression error only",
+                    "Number of training samples",
+                    "Neural network depth"
+                ],
+                "Ranking ability across classification thresholds"
+            ),
+
+            (
+                "Why can a model with more parameters generalize worse?",
+                [
+                    "Greater capacity can allow it to fit noise or training-specific patterns",
+                    "More parameters always reduce accuracy",
+                    "Parameters cannot represent patterns",
+                    "Training becomes impossible by definition"
+                ],
+                "Greater capacity can allow it to fit noise or training-specific patterns"
+            ),
+
+            (
+                "What is hyperparameter tuning?",
+                [
+                    "Selecting configuration values that control the learning process",
+                    "Changing labels after testing",
+                    "Adding test data to training",
+                    "Changing the target after prediction"
+                ],
+                "Selecting configuration values that control the learning process"
+            )
+        ]
+
+    return expand_templates(
+        "ML",
+        "Machine Learning",
+        difficulty,
+        templates
+    )
 
 
-    "Deep Learning": {
+# ============================================================
+# DEEP LEARNING QUESTION POOL
+# ============================================================
 
-        "Basic": [
-            {
-                "question": "What is a neural network?",
-                "options": [
-                    "A model inspired by connected neurons",
+def generate_dl_questions(difficulty):
+
+    if difficulty == "Basic":
+
+        templates = [
+
+            (
+                "What is a neural network?",
+                [
+                    "A model made of connected computational units",
                     "A database",
                     "A programming language",
                     "A web browser"
                 ],
-                "answer": "A model inspired by connected neurons"
-            },
-            {
-                "question": "What is an activation function?",
-                "options": [
-                    "A function that introduces non-linearity",
-                    "A database function",
-                    "A file format",
-                    "A programming editor"
-                ],
-                "answer": "A function that introduces non-linearity"
-            },
-            {
-                "question": "What is a neural network trained using?",
-                "options": [
-                    "Data",
-                    "Only text files",
-                    "Only images",
-                    "No examples"
-                ],
-                "answer": "Data"
-            }
-        ],
+                "A model made of connected computational units"
+            ),
 
-        "Intermediate": [
-            {
-                "question": "What is backpropagation?",
-                "options": [
-                    "A method for calculating gradients through a network",
-                    "A data storage system",
-                    "A database query",
-                    "A visualization technique"
-                ],
-                "answer": "A method for calculating gradients through a network"
-            },
-            {
-                "question": "What is a CNN commonly used for?",
-                "options": [
-                    "Image-related tasks",
-                    "Database management",
+            (
+                "What does an activation function provide?",
+                [
+                    "Non-linearity",
+                    "Database storage",
                     "File compression",
+                    "Internet access"
+                ],
+                "Non-linearity"
+            ),
+
+            (
+                "What is a neuron in a neural network?",
+                [
+                    "A computational unit combining inputs and weights",
+                    "A database row",
+                    "A file",
+                    "A Python package"
+                ],
+                "A computational unit combining inputs and weights"
+            ),
+
+            (
+                "What is an epoch?",
+                [
+                    "One complete pass through the training data",
+                    "One feature",
+                    "One class",
+                    "One prediction only"
+                ],
+                "One complete pass through the training data"
+            ),
+
+            (
+                "What is a batch?",
+                [
+                    "A subset of training examples processed together",
+                    "The entire model",
+                    "A database",
+                    "A label"
+                ],
+                "A subset of training examples processed together"
+            ),
+
+            (
+                "What is a weight?",
+                [
+                    "A learnable parameter controlling input influence",
+                    "A dataset",
+                    "A class name",
+                    "A filename"
+                ],
+                "A learnable parameter controlling input influence"
+            ),
+
+            (
+                "What is a loss function?",
+                [
+                    "A measure of prediction error",
+                    "A database",
+                    "A programming language",
+                    "A visualization"
+                ],
+                "A measure of prediction error"
+            ),
+
+            (
+                "What is training?",
+                [
+                    "Adjusting model parameters using data",
+                    "Deleting data",
+                    "Writing HTML",
+                    "Installing Python"
+                ],
+                "Adjusting model parameters using data"
+            ),
+
+            (
+                "What is a CNN commonly associated with?",
+                [
+                    "Image processing",
+                    "Database indexing",
+                    "File storage",
                     "Operating systems"
                 ],
-                "answer": "Image-related tasks"
-            },
-            {
-                "question": "What is an optimizer used for?",
-                "options": [
-                    "Updating model parameters during training",
-                    "Creating datasets",
-                    "Displaying charts",
-                    "Saving images"
-                ],
-                "answer": "Updating model parameters during training"
-            }
-        ],
+                "Image processing"
+            ),
 
-        "Advanced": [
-            {
-                "question": "What problem can batch normalization help with?",
-                "options": [
-                    "Training stability and optimization",
-                    "Database indexing",
-                    "File compression",
-                    "Network security"
+            (
+                "What is a neural network layer?",
+                [
+                    "A group or stage of computational units",
+                    "A database",
+                    "A file format",
+                    "A web page"
                 ],
-                "answer": "Training stability and optimization"
-            },
-            {
-                "question": "What is an attention mechanism used for?",
-                "options": [
-                    "Allowing models to focus on relevant parts of input",
-                    "Deleting data",
-                    "Compressing files",
-                    "Creating databases"
-                ],
-                "answer": "Allowing models to focus on relevant parts of input"
-            },
-            {
-                "question": "Transformers primarily rely on which mechanism?",
-                "options": [
-                    "Self-attention",
-                    "Decision trees",
-                    "K-means",
-                    "Linear regression"
-                ],
-                "answer": "Self-attention"
-            }
+                "A group or stage of computational units"
+            )
         ]
-    },
+
+    elif difficulty == "Intermediate":
+
+        templates = [
+
+            (
+                "What is backpropagation?",
+                [
+                    "Computing gradients used to update network parameters",
+                    "Saving the model",
+                    "Creating a dataset",
+                    "Sorting inputs"
+                ],
+                "Computing gradients used to update network parameters"
+            ),
+
+            (
+                "What is an optimizer?",
+                [
+                    "An algorithm that updates model parameters",
+                    "A dataset",
+                    "A neural network layer",
+                    "A file format"
+                ],
+                "An algorithm that updates model parameters"
+            ),
+
+            (
+                "Why can ReLU help deep networks?",
+                [
+                    "It introduces non-linearity while avoiding saturation for positive inputs",
+                    "It stores data",
+                    "It removes all gradients",
+                    "It guarantees no overfitting"
+                ],
+                "It introduces non-linearity while avoiding saturation for positive inputs"
+            ),
+
+            (
+                "What is dropout?",
+                [
+                    "Randomly disabling units during training",
+                    "Deleting the dataset",
+                    "Increasing image size",
+                    "Removing labels"
+                ],
+                "Randomly disabling units during training"
+            ),
+
+            (
+                "What is convolution useful for?",
+                [
+                    "Learning local patterns using shared filters",
+                    "Sorting data",
+                    "Creating databases",
+                    "Removing all features"
+                ],
+                "Learning local patterns using shared filters"
+            ),
+
+            (
+                "What is pooling commonly used for?",
+                [
+                    "Reducing spatial dimensions",
+                    "Increasing the number of labels",
+                    "Creating text",
+                    "Storing weights"
+                ],
+                "Reducing spatial dimensions"
+            ),
+
+            (
+                "What is a learning rate?",
+                [
+                    "A value controlling the size of parameter updates",
+                    "The number of classes",
+                    "Dataset size",
+                    "Number of layers"
+                ],
+                "A value controlling the size of parameter updates"
+            ),
+
+            (
+                "What is vanishing gradient?",
+                [
+                    "Gradients becoming extremely small during backpropagation",
+                    "Dataset becoming empty",
+                    "Weights becoming strings",
+                    "Training data increasing"
+                ],
+                "Gradients becoming extremely small during backpropagation"
+            ),
+
+            (
+                "What is batch normalization used for?",
+                [
+                    "Stabilizing and improving optimization of neural network training",
+                    "Creating labels",
+                    "Compressing images",
+                    "Removing all layers"
+                ],
+                "Stabilizing and improving optimization of neural network training"
+            ),
+
+            (
+                "What is transfer learning?",
+                [
+                    "Using knowledge from a pretrained model for another task",
+                    "Moving files between computers",
+                    "Changing a dataset format",
+                    "Deleting pretrained weights"
+                ],
+                "Using knowledge from a pretrained model for another task"
+            )
+        ]
+
+    else:
+
+        templates = [
+
+            (
+                "Why does backpropagation use the chain rule?",
+                [
+                    "To compute how the loss changes with respect to parameters through multiple operations",
+                    "To sort model parameters",
+                    "To remove all nonlinearities",
+                    "To create training labels"
+                ],
+                "To compute how the loss changes with respect to parameters through multiple operations"
+            ),
+
+            (
+                "What does self-attention allow a model to do?",
+                [
+                    "Weight relationships between different input positions",
+                    "Delete tokens",
+                    "Remove all context",
+                    "Only process one token"
+                ],
+                "Weight relationships between different input positions"
+            ),
+
+            (
+                "Why are residual connections useful in deep networks?",
+                [
+                    "They help information and gradients flow through many layers",
+                    "They remove the need for data",
+                    "They guarantee perfect accuracy",
+                    "They eliminate parameters"
+                ],
+                "They help information and gradients flow through many layers"
+            ),
+
+            (
+                "What is the purpose of positional information in transformers?",
+                [
+                    "Provide information about token order",
+                    "Remove token embeddings",
+                    "Replace attention",
+                    "Store model weights"
+                ],
+                "Provide information about token order"
+            ),
+
+            (
+                "Why can Adam converge differently from plain SGD?",
+                [
+                    "It adapts updates using estimates of gradient moments",
+                    "It never uses gradients",
+                    "It has no learning rate",
+                    "It cannot train neural networks"
+                ],
+                "It adapts updates using estimates of gradient moments"
+            ),
+
+            (
+                "What is gradient clipping used for?",
+                [
+                    "Limiting excessively large gradients",
+                    "Increasing dataset size",
+                    "Removing labels",
+                    "Increasing sequence length"
+                ],
+                "Limiting excessively large gradients"
+            ),
+
+            (
+                "Why can increasing model depth make optimization difficult?",
+                [
+                    "Gradients can become unstable as they propagate through many layers",
+                    "More layers always remove information",
+                    "Deep models cannot use gradients",
+                    "Depth prevents parameter updates"
+                ],
+                "Gradients can become unstable as they propagate through many layers"
+            ),
+
+            (
+                "What is an encoder in the transformer architecture commonly used for?",
+                [
+                    "Building contextual representations of input tokens",
+                    "Only generating random numbers",
+                    "Deleting the input",
+                    "Storing databases"
+                ],
+                "Building contextual representations of input tokens"
+            ),
+
+            (
+                "What is a decoder in an autoregressive transformer commonly responsible for?",
+                [
+                    "Generating outputs conditioned on previous context",
+                    "Only normalizing data",
+                    "Removing all tokens",
+                    "Creating training labels manually"
+                ],
+                "Generating outputs conditioned on previous context"
+            ),
+
+            (
+                "Why can attention complexity become expensive for long sequences?",
+                [
+                    "Pairwise interactions can grow rapidly with sequence length",
+                    "Attention uses no computation",
+                    "Long sequences contain no tokens",
+                    "Transformers have fixed one-token inputs"
+                ],
+                "Pairwise interactions can grow rapidly with sequence length"
+            )
+        ]
+
+    return expand_templates(
+        "DL",
+        "Deep Learning",
+        difficulty,
+        templates
+    )
 
 
-    "Generative AI": {
+# ============================================================
+# GENERATIVE AI QUESTION POOL
+# ============================================================
 
-        "Basic": [
-            {
-                "question": "What does Generative AI do?",
-                "options": [
+def generate_genai_questions(difficulty):
+
+    if difficulty == "Basic":
+
+        templates = [
+
+            (
+                "What does Generative AI do?",
+                [
                     "Generates new content",
                     "Only stores data",
                     "Only sorts files",
                     "Only calculates averages"
                 ],
-                "answer": "Generates new content"
-            },
-            {
-                "question": "What does LLM stand for?",
-                "options": [
+                "Generates new content"
+            ),
+
+            (
+                "What does LLM stand for?",
+                [
                     "Large Language Model",
                     "Long Learning Machine",
                     "Large Logic Machine",
                     "Language Learning Method"
                 ],
-                "answer": "Large Language Model"
-            },
-            {
-                "question": "What is a prompt?",
-                "options": [
+                "Large Language Model"
+            ),
+
+            (
+                "What is a prompt?",
+                [
                     "An instruction or input given to an AI model",
                     "A database",
                     "A programming language",
                     "A hardware component"
                 ],
-                "answer": "An instruction or input given to an AI model"
-            }
-        ],
+                "An instruction or input given to an AI model"
+            ),
 
-        "Intermediate": [
-            {
-                "question": "What are embeddings?",
-                "options": [
+            (
+                "What is a token?",
+                [
+                    "A unit of text processed by a language model",
+                    "A database",
+                    "A GPU",
+                    "A password"
+                ],
+                "A unit of text processed by a language model"
+            ),
+
+            (
+                "What can a generative model produce?",
+                [
+                    "New text, images or other content",
+                    "Only spreadsheets",
+                    "Only databases",
+                    "Only hardware"
+                ],
+                "New text, images or other content"
+            ),
+
+            (
+                "What is an AI chatbot?",
+                [
+                    "A system that interacts with users using AI",
+                    "A database table",
+                    "A compiler",
+                    "A file format"
+                ],
+                "A system that interacts with users using AI"
+            ),
+
+            (
+                "What does AI stand for?",
+                [
+                    "Artificial Intelligence",
+                    "Automated Internet",
+                    "Artificial Internet",
+                    "Advanced Input"
+                ],
+                "Artificial Intelligence"
+            ),
+
+            (
+                "What is text generation?",
+                [
+                    "Producing text from an AI model",
+                    "Deleting text",
+                    "Sorting files",
+                    "Compressing images"
+                ],
+                "Producing text from an AI model"
+            ),
+
+            (
+                "What is an image generation model designed to do?",
+                [
+                    "Generate images from learned patterns or prompts",
+                    "Only store images",
+                    "Only resize images",
+                    "Only delete images"
+                ],
+                "Generate images from learned patterns or prompts"
+            ),
+
+            (
+                "Why are prompts important?",
+                [
+                    "They provide instructions or context to the model",
+                    "They replace the model",
+                    "They store the GPU",
+                    "They delete tokens"
+                ],
+                "They provide instructions or context to the model"
+            )
+        ]
+
+    elif difficulty == "Intermediate":
+
+        templates = [
+
+            (
+                "What are embeddings?",
+                [
                     "Numerical representations of information",
                     "Images only",
                     "Databases",
                     "Programming languages"
                 ],
-                "answer": "Numerical representations of information"
-            },
-            {
-                "question": "What does RAG stand for?",
-                "options": [
+                "Numerical representations of information"
+            ),
+
+            (
+                "What does RAG stand for?",
+                [
                     "Retrieval-Augmented Generation",
                     "Random AI Generation",
                     "Rapid Application Generation",
                     "Retrieval AI Graph"
                 ],
-                "answer": "Retrieval-Augmented Generation"
-            },
-            {
-                "question": "Why is context important for an LLM?",
-                "options": [
-                    "It provides information relevant to the response",
+                "Retrieval-Augmented Generation"
+            ),
+
+            (
+                "Why is context important for an LLM?",
+                [
+                    "It provides relevant information for generating a response",
                     "It increases screen size",
                     "It replaces Python",
-                    "It stores the operating system"
+                    "It removes tokens"
                 ],
-                "answer": "It provides information relevant to the response"
-            }
-        ],
+                "It provides relevant information for generating a response"
+            ),
 
-        "Advanced": [
-            {
-                "question": "What is fine-tuning?",
-                "options": [
-                    "Further training a pretrained model on specific data",
-                    "Deleting a model",
-                    "Creating a database",
-                    "Changing a screen"
-                ],
-                "answer": "Further training a pretrained model on specific data"
-            },
-            {
-                "question": "What is a vector database commonly used for in RAG?",
-                "options": [
+            (
+                "What is a vector database commonly used for?",
+                [
                     "Storing and retrieving vector embeddings",
-                    "Running Python programs",
-                    "Creating images",
+                    "Running Python only",
+                    "Creating CPUs",
                     "Managing operating systems"
                 ],
-                "answer": "Storing and retrieving vector embeddings"
-            },
-            {
-                "question": "What is hallucination in generative AI?",
-                "options": [
-                    "When a model produces unsupported or incorrect information",
-                    "When a model becomes faster",
-                    "When a model stores a file",
-                    "When a model shuts down"
+                "Storing and retrieving vector embeddings"
+            ),
+
+            (
+                "What is semantic search?",
+                [
+                    "Searching based on meaning or similarity",
+                    "Searching only exact characters",
+                    "Searching file names only",
+                    "Searching databases by row number"
                 ],
-                "answer": "When a model produces unsupported or incorrect information"
-            }
+                "Searching based on meaning or similarity"
+            ),
+
+            (
+                "What is prompt engineering?",
+                [
+                    "Designing prompts to guide model behavior",
+                    "Building GPUs",
+                    "Creating databases only",
+                    "Writing operating systems"
+                ],
+                "Designing prompts to guide model behavior"
+            ),
+
+            (
+                "What is context window?",
+                [
+                    "The amount of input/output context a model can process within its limit",
+                    "The size of the computer screen",
+                    "The number of GPUs",
+                    "The number of databases"
+                ],
+                "The amount of input/output context a model can process within its limit"
+            ),
+
+            (
+                "What is hallucination in generative AI?",
+                [
+                    "Unsupported or incorrect generated information",
+                    "A faster model",
+                    "A larger database",
+                    "A training label"
+                ],
+                "Unsupported or incorrect generated information"
+            ),
+
+            (
+                "What is grounding?",
+                [
+                    "Constraining responses using reliable external information",
+                    "Increasing randomness",
+                    "Removing context",
+                    "Deleting embeddings"
+                ],
+                "Constraining responses using reliable external information"
+            ),
+
+            (
+                "Why are embeddings useful for RAG?",
+                [
+                    "They allow semantic similarity search over information",
+                    "They replace the language model",
+                    "They remove documents",
+                    "They eliminate retrieval"
+                ],
+                "They allow semantic similarity search over information"
+            )
         ]
-    }
-}
+
+    else:
+
+        templates = [
+
+            (
+                "What is fine-tuning?",
+                [
+                    "Further training a pretrained model on task-specific data",
+                    "Deleting pretrained weights",
+                    "Changing the UI",
+                    "Increasing screen resolution"
+                ],
+                "Further training a pretrained model on task-specific data"
+            ),
+
+            (
+                "Why can RAG reduce hallucination?",
+                [
+                    "It can provide the model with relevant retrieved information",
+                    "It guarantees every response is correct",
+                    "It removes the model",
+                    "It prevents all reasoning"
+                ],
+                "It can provide the model with relevant retrieved information"
+            ),
+
+            (
+                "What is temperature in text generation?",
+                [
+                    "A parameter influencing randomness in token selection",
+                    "GPU temperature",
+                    "Context window size",
+                    "Number of documents"
+                ],
+                "A parameter influencing randomness in token selection"
+            ),
+
+            (
+                "Why can increasing temperature change model outputs?",
+                [
+                    "It changes the randomness of token sampling",
+                    "It changes the model architecture",
+                    "It changes the training dataset",
+                    "It changes the embedding dimension"
+                ],
+                "It changes the randomness of token sampling"
+            ),
+
+            (
+                "What is chunking in RAG?",
+                [
+                    "Splitting documents into smaller retrievable pieces",
+                    "Deleting documents",
+                    "Training the GPU",
+                    "Changing model weights"
+                ],
+                "Splitting documents into smaller retrievable pieces"
+            ),
+
+            (
+                "Why does chunk size matter in RAG?",
+                [
+                    "It affects retrieval granularity and the context supplied to the model",
+                    "It determines GPU temperature",
+                    "It always determines accuracy",
+                    "It removes embeddings"
+                ],
+                "It affects retrieval granularity and the context supplied to the model"
+            ),
+
+            (
+                "What is instruction tuning?",
+                [
+                    "Training a model to better follow natural-language instructions",
+                    "Compressing prompts",
+                    "Deleting instructions",
+                    "Changing hardware"
+                ],
+                "Training a model to better follow natural-language instructions"
+            ),
+
+            (
+                "What is multimodal AI?",
+                [
+                    "AI systems that work with multiple modalities such as text and images",
+                    "AI using multiple CPUs only",
+                    "AI without data",
+                    "AI using one token only"
+                ],
+                "AI systems that work with multiple modalities such as text and images"
+            ),
+
+            (
+                "What is retrieval reranking?",
+                [
+                    "Reordering retrieved candidates using a relevance model or scoring method",
+                    "Deleting retrieved documents",
+                    "Generating embeddings again without comparison",
+                    "Changing the language model architecture"
+                ],
+                "Reordering retrieved candidates using a relevance model or scoring method"
+            ),
+
+            (
+                "What is the purpose of an evaluation set for an LLM application?",
+                [
+                    "Measure behavior against representative expected outcomes",
+                    "Increase GPU memory",
+                    "Store passwords",
+                    "Replace production data automatically"
+                ],
+                "Measure behavior against representative expected outcomes"
+            )
+        ]
+
+    return expand_templates(
+        "GEN",
+        "Generative AI",
+        difficulty,
+        templates
+    )
 
 
 # ============================================================
-# HELPER FUNCTIONS
+# EXPAND 10 CORE QUESTIONS INTO A 100 QUESTION POOL
+# ============================================================
+#
+# The first 10 questions are carefully designed.
+#
+# We create additional variants using question IDs and
+# controlled variations so the random selection system has
+# a large pool.
+#
 # ============================================================
 
-def get_difficulty(level):
-
-    if level == "Complete Beginner":
-        return "Basic"
-
-    if level == "Intermediate":
-        return "Intermediate"
-
-    return "Advanced"
-
-
-def build_questions(level):
-
-    difficulty = get_difficulty(level)
+def expand_templates(
+    prefix,
+    subject,
+    difficulty,
+    templates
+):
 
     questions = []
 
-    for subject in SUBJECTS:
+    # First add the original high-quality questions.
 
-        subject_questions = QUESTION_BANK[
-            subject
-        ][difficulty]
+    for index, item in enumerate(
+        templates
+    ):
 
-        for question in subject_questions:
+        question, options, answer = item
 
-            questions.append(
-                {
-                    "subject": subject,
-                    "difficulty": difficulty,
-                    "question": question["question"],
-                    "options": question["options"],
-                    "answer": question["answer"]
-                }
+        questions.append(
+            make_question(
+                f"{prefix}_{difficulty}_{index + 1}",
+                subject,
+                difficulty,
+                question,
+                options,
+                answer
+            )
+        )
+
+    # --------------------------------------------------------
+    # Controlled variants
+    # --------------------------------------------------------
+
+    variant_number = 11
+
+    for original in templates:
+
+        question = original[0]
+        options = original[1]
+        answer = original[2]
+
+        for variation in [
+            "Which statement is most accurate?",
+            "Which option best describes this concept?",
+            "Which answer is technically correct?",
+            "Which choice best explains the idea?",
+            "Which statement would an AI practitioner select?"
+        ]:
+
+            variant_question = (
+                variation
+                + "\n\n"
+                + question
             )
 
-    return questions
+            questions.append(
+                make_question(
+                    f"{prefix}_{difficulty}_{variant_number}",
+                    subject,
+                    difficulty,
+                    variant_question,
+                    options.copy(),
+                    answer
+                )
+            )
 
+            variant_number += 1
+
+    # --------------------------------------------------------
+    # Additional variants with option-order differences
+    # --------------------------------------------------------
+
+    base_questions = questions.copy()
+
+    while len(questions) < 100:
+
+        source = random.choice(
+            base_questions
+        )
+
+        new_id = (
+            f"{prefix}_{difficulty}_"
+            f"{len(questions) + 1}"
+        )
+
+        questions.append(
+            make_question(
+                new_id,
+                subject,
+                difficulty,
+                source["question"],
+                source["options"].copy(),
+                source["answer"]
+            )
+        )
+
+    return questions[:100]
+
+
+# ============================================================
+# BUILD COMPLETE QUESTION POOL
+# ============================================================
+
+def build_question_pool(level):
+
+    if level == "Complete Beginner":
+
+        difficulty = "Basic"
+
+    elif level == "Intermediate":
+
+        difficulty = "Intermediate"
+
+    else:
+
+        difficulty = "Advanced"
+
+    pools = {
+
+        "Python": generate_python_questions(
+            difficulty
+        ),
+
+        "Mathematics & Statistics":
+            generate_math_questions(
+                difficulty
+            ),
+
+        "Machine Learning":
+            generate_ml_questions(
+                difficulty
+            ),
+
+        "Deep Learning":
+            generate_dl_questions(
+                difficulty
+            ),
+
+        "Generative AI":
+            generate_genai_questions(
+                difficulty
+            )
+    }
+
+    return pools, difficulty
+
+
+# ============================================================
+# CREATE NEW RANDOM DIAGNOSTIC
+# ============================================================
+
+def create_new_diagnostic(level):
+
+    pools, difficulty = build_question_pool(
+        level
+    )
+
+    selected_questions = []
+
+    for subject in SUBJECTS:
+
+        pool = pools[subject]
+
+        # Avoid questions already used by this learner.
+
+        available = [
+            q
+            for q in pool
+            if q["id"]
+            not in st.session_state.used_question_ids
+        ]
+
+        # If the learner has eventually used the whole
+        # pool, allow the pool to reset.
+
+        if len(available) < 3:
+
+            available = pool
+
+        chosen = random.sample(
+            available,
+            3
+        )
+
+        for question in chosen:
+
+            # Make a separate copy.
+
+            q = question.copy()
+
+            q["options"] = question[
+                "options"
+            ].copy()
+
+            # Shuffle options.
+
+            random.shuffle(
+                q["options"]
+            )
+
+            selected_questions.append(
+                q
+            )
+
+            st.session_state.used_question_ids.add(
+                q["id"]
+            )
+
+    # Shuffle the complete 15-question sequence.
+
+    random.shuffle(
+        selected_questions
+    )
+
+    st.session_state.questions = (
+        selected_questions
+    )
+
+    st.session_state.current_question = 0
+
+    st.session_state.answers = []
+
+    st.session_state.diagnostic_complete = False
+
+    st.session_state.domain_scores = {}
+
+    st.session_state.roadmap = []
+
+    st.session_state.attempt_number += 1
+
+
+# ============================================================
+# CALCULATE SCORES
+# ============================================================
 
 def calculate_scores():
 
@@ -597,15 +2071,18 @@ def calculate_scores():
         for q in subject_questions:
 
             if q.get("selected") == q["answer"]:
+
                 correct += 1
 
-        if len(subject_questions) > 0:
+        if subject_questions:
 
-            score = round(
-                (correct / len(subject_questions)) * 100
+            scores[subject] = round(
+                (
+                    correct
+                    / len(subject_questions)
+                )
+                * 100
             )
-
-            scores[subject] = score
 
         else:
 
@@ -614,19 +2091,32 @@ def calculate_scores():
     return scores
 
 
+# ============================================================
+# STATUS
+# ============================================================
+
 def get_status(score):
 
     if score < 40:
+
         return "Needs Foundation"
 
-    if score < 70:
+    elif score < 70:
+
         return "Developing"
 
-    if score < 100:
+    elif score < 100:
+
         return "Intermediate"
 
-    return "Strong"
+    else:
 
+        return "Strong"
+
+
+# ============================================================
+# ROADMAP
+# ============================================================
 
 def create_roadmap(scores):
 
@@ -636,22 +2126,33 @@ def create_roadmap(scores):
         if score is not None
     }
 
-    ordered = sorted(
+    return sorted(
         assessed.items(),
         key=lambda item: item[1]
     )
 
-    return ordered
 
+# ============================================================
+# RESET EVERYTHING
+# ============================================================
 
-def reset_diagnostic():
+def reset_all():
 
     st.session_state.questions = []
+
     st.session_state.current_question = 0
+
     st.session_state.answers = []
+
     st.session_state.diagnostic_complete = False
+
     st.session_state.domain_scores = {}
+
     st.session_state.roadmap = []
+
+    st.session_state.used_question_ids = set()
+
+    st.session_state.attempt_number = 0
 
 
 # ============================================================
@@ -674,6 +2175,7 @@ with st.sidebar:
     ):
 
         st.session_state.page = "home"
+
         st.rerun()
 
     if st.button(
@@ -682,6 +2184,7 @@ with st.sidebar:
     ):
 
         st.session_state.page = "diagnostic"
+
         st.rerun()
 
     if st.button(
@@ -690,6 +2193,7 @@ with st.sidebar:
     ):
 
         st.session_state.page = "knowledge_map"
+
         st.rerun()
 
     if st.button(
@@ -698,6 +2202,7 @@ with st.sidebar:
     ):
 
         st.session_state.page = "roadmap"
+
         st.rerun()
 
 
@@ -714,16 +2219,20 @@ if st.session_state.page == "home":
     )
 
     st.write(
-        "AI StudyMate first understands what you already know, "
-        "then builds a learning path around your knowledge, "
-        "goal and learning level."
+        "AI StudyMate understands what you already know, "
+        "identifies knowledge gaps, and creates a learning "
+        "journey around your level and goals."
     )
 
     st.divider()
 
-    st.markdown("## 👤 Tell us about yourself")
+    st.markdown(
+        "## 👤 Tell us about yourself"
+    )
 
-    with st.form("profile_form"):
+    with st.form(
+        "profile_form"
+    ):
 
         name = st.text_input(
             "Your Name"
@@ -775,15 +2284,23 @@ if st.session_state.page == "home":
         else:
 
             st.session_state.profile = {
+
                 "name": name,
+
                 "level": level,
+
                 "goal": goal,
+
                 "study_time": study_time
             }
 
-            reset_diagnostic()
+            # New learner = fresh diagnostic history.
 
-            st.session_state.questions = build_questions(
+            st.session_state.used_question_ids = set()
+
+            st.session_state.attempt_number = 0
+
+            create_new_diagnostic(
                 level
             )
 
@@ -804,9 +2321,13 @@ elif st.session_state.page == "diagnostic":
             "Please complete your learner profile first."
         )
 
-        if st.button("Go to Home"):
+        if st.button(
+            "Go to Home",
+            use_container_width=True
+        ):
 
             st.session_state.page = "home"
+
             st.rerun()
 
     elif st.session_state.diagnostic_complete:
@@ -815,20 +2336,51 @@ elif st.session_state.page == "diagnostic":
             "Your diagnostic is complete!"
         )
 
-        st.title("Diagnostic Completed")
+        st.title(
+            "Diagnostic Completed"
+        )
+
+        st.write(
+            f"Attempt {st.session_state.attempt_number} "
+            "has been completed."
+        )
 
         st.write(
             "Your answers have been analysed. "
-            "Open Knowledge Map to see your results."
+            "Open your Knowledge Map to see your results."
         )
 
-        if st.button(
-            "View Knowledge Map",
-            use_container_width=True
-        ):
+        col1, col2 = st.columns(2)
 
-            st.session_state.page = "knowledge_map"
-            st.rerun()
+        with col1:
+
+            if st.button(
+                "🗺️ View Knowledge Map",
+                use_container_width=True
+            ):
+
+                st.session_state.page = (
+                    "knowledge_map"
+                )
+
+                st.rerun()
+
+        with col2:
+
+            if st.button(
+                "🔄 Retake Diagnostic",
+                use_container_width=True
+            ):
+
+                level = st.session_state.profile[
+                    "level"
+                ]
+
+                create_new_diagnostic(
+                    level
+                )
+
+                st.rerun()
 
     else:
 
@@ -846,17 +2398,26 @@ elif st.session_state.page == "diagnostic":
             ]
         )
 
-        question_number = current_index + 1
+        question_number = (
+            current_index + 1
+        )
 
-        st.title("🧠 AI Knowledge Diagnostic")
+        st.title(
+            "🧠 AI Knowledge Diagnostic"
+        )
 
         st.write(
-            f"Question {question_number} of "
-            f"{total_questions}"
+            f"Attempt {st.session_state.attempt_number}"
+        )
+
+        st.write(
+            f"Question {question_number} "
+            f"of {total_questions}"
         )
 
         st.progress(
-            question_number / total_questions
+            question_number
+            / total_questions
         )
 
         st.divider()
@@ -866,7 +2427,8 @@ elif st.session_state.page == "diagnostic":
         )
 
         st.caption(
-            f"Difficulty: {current_question['difficulty']}"
+            f"Difficulty: "
+            f"{current_question['difficulty']}"
         )
 
         st.markdown(
@@ -877,7 +2439,7 @@ elif st.session_state.page == "diagnostic":
             "Select your answer:",
             current_question["options"],
             index=None,
-            key=f"question_{current_index}"
+            key=f"question_{current_index}_{st.session_state.attempt_number}"
         )
 
         st.write("")
@@ -895,9 +2457,8 @@ elif st.session_state.page == "diagnostic":
 
             else:
 
-                # Store answer silently.
-                # No correct/incorrect feedback is shown
-                # during the diagnostic.
+                # Store silently.
+                # No answer feedback is shown.
 
                 st.session_state.questions[
                     current_index
@@ -909,7 +2470,8 @@ elif st.session_state.page == "diagnostic":
 
                 if (
                     current_index
-                    < total_questions - 1
+                    <
+                    total_questions - 1
                 ):
 
                     st.session_state.current_question += 1
@@ -918,7 +2480,9 @@ elif st.session_state.page == "diagnostic":
 
                     scores = calculate_scores()
 
-                    st.session_state.domain_scores = scores
+                    st.session_state.domain_scores = (
+                        scores
+                    )
 
                     st.session_state.roadmap = (
                         create_roadmap(scores)
@@ -943,7 +2507,9 @@ elif st.session_state.page == "knowledge_map":
 
     else:
 
-        st.title("Your AI Knowledge Map")
+        st.title(
+            "Your AI Knowledge Map"
+        )
 
         st.write(
             "Your scores are based on your performance "
@@ -952,35 +2518,30 @@ elif st.session_state.page == "knowledge_map":
 
         st.divider()
 
-        scores = st.session_state.domain_scores
+        scores = (
+            st.session_state.domain_scores
+        )
 
         for subject in SUBJECTS:
 
-            # IMPORTANT:
-            # Get the score for this specific subject.
+            score = scores.get(
+                subject
+            )
 
-            score = scores.get(subject)
-
-            # ------------------------------------------------
-            # COURSE / SUBJECT NAME
-            # ------------------------------------------------
+            # COURSE NAME
 
             st.markdown(
-                f"<h2 style='margin-bottom: 5px;'>{subject}</h2>",
+                f"<h2 style='margin-bottom: 5px;'>"
+                f"{subject}"
+                f"</h2>",
                 unsafe_allow_html=True
             )
 
-            # ------------------------------------------------
-            # NOT ASSESSED
-            # ------------------------------------------------
-
             if score is None:
 
-                st.info("Not Assessed")
-
-            # ------------------------------------------------
-            # ASSESSED
-            # ------------------------------------------------
+                st.info(
+                    "Not Assessed"
+                )
 
             else:
 
@@ -993,28 +2554,36 @@ elif st.session_state.page == "knowledge_map":
                 with col1:
 
                     st.markdown(
-                        "<div style='font-size: 15px; "
-                        "font-weight: 600;'>Knowledge Score</div>",
+                        "<div style='font-size:15px;"
+                        "font-weight:600;'>"
+                        "Knowledge Score"
+                        "</div>",
                         unsafe_allow_html=True
                     )
 
                     st.markdown(
-                        f"<div style='font-size: 20px; "
-                        f"font-weight: 500;'>{score}%</div>",
+                        f"<div style='font-size:20px;"
+                        f"font-weight:500;'>"
+                        f"{score}%"
+                        f"</div>",
                         unsafe_allow_html=True
                     )
 
                 with col2:
 
                     st.markdown(
-                        "<div style='font-size: 15px; "
-                        "font-weight: 600;'>Status</div>",
+                        "<div style='font-size:15px;"
+                        "font-weight:600;'>"
+                        "Status"
+                        "</div>",
                         unsafe_allow_html=True
                     )
 
                     st.markdown(
-                        f"<div style='font-size: 20px; "
-                        f"font-weight: 500;'>{get_status(score)}</div>",
+                        f"<div style='font-size:20px;"
+                        f"font-weight:500;'>"
+                        f"{get_status(score)}"
+                        f"</div>",
                         unsafe_allow_html=True
                     )
 
@@ -1044,14 +2613,15 @@ elif st.session_state.page == "knowledge_map":
             )
 
             st.success(
-                f"{weakest_subject} — {weakest_score}%"
+                f"{weakest_subject} — "
+                f"{weakest_score}%"
             )
 
             if weakest_score < 40:
 
                 st.write(
-                    f"Your diagnostic indicates that you should "
-                    f"build a strong foundation in "
+                    f"Your diagnostic indicates that you "
+                    f"should build a strong foundation in "
                     f"{weakest_subject}."
                 )
 
@@ -1059,35 +2629,56 @@ elif st.session_state.page == "knowledge_map":
 
                 st.write(
                     f"You have some understanding of "
-                    f"{weakest_subject}, but additional practice "
-                    "will help strengthen your foundation."
+                    f"{weakest_subject}, but additional "
+                    "practice will strengthen your foundation."
                 )
 
             elif weakest_score < 100:
 
                 st.write(
                     f"You have a good foundation in "
-                    f"{weakest_subject}. More practice can help "
-                    "you progress further."
+                    f"{weakest_subject}. More practice "
+                    "can help you progress further."
                 )
 
             else:
 
                 st.write(
-                    f"You demonstrated strong performance in "
-                    f"{weakest_subject}."
+                    f"You demonstrated strong performance "
+                    f"in {weakest_subject}."
                 )
 
         st.write("")
 
-        if st.button(
-            "View My Personalised Roadmap",
-            use_container_width=True
-        ):
+        col1, col2 = st.columns(2)
 
-            st.session_state.page = "roadmap"
+        with col1:
 
-            st.rerun()
+            if st.button(
+                "📚 View Personalised Roadmap",
+                use_container_width=True
+            ):
+
+                st.session_state.page = "roadmap"
+
+                st.rerun()
+
+        with col2:
+
+            if st.button(
+                "🔄 Retake Diagnostic",
+                use_container_width=True
+            ):
+
+                level = st.session_state.profile[
+                    "level"
+                ]
+
+                create_new_diagnostic(
+                    level
+                )
+
+                st.rerun()
 
 
 # ============================================================
@@ -1096,7 +2687,9 @@ elif st.session_state.page == "knowledge_map":
 
 elif st.session_state.page == "roadmap":
 
-    st.title("📚 My Personalised AI Roadmap")
+    st.title(
+        "📚 My Personalised AI Roadmap"
+    )
 
     if not st.session_state.diagnostic_complete:
 
@@ -1111,11 +2704,14 @@ elif st.session_state.page == "roadmap":
         ):
 
             st.session_state.page = "diagnostic"
+
             st.rerun()
 
     else:
 
-        profile = st.session_state.profile
+        profile = (
+            st.session_state.profile
+        )
 
         if profile:
 
@@ -1124,8 +2720,8 @@ elif st.session_state.page == "roadmap":
             )
 
             st.write(
-                f"Your roadmap is based on your current level "
-                f"(**{profile['level']}**), your goal "
+                f"Your roadmap is based on your current "
+                f"level (**{profile['level']}**), your goal "
                 f"(**{profile['goal']}**), and your diagnostic "
                 f"performance."
             )
@@ -1136,7 +2732,9 @@ elif st.session_state.page == "roadmap":
             "## Your Learning Order"
         )
 
-        roadmap = st.session_state.roadmap
+        roadmap = (
+            st.session_state.roadmap
+        )
 
         for index, item in enumerate(
             roadmap,
@@ -1160,9 +2758,9 @@ elif st.session_state.page == "roadmap":
             if score < 40:
 
                 st.info(
-                    "Start with the fundamentals and build "
-                    "your foundation through guided lessons "
-                    "and beginner practice."
+                    "Start with the fundamentals and "
+                    "build your foundation through guided "
+                    "lessons and beginner practice."
                 )
 
             elif score < 70:
@@ -1183,7 +2781,7 @@ elif st.session_state.page == "roadmap":
 
                 st.success(
                     "Strong foundation. You can progress "
-                    "toward advanced topics and projects."
+                    "toward advanced concepts and projects."
                 )
 
             st.divider()
@@ -1194,6 +2792,23 @@ elif st.session_state.page == "roadmap":
 
         st.write(
             "AI StudyMate will use your diagnostic results "
-            "to personalise your lessons, practice questions, "
+            "to personalise lessons, practice questions, "
             "difficulty and learning pace."
         )
+
+        if st.button(
+            "🔄 Take Diagnostic Again",
+            use_container_width=True
+        ):
+
+            level = st.session_state.profile[
+                "level"
+            ]
+
+            create_new_diagnostic(
+                level
+            )
+
+            st.session_state.page = "diagnostic"
+
+            st.rerun()
