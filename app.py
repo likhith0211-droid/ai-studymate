@@ -22,8 +22,6 @@ DEFAULTS = {
     "questions": [],
     "current_question": 0,
     "answers": [],
-    "answer_submitted": False,
-    "last_answer_correct": None,
     "diagnostic_complete": False,
     "domain_scores": {},
     "roadmap": []
@@ -51,15 +49,13 @@ SUBJECTS = [
 # QUESTION BANK
 # ============================================================
 #
-# 5 subjects
-# 3 questions per subject
-# 3 difficulty levels
+# The student's selected level determines the questions:
 #
 # Complete Beginner -> Basic
 # Intermediate      -> Intermediate
 # Advanced           -> Advanced
 #
-# Total diagnostic questions = 15
+# 5 subjects x 3 questions = 15 questions
 # ============================================================
 
 QUESTION_BANK = {
@@ -826,7 +822,6 @@ QUESTION_BANK = {
 # ============================================================
 
 def get_difficulty(level):
-    """Convert learner level into question difficulty."""
 
     mapping = {
         "Complete Beginner": "Basic",
@@ -838,12 +833,6 @@ def get_difficulty(level):
 
 
 def build_questions(level):
-    """
-    Build the 15-question diagnostic.
-
-    The learner's selected level determines
-    the difficulty of ALL questions.
-    """
 
     difficulty = get_difficulty(level)
 
@@ -851,7 +840,11 @@ def build_questions(level):
 
     for subject in SUBJECTS:
 
-        for question in QUESTION_BANK[subject][difficulty]:
+        subject_questions = QUESTION_BANK[
+            subject
+        ][difficulty]
+
+        for question in subject_questions:
 
             question_copy = question.copy()
 
@@ -881,13 +874,14 @@ def calculate_scores():
 
         else:
 
-            correct_answers = sum(
-                answer["correct"]
+            correct = sum(
+                1
                 for answer in subject_answers
+                if answer["correct"]
             )
 
             scores[subject] = round(
-                correct_answers /
+                correct /
                 len(subject_answers) *
                 100
             )
@@ -967,15 +961,18 @@ def create_roadmap(scores):
     return roadmap
 
 
-def reset_diagnostic_state():
+def reset_diagnostic():
 
     st.session_state.questions = []
+
     st.session_state.current_question = 0
+
     st.session_state.answers = []
-    st.session_state.answer_submitted = False
-    st.session_state.last_answer_correct = None
+
     st.session_state.diagnostic_complete = False
+
     st.session_state.domain_scores = {}
+
     st.session_state.roadmap = []
 
 
@@ -987,7 +984,9 @@ with st.sidebar:
 
     st.markdown("## AI StudyMate")
 
-    st.caption("Personalised AI Tutor")
+    st.caption(
+        "Personalised AI Tutor"
+    )
 
     st.divider()
 
@@ -997,6 +996,7 @@ with st.sidebar:
     ):
 
         st.session_state.page = "home"
+
         st.rerun()
 
     if st.button(
@@ -1007,6 +1007,7 @@ with st.sidebar:
         if st.session_state.profile:
 
             st.session_state.page = "diagnostic"
+
             st.rerun()
 
         else:
@@ -1023,6 +1024,7 @@ with st.sidebar:
         if st.session_state.diagnostic_complete:
 
             st.session_state.page = "knowledge_map"
+
             st.rerun()
 
         else:
@@ -1039,6 +1041,7 @@ with st.sidebar:
         if st.session_state.diagnostic_complete:
 
             st.session_state.page = "roadmap"
+
             st.rerun()
 
         else:
@@ -1049,7 +1052,7 @@ with st.sidebar:
 
 
 # ============================================================
-# HOME PAGE
+# HOME
 # ============================================================
 
 if st.session_state.page == "home":
@@ -1062,13 +1065,15 @@ if st.session_state.page == "home":
 
     st.write(
         "Tell us about your current experience and learning goal. "
-        "Your selected level will determine the difficulty of your "
+        "Your current level will determine the difficulty of your "
         "initial diagnostic assessment."
     )
 
     st.divider()
 
-    st.markdown("### Learner Profile")
+    st.markdown(
+        "### Learner Profile"
+    )
 
     with st.form("learner_profile"):
 
@@ -1129,8 +1134,9 @@ if st.session_state.page == "home":
                 "study_time": study_time
             }
 
-            reset_diagnostic_state()
+            reset_diagnostic()
 
+            # Build questions based on selected level
             st.session_state.questions = build_questions(
                 level
             )
@@ -1141,7 +1147,7 @@ if st.session_state.page == "home":
 
 
 # ============================================================
-# DIAGNOSTIC PAGE
+# DIAGNOSTIC
 # ============================================================
 
 elif st.session_state.page == "diagnostic":
@@ -1155,6 +1161,7 @@ elif st.session_state.page == "diagnostic":
         if st.button("Go to Home"):
 
             st.session_state.page = "home"
+
             st.rerun()
 
     else:
@@ -1162,12 +1169,14 @@ elif st.session_state.page == "diagnostic":
         profile = st.session_state.profile
 
         # ----------------------------------------------------
-        # COMPLETED
+        # DIAGNOSTIC COMPLETE
         # ----------------------------------------------------
 
         if st.session_state.diagnostic_complete:
 
-            st.title("Diagnostic Complete")
+            st.title(
+                "Diagnostic Complete"
+            )
 
             st.success(
                 f"Well done, {profile['name']}! "
@@ -1175,8 +1184,8 @@ elif st.session_state.page == "diagnostic":
             )
 
             st.write(
-                "We have assessed your current knowledge "
-                "across the five AI learning domains."
+                "Your knowledge map has been generated from "
+                "your answers."
             )
 
             if st.button(
@@ -1185,7 +1194,12 @@ elif st.session_state.page == "diagnostic":
             ):
 
                 st.session_state.page = "knowledge_map"
+
                 st.rerun()
+
+        # ----------------------------------------------------
+        # QUESTIONS
+        # ----------------------------------------------------
 
         else:
 
@@ -1197,41 +1211,48 @@ elif st.session_state.page == "diagnostic":
 
             total_questions = len(questions)
 
-            current_question = questions[current_index]
+            current_question = questions[
+                current_index
+            ]
 
-            difficulty = current_question["difficulty"]
+            subject = current_question[
+                "subject"
+            ]
 
-            subject = current_question["subject"]
+            difficulty = current_question[
+                "difficulty"
+            ]
 
             # ------------------------------------------------
             # HEADER
             # ------------------------------------------------
 
-            st.title("AI Diagnostic Assessment")
-
-            st.write(
-                f"Welcome, **{profile['name']}**."
+            st.title(
+                "AI Diagnostic Assessment"
             )
 
             st.write(
-                f"Your selected level: **{profile['level']}**"
+                f"Current level: **{profile['level']}**"
             )
 
             st.write(
-                f"Diagnostic difficulty: **{difficulty}**"
+                f"Question level: **{difficulty}**"
             )
 
             # ------------------------------------------------
             # PROGRESS
             # ------------------------------------------------
 
-            progress = current_index / total_questions
+            progress = (
+                current_index /
+                total_questions
+            )
 
             st.progress(progress)
 
             st.caption(
-                f"Question {current_index + 1} of "
-                f"{total_questions}"
+                f"Question {current_index + 1} "
+                f"of {total_questions}"
             )
 
             st.divider()
@@ -1245,7 +1266,7 @@ elif st.session_state.page == "diagnostic":
             )
 
             st.caption(
-                f"{difficulty} level question"
+                f"{difficulty} level"
             )
 
             # ------------------------------------------------
@@ -1258,148 +1279,76 @@ elif st.session_state.page == "diagnostic":
 
             st.write("")
 
-            # =================================================
-            # BEFORE ANSWER
-            # =================================================
+            # IMPORTANT:
+            # index=None means that the learner starts
+            # with NO option selected.
 
-            if not st.session_state.answer_submitted:
+            selected = st.radio(
+                "Select your answer:",
+                current_question["options"],
+                index=None,
+                key=f"question_{current_index}"
+            )
 
-                # IMPORTANT:
-                # index=None means NO option is selected
-                # when the question first appears.
+            st.write("")
 
-                selected = st.radio(
-                    "Select your answer:",
-                    current_question["options"],
-                    index=None,
-                    key=f"answer_{current_index}"
-                )
+            # ------------------------------------------------
+            # NEXT QUESTION
+            # ------------------------------------------------
 
-                st.write("")
+            if st.button(
+                "Next Question",
+                use_container_width=True
+            ):
 
-                if st.button(
-                    "Check Answer",
-                    use_container_width=True
-                ):
+                if selected is None:
 
-                    if selected is None:
-
-                        st.warning(
-                            "Please select an answer before continuing."
-                        )
-
-                    else:
-
-                        is_correct = (
-                            selected ==
-                            current_question["answer"]
-                        )
-
-                        st.session_state.answers.append({
-
-                            "question_number":
-                                current_index + 1,
-
-                            "subject":
-                                subject,
-
-                            "difficulty":
-                                difficulty,
-
-                            "selected":
-                                selected,
-
-                            "correct_answer":
-                                current_question["answer"],
-
-                            "correct":
-                                is_correct
-                        })
-
-                        st.session_state.last_answer_correct = (
-                            is_correct
-                        )
-
-                        st.session_state.answer_submitted = True
-
-                        st.rerun()
-
-            # =================================================
-            # AFTER ANSWER
-            # =================================================
-
-            else:
-
-                if st.session_state.last_answer_correct:
-
-                    st.success(
-                        "Correct!"
+                    st.warning(
+                        "Please select an answer before continuing."
                     )
 
                 else:
 
-                    st.error(
-                        "Incorrect."
+                    # Store the answer silently.
+                    #
+                    # We do NOT display:
+                    # - Correct / Incorrect
+                    # - Correct answer
+                    # - Explanation
+
+                    is_correct = (
+                        selected ==
+                        current_question["answer"]
                     )
 
-                st.markdown(
-                    "### Correct Answer"
-                )
+                    st.session_state.answers.append({
 
-                st.write(
-                    current_question["answer"]
-                )
+                        "question_number":
+                            current_index + 1,
 
-                st.info(
-                    current_question["explanation"]
-                )
+                        "subject":
+                            subject,
 
-                # --------------------------------------------
-                # SUBJECT PROGRESS
-                # --------------------------------------------
+                        "difficulty":
+                            difficulty,
 
-                subject_answers = [
-                    answer
-                    for answer in st.session_state.answers
-                    if answer["subject"] == subject
-                ]
+                        "selected":
+                            selected,
 
-                subject_correct = sum(
-                    answer["correct"]
-                    for answer in subject_answers
-                )
+                        "correct_answer":
+                            current_question["answer"],
 
-                subject_score = round(
-                    subject_correct /
-                    len(subject_answers) *
-                    100
-                )
+                        "correct":
+                            is_correct
+                    })
 
-                st.caption(
-                    f"{subject} progress: "
-                    f"{subject_score}%"
-                )
-
-                st.write("")
-
-                # --------------------------------------------
-                # NEXT QUESTION
-                # --------------------------------------------
-
-                if st.button(
-                    "Next Question",
-                    use_container_width=True
-                ):
+                    # Move to next question
 
                     st.session_state.current_question += 1
 
-                    st.session_state.answer_submitted = False
-
-                    st.session_state.last_answer_correct = None
-
-                    # ----------------------------------------
-                    # CHECK WHETHER ALL QUESTIONS ARE DONE
-                    # ----------------------------------------
+                    # ------------------------------------------------
+                    # FINISHED ALL QUESTIONS
+                    # ------------------------------------------------
 
                     if (
                         st.session_state.current_question
@@ -1435,10 +1384,13 @@ elif st.session_state.page == "knowledge_map":
 
     else:
 
-        st.title("Your AI Knowledge Map")
+        st.title(
+            "Your AI Knowledge Map"
+        )
 
         st.write(
-            "Your scores are based on your diagnostic performance."
+            "Your scores are based on your performance "
+            "in the diagnostic assessment."
         )
 
         st.divider()
@@ -1482,6 +1434,10 @@ elif st.session_state.page == "knowledge_map":
                     )
 
             st.write("")
+
+        # ----------------------------------------------------
+        # RECOMMENDED STARTING POINT
+        # ----------------------------------------------------
 
         st.divider()
 
@@ -1554,7 +1510,7 @@ elif st.session_state.page == "knowledge_map":
 
 
 # ============================================================
-# ROADMAP
+# PERSONALIZED ROADMAP
 # ============================================================
 
 elif st.session_state.page == "roadmap":
@@ -1572,7 +1528,7 @@ elif st.session_state.page == "roadmap":
         )
 
         st.write(
-            "Your roadmap is based on your diagnostic results."
+            "Your roadmap is generated from your diagnostic results."
         )
 
         st.divider()
@@ -1580,7 +1536,7 @@ elif st.session_state.page == "roadmap":
         scores = st.session_state.domain_scores
 
         # ----------------------------------------------------
-        # SHOW ALL SUBJECTS
+        # SHOW ALL FIVE SUBJECTS
         # ----------------------------------------------------
 
         for subject in SUBJECTS:
@@ -1625,7 +1581,7 @@ elif st.session_state.page == "roadmap":
                 elif score < 70:
 
                     st.info(
-                        "Practice core concepts."
+                        "Practice core concepts before progressing."
                     )
 
                 elif score < 100:
@@ -1652,7 +1608,7 @@ elif st.session_state.page == "roadmap":
         )
 
         st.write(
-            "The next version of AI StudyMate will use this "
+            "The next stage of AI StudyMate will use your "
             "knowledge map to provide personalised lessons, "
             "practice questions and adaptive AI tutoring."
         )
