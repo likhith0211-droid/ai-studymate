@@ -1,655 +1,485 @@
 import streamlit as st
 
+# ============================================================
+# AI STUDYMATE
+# Step 1: Five-Domain Diagnostic + Learner Knowledge Map
+# ============================================================
+
 st.set_page_config(
     page_title="AI StudyMate",
-    page_icon="🤖",
-    layout="centered"
+    page_icon="🎓",
+    layout="wide"
 )
 
-# -----------------------------
+# ============================================================
 # SESSION STATE
-# -----------------------------
-if "started" not in st.session_state:
-    st.session_state.started = False
+# ============================================================
 
-if "profile" not in st.session_state:
-    st.session_state.profile = {}
+defaults = {
+    "page": "welcome",
+    "profile": {},
+    "diagnostic_index": 0,
+    "diagnostic_answers": {},
+    "diagnostic_complete": False,
+    "domain_scores": {},
+    "recommended_domain": None,
+    "recommended_module": None,
+}
 
-if "diagnostic_completed" not in st.session_state:
-    st.session_state.diagnostic_completed = False
-
-if "topic_scores" not in st.session_state:
-    st.session_state.topic_scores = {}
-
-if "current_topic" not in st.session_state:
-    st.session_state.current_topic = None
-
-if "tutor_started" not in st.session_state:
-    st.session_state.tutor_started = False
-
-if "mastery" not in st.session_state:
-    st.session_state.mastery = "Not Started"
-
-if "attempts" not in st.session_state:
-    st.session_state.attempts = 0
-
-if "mastery_points" not in st.session_state:
-    st.session_state.mastery_points = 0
-
-if "difficulty" not in st.session_state:
-    st.session_state.difficulty = "Easy"
-
-if "last_feedback" not in st.session_state:
-    st.session_state.last_feedback = ""
+for key, value in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
 
-# -----------------------------
-# ADAPTIVE LESSONS
-# -----------------------------
-lessons = {
+# ============================================================
+# CURRICULUM
+# ============================================================
 
-    "AI Fundamentals": {
-        "title": "Understanding Artificial Intelligence",
-
-        "easy": """
-Artificial Intelligence (AI) is the field of creating computer systems
-that can perform tasks that normally require human intelligence.
-
-Examples include:
-- Understanding language
-- Recognizing objects in images
-- Making predictions
-- Recommending content
-
-Think of AI as a system that receives information,
-processes it, and produces an intelligent output.
-""",
-
-        "medium": """
-AI systems can be designed to recognize patterns, make predictions,
-understand language and support decision-making.
-
-For example, an image recognition system can receive an image,
-process its visual patterns and predict what objects are present.
-
-The important idea is that AI systems use information to produce
-useful outputs for a particular task.
-""",
-
-        "hard": """
-Modern AI systems can learn complex patterns from large amounts of data.
-
-For example, an image classification model can learn relationships
-between visual features and labels during training.
-
-A key distinction is that AI is a broad field, while machine learning
-is one approach used to build AI systems.
-""",
-
-        "questions": {
-            "Easy": "In your own words, what is Artificial Intelligence?",
-            "Medium": "Give one example of an AI system and explain what information it receives and what output it produces.",
-            "Hard": "Explain the relationship between Artificial Intelligence and Machine Learning."
-        },
-
-        "keywords": {
-            "Easy": ["computer", "machine", "intelligence", "human", "task"],
-            "Medium": ["input", "output", "image", "language", "prediction", "data"],
-            "Hard": ["ai", "artificial intelligence", "machine learning", "learning", "data"]
-        }
+curriculum = {
+    "Python": {
+        "icon": "🐍",
+        "modules": [
+            "Python Basics",
+            "Data Structures",
+            "Functions",
+            "Object-Oriented Programming",
+            "NumPy",
+            "Pandas",
+        ],
     },
 
-    "Python": {
-        "title": "Python for AI",
-
-        "easy": """
-Python is one of the most commonly used programming languages in AI.
-
-Important Python concepts include:
-- Variables
-- Data types
-- Conditions
-- Loops
-- Functions
-- Lists and dictionaries
-
-Example:
-
-x = 10
-
-Here, x is a variable containing the value 10.
-""",
-
-        "medium": """
-Python is widely used in AI because it has a simple syntax
-and a large ecosystem of libraries.
-
-Common AI and data libraries include:
-- NumPy
-- Pandas
-- Matplotlib
-- Scikit-learn
-
-Python allows developers to work with data, build models
-and create AI applications efficiently.
-""",
-
-        "hard": """
-Python is especially useful for AI development because it provides
-libraries and frameworks for different stages of the machine learning
-workflow.
-
-For example, data can be prepared with Pandas and NumPy,
-models can be trained with Scikit-learn,
-and neural networks can be developed using deep-learning frameworks.
-
-This ecosystem reduces the amount of low-level code developers need
-to write when building AI systems.
-""",
-
-        "questions": {
-            "Easy": "Why is Python useful when learning Artificial Intelligence?",
-            "Medium": "Name two Python libraries commonly used in AI and explain what they are useful for.",
-            "Hard": "Explain how Python's ecosystem supports different stages of an AI development workflow."
-        },
-
-        "keywords": {
-            "Easy": ["simple", "easy", "ai", "library", "libraries", "programming"],
-            "Medium": ["numpy", "pandas", "scikit", "matplotlib", "data", "model"],
-            "Hard": ["data", "prepare", "model", "train", "library", "framework", "workflow"]
-        }
+    "Mathematics & Statistics": {
+        "icon": "📐",
+        "modules": [
+            "Statistics Fundamentals",
+            "Probability",
+            "Linear Algebra",
+            "Calculus for AI",
+        ],
     },
 
     "Machine Learning": {
-        "title": "Introduction to Machine Learning",
+        "icon": "🤖",
+        "modules": [
+            "Machine Learning Fundamentals",
+            "Data Preparation",
+            "Regression",
+            "Classification",
+            "Model Evaluation",
+        ],
+    },
 
-        "easy": """
-Machine Learning (ML) is a branch of AI where computers learn
-patterns from data.
-
-For example, instead of manually programming a system to recognize cats,
-we can provide many examples of images containing cats.
-
-The model learns patterns from those examples and can then
-make predictions on new data.
-""",
-
-        "medium": """
-Machine learning uses data to train models that can make predictions
-or decisions.
-
-In supervised learning, the training examples contain labels.
-
-For example, a model can learn from images labelled "cat" and "dog"
-and later predict the label of a new image.
-""",
-
-        "hard": """
-A machine learning model learns a relationship between input features
-and a target output from training data.
-
-In supervised learning, labelled examples are used during training.
-The trained model can then generalize its learned patterns
-to previously unseen data.
-
-The quality and representativeness of the training data
-can strongly affect model performance.
-""",
-
-        "questions": {
-            "Easy": "What does a machine learning model learn from?",
-            "Medium": "What is supervised learning? Give a simple example.",
-            "Hard": "Why is the quality of training data important for a machine learning model?"
-        },
-
-        "keywords": {
-            "Easy": ["data", "examples", "patterns", "training"],
-            "Medium": ["label", "labelled", "data", "training", "prediction"],
-            "Hard": ["data", "quality", "training", "representative", "performance", "model"]
-        }
+    "Deep Learning": {
+        "icon": "🧠",
+        "modules": [
+            "Neural Networks",
+            "Activation Functions",
+            "Backpropagation",
+            "Convolutional Neural Networks",
+            "Transformers",
+        ],
     },
 
     "Generative AI": {
-        "title": "Understanding Generative AI",
-
-        "easy": """
-Generative AI refers to AI systems that can create new content.
-
-They can generate:
-- Text
-- Images
-- Audio
-- Video
-- Code
-
-Large Language Models (LLMs) are an important example of Generative AI.
-""",
-
-        "medium": """
-Generative AI models learn patterns from existing data
-and can use those learned patterns to generate new content.
-
-For example, a language model can generate text based on
-a user's prompt.
-
-Generative AI is different from a system that only classifies
-or labels existing information.
-""",
-
-        "hard": """
-Generative AI models learn statistical patterns from large datasets
-and use those patterns to produce new outputs.
-
-Large Language Models generate text by predicting likely tokens
-based on the context provided to them.
-
-The quality of the generated output depends on factors such as
-the model, training data, prompt and context.
-""",
-
-        "questions": {
-            "Easy": "What makes Generative AI different from a system that only classifies information?",
-            "Medium": "How can a Generative AI system create new text from a user prompt?",
-            "Hard": "What role do training data, prompts and context play in Generative AI output?"
-        },
-
-        "keywords": {
-            "Easy": ["create", "generate", "new", "content", "text", "image"],
-            "Medium": ["prompt", "generate", "data", "patterns", "text"],
-            "Hard": ["training", "prompt", "context", "model", "data", "output"]
-        }
+        "icon": "✨",
+        "modules": [
+            "LLM Fundamentals",
+            "Tokens",
+            "Embeddings",
+            "Transformers for GenAI",
+            "Prompt Engineering",
+            "RAG Fundamentals",
+        ],
     },
-
-    "RAG": {
-        "title": "Understanding RAG",
-
-        "easy": """
-RAG stands for Retrieval-Augmented Generation.
-
-A RAG system retrieves relevant information from a knowledge source
-and provides that information to a language model before generating
-an answer.
-
-Simple flow:
-
-Question → Retrieve information → Generate answer
-""",
-
-        "medium": """
-RAG combines information retrieval with text generation.
-
-When a user asks a question, the system first searches
-a knowledge source for relevant information.
-
-That retrieved information is then provided as context
-to the language model so it can generate a more informed answer.
-""",
-
-        "hard": """
-Retrieval-Augmented Generation helps language models use
-external knowledge during response generation.
-
-A typical RAG pipeline retrieves relevant documents,
-selects useful context and provides that context to a language model.
-
-This approach can help applications answer questions using
-domain-specific or updated information contained in the knowledge base.
-""",
-
-        "questions": {
-            "Easy": "What is the main purpose of retrieving information in a RAG system?",
-            "Medium": "How does retrieved information help a language model answer a question?",
-            "Hard": "Why can RAG be useful when building an AI application that needs domain-specific information?"
-        },
-
-        "keywords": {
-            "Easy": ["information", "context", "knowledge", "answer", "relevant"],
-            "Medium": ["retrieve", "context", "information", "question", "answer"],
-            "Hard": ["knowledge", "domain", "information", "documents", "context", "updated"]
-        }
-    },
-
-    "AI Agents": {
-        "title": "Introduction to AI Agents",
-
-        "easy": """
-An AI agent is a system designed to perceive information
-and take actions toward a goal.
-
-A simple agent workflow can be:
-
-Observe → Think → Act → Observe again
-
-For example, an AI agent could receive a user's goal,
-decide what steps are needed, use available tools,
-and then return the result.
-""",
-
-        "medium": """
-AI agents can combine reasoning, planning and tool usage
-to accomplish a goal.
-
-Instead of only generating a response,
-an agent can decide which actions are required,
-use available tools and evaluate the results.
-""",
-
-        "hard": """
-An AI agent can be viewed as a system that receives observations,
-maintains relevant context, decides what action to take,
-uses available tools and evaluates the resulting information.
-
-This allows an agent to perform multi-step tasks rather than
-simply producing a single response to a prompt.
-""",
-
-        "questions": {
-            "Easy": "What is one important difference between an AI agent and a simple chatbot?",
-            "Medium": "Why might an AI agent need tools when completing a task?",
-            "Hard": "Describe how an AI agent could complete a multi-step task using observations, decisions and tools."
-        },
-
-        "keywords": {
-            "Easy": ["action", "goal", "tools", "steps", "act"],
-            "Medium": ["tools", "action", "goal", "task", "steps"],
-            "Hard": ["observe", "observation", "decision", "action", "tools", "steps", "goal"]
-        }
-    }
 }
 
 
-# -----------------------------
+# ============================================================
+# DIAGNOSTIC QUESTIONS
+# ============================================================
+
+diagnostic_questions = [
+
+    # ---------------- PYTHON ----------------
+
+    {
+        "domain": "Python",
+        "question": "Which symbol is used to start a comment in Python?",
+        "options": ["//", "#", "/*", "--"],
+        "answer": "#",
+        "module": "Python Basics",
+    },
+
+    {
+        "domain": "Python",
+        "question": "Which Python data structure stores key-value pairs?",
+        "options": ["List", "Tuple", "Dictionary", "Set"],
+        "answer": "Dictionary",
+        "module": "Data Structures",
+    },
+
+    {
+        "domain": "Python",
+        "question": "What is the main purpose of a Python function?",
+        "options": [
+            "To store only numbers",
+            "To group reusable instructions",
+            "To create hardware",
+            "To delete variables"
+        ],
+        "answer": "To group reusable instructions",
+        "module": "Functions",
+    },
+
+    # ---------------- MATH ----------------
+
+    {
+        "domain": "Mathematics & Statistics",
+        "question": "What does the mean of a dataset represent?",
+        "options": [
+            "The middle value only",
+            "The average value",
+            "The largest value",
+            "The smallest value"
+        ],
+        "answer": "The average value",
+        "module": "Statistics Fundamentals",
+    },
+
+    {
+        "domain": "Mathematics & Statistics",
+        "question": "What is the probability of getting heads when tossing a fair coin?",
+        "options": ["0", "0.25", "0.5", "1"],
+        "answer": "0.5",
+        "module": "Probability",
+    },
+
+    {
+        "domain": "Mathematics & Statistics",
+        "question": "Which mathematical objects are commonly used to represent data in machine learning?",
+        "options": [
+            "Vectors and matrices",
+            "Only circles",
+            "Only equations",
+            "Only graphs"
+        ],
+        "answer": "Vectors and matrices",
+        "module": "Linear Algebra",
+    },
+
+    # ---------------- MACHINE LEARNING ----------------
+
+    {
+        "domain": "Machine Learning",
+        "question": "What is supervised learning?",
+        "options": [
+            "Learning from labelled examples",
+            "Learning without any data",
+            "Writing programs manually",
+            "Training only neural networks"
+        ],
+        "answer": "Learning from labelled examples",
+        "module": "Machine Learning Fundamentals",
+    },
+
+    {
+        "domain": "Machine Learning",
+        "question": "Why is a dataset usually divided into training and testing data?",
+        "options": [
+            "To make the computer faster",
+            "To evaluate how well a model generalizes",
+            "To remove all features",
+            "To avoid using algorithms"
+        ],
+        "answer": "To evaluate how well a model generalizes",
+        "module": "Model Evaluation",
+    },
+
+    {
+        "domain": "Machine Learning",
+        "question": "Which problem is classification designed to solve?",
+        "options": [
+            "Predicting categories",
+            "Only storing data",
+            "Sorting files",
+            "Writing Python code"
+        ],
+        "answer": "Predicting categories",
+        "module": "Classification",
+    },
+
+    # ---------------- DEEP LEARNING ----------------
+
+    {
+        "domain": "Deep Learning",
+        "question": "What is a neural network made up of?",
+        "options": [
+            "Connected layers of computational units",
+            "Only databases",
+            "Only Python files",
+            "Web pages"
+        ],
+        "answer": "Connected layers of computational units",
+        "module": "Neural Networks",
+    },
+
+    {
+        "domain": "Deep Learning",
+        "question": "What is the purpose of an activation function?",
+        "options": [
+            "To introduce non-linearity into a neural network",
+            "To store files",
+            "To create a database",
+            "To replace training data"
+        ],
+        "answer": "To introduce non-linearity into a neural network",
+        "module": "Activation Functions",
+    },
+
+    {
+        "domain": "Deep Learning",
+        "question": "What is backpropagation mainly used for?",
+        "options": [
+            "Updating neural network parameters using error information",
+            "Creating a Python list",
+            "Collecting internet data",
+            "Designing a website"
+        ],
+        "answer": "Updating neural network parameters using error information",
+        "module": "Backpropagation",
+    },
+
+    # ---------------- GENERATIVE AI ----------------
+
+    {
+        "domain": "Generative AI",
+        "question": "What is an LLM?",
+        "options": [
+            "Large Language Model",
+            "Local Learning Machine",
+            "Linear Logic Method",
+            "Language Loading Module"
+        ],
+        "answer": "Large Language Model",
+        "module": "LLM Fundamentals",
+    },
+
+    {
+        "domain": "Generative AI",
+        "question": "What are embeddings commonly used for?",
+        "options": [
+            "Representing information as numerical vectors",
+            "Creating computer hardware",
+            "Deleting databases",
+            "Compiling Python"
+        ],
+        "answer": "Representing information as numerical vectors",
+        "module": "Embeddings",
+    },
+
+    {
+        "domain": "Generative AI",
+        "question": "What is RAG designed to do?",
+        "options": [
+            "Retrieve relevant information and use it to help generate an answer",
+            "Replace Python",
+            "Train a CPU",
+            "Create spreadsheets"
+        ],
+        "answer": "Retrieve relevant information and use it to help generate an answer",
+        "module": "RAG Fundamentals",
+    },
+]
+
+
+# ============================================================
 # HELPER FUNCTIONS
-# -----------------------------
-def get_difficulty():
-    return st.session_state.difficulty
+# ============================================================
+
+def calculate_domain_scores():
+    """Calculate percentage score for each learning domain."""
+
+    results = {}
+
+    for domain in curriculum.keys():
+
+        questions = [
+            q for q in diagnostic_questions
+            if q["domain"] == domain
+        ]
+
+        correct = 0
+
+        for index, question in enumerate(diagnostic_questions):
+
+            if question["domain"] != domain:
+                continue
+
+            if st.session_state.diagnostic_answers.get(index) == question["answer"]:
+                correct += 1
+
+        if questions:
+            results[domain] = round((correct / len(questions)) * 100)
+
+    return results
 
 
-def calculate_answer_score(answer, keywords):
-    answer_lower = answer.lower()
+def get_status(score):
+    if score >= 80:
+        return "🟢 Strong"
 
-    matched = 0
+    if score >= 50:
+        return "🟡 Developing"
 
-    for keyword in keywords:
-        if keyword.lower() in answer_lower:
-            matched += 1
+    if score > 0:
+        return "🔴 Needs Practice"
 
-    total = len(keywords)
-
-    if total == 0:
-        return 0
-
-    return matched / total
+    return "⚪ Not Assessed"
 
 
-def adapt_tutor(score):
+def recommend_learning_path(scores):
     """
-    Adapt difficulty based on learner performance.
+    Select the weakest assessed domain.
+
+    The first version intentionally uses deterministic rules.
+    This keeps recommendations fast and reproducible.
     """
 
-    if score >= 0.40:
-        if st.session_state.difficulty == "Easy":
-            st.session_state.difficulty = "Medium"
-        elif st.session_state.difficulty == "Medium":
-            st.session_state.difficulty = "Hard"
-
-        st.session_state.mastery_points += 10
-
-        if st.session_state.mastery_points >= 20:
-            st.session_state.mastery = "Improving"
-        else:
-            st.session_state.mastery = "Practice"
-
-        return "correct"
-
-    elif score > 0:
-        st.session_state.mastery = "Needs Practice"
-        st.session_state.mastery_points += 3
-
-        return "partial"
-
-    else:
-        if st.session_state.difficulty == "Hard":
-            st.session_state.difficulty = "Medium"
-        elif st.session_state.difficulty == "Medium":
-            st.session_state.difficulty = "Easy"
-
-        st.session_state.mastery = "Needs Review"
-
-        return "weak"
-
-
-# -----------------------------
-# HEADER
-# -----------------------------
-st.title("🤖 AI StudyMate")
-st.caption("Your Personalized AI Tutor for Learning AI")
-
-
-# -----------------------------
-# TUTOR SCREEN
-# -----------------------------
-if st.session_state.tutor_started:
-
-    topic = st.session_state.current_topic
-
-    if topic not in lessons:
-        st.error("No lesson is available for this topic.")
-        st.stop()
-
-    lesson = lessons[topic]
-    difficulty = get_difficulty()
-
-    st.success(
-        f"🎯 Personalized lesson: **{topic}**"
+    # Find domains with the lowest score.
+    weakest_domain = min(
+        scores,
+        key=scores.get
     )
 
-    st.info(
-        f"🧠 Adaptive Difficulty: **{difficulty}**"
-    )
+    weakest_score = scores[weakest_domain]
 
-    st.header(f"📚 {lesson['title']}")
+    # Choose the first module for the domain.
+    module = curriculum[weakest_domain]["modules"][0]
 
-    st.write(
-        lesson[difficulty.lower()]
-    )
+    # If the learner is already strong in a domain,
+    # look for the next domain with a lower score.
+    if weakest_score >= 80:
+
+        ordered_domains = sorted(
+            scores,
+            key=scores.get
+        )
+
+        for domain in ordered_domains:
+            if scores[domain] < 80:
+                weakest_domain = domain
+                module = curriculum[domain]["modules"][0]
+                break
+
+    return weakest_domain, module
+
+
+def reset_diagnostic():
+    st.session_state.diagnostic_index = 0
+    st.session_state.diagnostic_answers = {}
+    st.session_state.diagnostic_complete = False
+    st.session_state.domain_scores = {}
+    st.session_state.recommended_domain = None
+    st.session_state.recommended_module = None
+    st.session_state.page = "diagnostic"
+
+
+# ============================================================
+# SIDEBAR
+# ============================================================
+
+with st.sidebar:
+
+    st.title("🎓 AI StudyMate")
+
+    st.caption("Personalised AI Learning")
 
     st.divider()
 
-    st.subheader("🧠 Adaptive Check")
+    if st.session_state.profile:
 
-    st.write(
-        lesson["questions"][difficulty]
-    )
-
-    answer = st.text_area(
-        "Write your answer in your own words:",
-        height=150,
-        placeholder="Type your answer here..."
-    )
-
-    if st.button("✅ Check My Understanding"):
-
-        if not answer.strip():
-
-            st.warning(
-                "Please write an answer before checking."
-            )
-
-        else:
-
-            keywords = lesson["keywords"][difficulty]
-
-            score = calculate_answer_score(
-                answer,
-                keywords
-            )
-
-            result = adapt_tutor(score)
-
-            st.session_state.attempts += 1
-
-            if result == "correct":
-
-                st.success(
-                    "🎉 Good job! Your answer demonstrates "
-                    "understanding of the key concept."
-                )
-
-                st.write("### 🌟 Adaptive Tutor Feedback")
-
-                st.write(
-                    "You performed well, so the tutor is increasing "
-                    "the difficulty of your next activity."
-                )
-
-                st.write(
-                    f"**Next difficulty:** {st.session_state.difficulty}"
-                )
-
-            elif result == "partial":
-
-                st.info(
-                    "👍 You're on the right track."
-                )
-
-                st.write("### 💡 Tutor Hint")
-
-                st.write(
-                    "Your answer contains part of the expected concept. "
-                    "Review the lesson and try to include the main idea "
-                    "more clearly."
-                )
-
-                st.write(
-                    f"**Current difficulty:** {st.session_state.difficulty}"
-                )
-
-            else:
-
-                st.error(
-                    "Let's review this concept once more."
-                )
-
-                st.write("### 💡 Tutor Support")
-
-                st.write(
-                    "The tutor has reduced the difficulty to help "
-                    "you strengthen the fundamentals."
-                )
-
-                st.write(
-                    f"**New difficulty:** {st.session_state.difficulty}"
-                )
-
-    st.divider()
-
-    st.subheader("📈 Your Learning Progress")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.metric(
-            "Attempts",
-            st.session_state.attempts
+        st.write(
+            f"👋 **{st.session_state.profile.get('name', 'Learner')}**"
         )
 
-    with col2:
-        st.metric(
-            "Mastery Points",
-            st.session_state.mastery_points
-        )
-
-    with col3:
-        st.metric(
-            "Difficulty",
-            st.session_state.difficulty
-        )
-
-    if st.session_state.mastery == "Improving":
-
-        st.success(
-            "🟢 Mastery Status: Improving"
-        )
-
-    elif st.session_state.mastery == "Needs Practice":
-
-        st.warning(
-            "🟡 Mastery Status: Needs Practice"
-        )
-
-    elif st.session_state.mastery == "Needs Review":
-
-        st.error(
-            "🔴 Mastery Status: Needs Review"
-        )
-
-    else:
-
-        st.info(
-            "🔵 Mastery Status: Start your first activity"
+        st.write(
+            f"🎯 {st.session_state.profile.get('goal', 'Learn AI')}"
         )
 
     st.divider()
 
-    if st.button("🔄 Continue Adaptive Learning"):
-
+    if st.button("🏠 Home", use_container_width=True):
+        st.session_state.page = "home"
         st.rerun()
 
-    if st.button("⬅️ Back to Personalized Path"):
-
-        st.session_state.tutor_started = False
-
+    if st.button("🧪 Diagnostic", use_container_width=True):
+        st.session_state.page = "diagnostic"
         st.rerun()
 
-    st.stop()
+    if st.button("📚 My Roadmap", use_container_width=True):
+        st.session_state.page = "roadmap"
+        st.rerun()
+
+    st.divider()
+
+    st.caption("AI StudyMate")
+    st.caption("Python → Math → ML → DL → GenAI")
 
 
-# -----------------------------
-# WELCOME SCREEN
-# -----------------------------
-if not st.session_state.started:
+# ============================================================
+# WELCOME
+# ============================================================
+
+if st.session_state.page == "welcome":
+
+    st.title("🎓 AI StudyMate")
 
     st.subheader(
-        "Learn AI at your own pace."
+        "Your personalised journey from Python to Generative AI."
     )
 
     st.write(
-        "AI StudyMate first understands what you already know, "
-        "then adapts the learning experience based on your performance."
+        """
+        AI StudyMate helps you learn Artificial Intelligence
+        through a personalised learning path.
+
+        Instead of giving every learner the same course order,
+        StudyMate first checks what you already know and uses
+        your results to recommend where to start.
+        """
     )
 
-    st.write("### What your AI tutor will do")
+    st.divider()
 
-    st.write("🔎 Assess your current knowledge")
-    st.write("🎯 Identify your weakest topics")
-    st.write("🛣️ Create a personalized learning path")
-    st.write("🤖 Teach concepts step by step")
-    st.write("📈 Adapt difficulty based on your performance")
+    col1, col2, col3, col4, col5 = st.columns(5)
 
-    if st.button("🚀 Start Learning"):
+    with col1:
+        st.metric("🐍", "Python")
 
-        st.session_state.started = True
+    with col2:
+        st.metric("📐", "Math")
 
-        st.rerun()
+    with col3:
+        st.metric("🤖", "ML")
 
-    st.stop()
+    with col4:
+        st.metric("🧠", "Deep Learning")
 
+    with col5:
+        st.metric("✨", "GenAI")
 
-# -----------------------------
-# PROFILE
-# -----------------------------
-if not st.session_state.profile:
+    st.divider()
 
-    st.header("👤 Tell Me About Yourself")
+    st.subheader("Let's understand your learning goals")
 
     name = st.text_input(
-        "Your Name"
+        "Your name"
     )
 
     level = st.selectbox(
-        "Current AI Experience",
+        "Current AI experience",
         [
+            "Complete Beginner",
             "Beginner",
             "Intermediate",
             "Advanced"
@@ -657,13 +487,13 @@ if not st.session_state.profile:
     )
 
     goal = st.selectbox(
-        "What do you want to achieve?",
+        "What is your main goal?",
         [
-            "Learn AI fundamentals",
-            "Build AI projects",
-            "Prepare for a job",
-            "Learn Generative AI",
-            "Learn AI Agents"
+            "Learn AI from the beginning",
+            "Become a Machine Learning Developer",
+            "Build Generative AI Applications",
+            "Prepare for an AI Job",
+            "Build AI Projects"
         ]
     )
 
@@ -677,13 +507,15 @@ if not st.session_state.profile:
         ]
     )
 
-    if st.button("Continue →"):
+    if st.button(
+        "Start My AI Journey →",
+        type="primary",
+        use_container_width=True
+    ):
 
         if not name.strip():
 
-            st.warning(
-                "Please enter your name."
-            )
+            st.warning("Please enter your name.")
 
         else:
 
@@ -694,287 +526,330 @@ if not st.session_state.profile:
                 "study_time": study_time
             }
 
+            st.session_state.page = "diagnostic"
+
             st.rerun()
 
-    st.stop()
 
+# ============================================================
+# HOME
+# ============================================================
 
-# -----------------------------
-# DIAGNOSTIC TEST
-# -----------------------------
-if not st.session_state.diagnostic_completed:
+elif st.session_state.page == "home":
 
-    st.header("🧠 AI Knowledge Diagnostic")
-
-    st.write(
-        f"Hi **{st.session_state.profile['name']}**! "
-        "Let's quickly understand what you already know."
+    st.title(
+        f"Welcome back, {st.session_state.profile.get('name', 'Learner')} 👋"
     )
 
-    st.write(
-        "There are 10 questions. Answer honestly — "
-        "the goal is to personalize your learning path."
-    )
+    st.subheader("Your AI Learning Journey")
 
-    questions = [
+    if not st.session_state.diagnostic_complete:
 
-        (
-            "AI Fundamentals",
-            "What does AI stand for?",
-            [
-                "Artificial Intelligence",
-                "Automated Internet",
-                "Advanced Information",
-                "Artificial Interface"
-            ],
-            "Artificial Intelligence"
-        ),
-
-        (
-            "AI Fundamentals",
-            "Which is an example of AI?",
-            [
-                "A calculator",
-                "A system recognizing objects in images",
-                "A light bulb",
-                "A keyboard"
-            ],
-            "A system recognizing objects in images"
-        ),
-
-        (
-            "Python",
-            "Which symbol is commonly used to write a comment in Python?",
-            [
-                "//",
-                "#",
-                "<!--",
-                "**"
-            ],
-            "#"
-        ),
-
-        (
-            "Python",
-            "Which Python data type represents True or False?",
-            [
-                "String",
-                "Integer",
-                "Boolean",
-                "List"
-            ],
-            "Boolean"
-        ),
-
-        (
-            "Machine Learning",
-            "What is supervised learning?",
-            [
-                "Learning without data",
-                "Learning from labelled examples",
-                "Only writing rules manually",
-                "Deleting incorrect data"
-            ],
-            "Learning from labelled examples"
-        ),
-
-        (
-            "Machine Learning",
-            "What is a training dataset?",
-            [
-                "Data used to teach a model",
-                "A programming language",
-                "A computer",
-                "A user interface"
-            ],
-            "Data used to teach a model"
-        ),
-
-        (
-            "Generative AI",
-            "What can a generative AI model do?",
-            [
-                "Only classify data",
-                "Generate new content",
-                "Only store files",
-                "Only calculate numbers"
-            ],
-            "Generate new content"
-        ),
-
-        (
-            "Generative AI",
-            "What does LLM stand for?",
-            [
-                "Large Language Model",
-                "Long Learning Machine",
-                "Logical Language Method",
-                "Large Logic Machine"
-            ],
-            "Large Language Model"
-        ),
-
-        (
-            "RAG",
-            "What does RAG stand for?",
-            [
-                "Retrieval-Augmented Generation",
-                "Random AI Generation",
-                "Rapid Automated Guidance",
-                "Retrieved AI Graph"
-            ],
-            "Retrieval-Augmented Generation"
-        ),
-
-        (
-            "AI Agents",
-            "What are AI agents designed to do?",
-            [
-                "Only answer fixed questions",
-                "Perceive information and take actions toward a goal",
-                "Only store data",
-                "Only generate images"
-            ],
-            "Perceive information and take actions toward a goal"
-        )
-    ]
-
-    answers = []
-
-    for i, (
-        topic,
-        question,
-        options,
-        correct
-    ) in enumerate(questions):
-
-        st.subheader(
-            f"Question {i + 1}"
+        st.info(
+            "Complete your diagnostic assessment so AI StudyMate "
+            "can understand your current knowledge."
         )
 
-        answer = st.radio(
-            question,
-            options,
-            key=f"question_{i}"
-        )
-
-        answers.append(
-            (topic, answer, correct)
-        )
-
-    if st.button(
-        "📊 Generate My Personalized Path"
-    ):
-
-        topic_scores = {}
-
-        for topic, answer, correct in answers:
-
-            if topic not in topic_scores:
-
-                topic_scores[topic] = {
-                    "correct": 0,
-                    "total": 0
-                }
-
-            topic_scores[topic]["total"] += 1
-
-            if answer == correct:
-
-                topic_scores[topic]["correct"] += 1
-
-        for topic in topic_scores:
-
-            correct = topic_scores[topic]["correct"]
-
-            total = topic_scores[topic]["total"]
-
-            topic_scores[topic]["percentage"] = int(
-                correct / total * 100
-            )
-
-        st.session_state.topic_scores = topic_scores
-
-        st.session_state.diagnostic_completed = True
-
-        st.rerun()
-
-    st.stop()
-
-
-# -----------------------------
-# PERSONALIZED PATH
-# -----------------------------
-st.header(
-    "🛣️ Your Personalized Learning Path"
-)
-
-st.write(
-    f"Based on your diagnostic assessment, "
-    f"here is the learning path created for "
-    f"**{st.session_state.profile['name']}**."
-)
-
-scores = st.session_state.topic_scores
-
-ordered_topics = sorted(
-    scores.keys(),
-    key=lambda topic: scores[topic]["percentage"]
-)
-
-for position, topic in enumerate(
-    ordered_topics,
-    start=1
-):
-
-    percentage = scores[topic]["percentage"]
-
-    if percentage >= 80:
-
-        status = "🟢 Strong"
-
-    elif percentage >= 50:
-
-        status = "🟡 Practice More"
+        if st.button(
+            "Take Diagnostic Assessment →",
+            type="primary"
+        ):
+            st.session_state.page = "diagnostic"
+            st.rerun()
 
     else:
 
-        status = "🔴 Priority"
+        scores = st.session_state.domain_scores
+
+        cols = st.columns(5)
+
+        for i, (domain, score) in enumerate(scores.items()):
+
+            with cols[i]:
+
+                st.metric(
+                    f"{curriculum[domain]['icon']} {domain}",
+                    f"{score}%"
+                )
+
+                st.caption(get_status(score))
+
+        st.divider()
+
+        st.subheader("🎯 Your Recommended Starting Point")
+
+        st.success(
+            f"""
+            **{st.session_state.recommended_module}**
+
+            This is inside **{st.session_state.recommended_domain}**.
+
+            Your diagnostic indicates that this area needs
+            attention before moving deeper into the AI roadmap.
+            """
+        )
+
+        if st.button(
+            "Start Recommended Learning →",
+            type="primary"
+        ):
+
+            st.session_state.page = "roadmap"
+            st.rerun()
+
+        st.divider()
+
+        st.subheader("Your Knowledge Map")
+
+        for domain, score in scores.items():
+
+            st.write(
+                f"{curriculum[domain]['icon']} **{domain}** — {score}%"
+            )
+
+            st.progress(score / 100)
+
+            st.caption(get_status(score))
+
+
+# ============================================================
+# DIAGNOSTIC
+# ============================================================
+
+elif st.session_state.page == "diagnostic":
+
+    st.title("🧪 AI Knowledge Diagnostic")
 
     st.write(
-        f"**{position}. {topic}** — "
-        f"{percentage}% — {status}"
+        """
+        This assessment checks your current understanding across
+        Python, Mathematics & Statistics, Machine Learning,
+        Deep Learning and Generative AI.
+
+        Answer honestly. The goal is not to get a high score.
+        The goal is to create the right learning path for you.
+        """
     )
 
-    st.progress(
-        percentage / 100
+    st.divider()
+
+    total_questions = len(diagnostic_questions)
+
+    if st.session_state.diagnostic_index < total_questions:
+
+        index = st.session_state.diagnostic_index
+
+        question = diagnostic_questions[index]
+
+        domain = question["domain"]
+
+        st.caption(
+            f"{curriculum[domain]['icon']} {domain}"
+        )
+
+        st.progress(
+            (index + 1) / total_questions
+        )
+
+        st.write(
+            f"Question {index + 1} of {total_questions}"
+        )
+
+        st.subheader(
+            question["question"]
+        )
+
+        answer = st.radio(
+            "Choose your answer:",
+            question["options"],
+            key=f"diagnostic_{index}"
+        )
+
+        if st.button(
+            "Submit Answer →",
+            type="primary"
+        ):
+
+            st.session_state.diagnostic_answers[index] = answer
+
+            st.session_state.diagnostic_index += 1
+
+            st.rerun()
+
+    else:
+
+        # Calculate results
+        scores = calculate_domain_scores()
+
+        st.session_state.domain_scores = scores
+
+        recommended_domain, recommended_module = recommend_learning_path(
+            scores
+        )
+
+        st.session_state.recommended_domain = recommended_domain
+        st.session_state.recommended_module = recommended_module
+
+        st.session_state.diagnostic_complete = True
+
+        st.success("Diagnostic complete! 🎉")
+
+        st.subheader("Your Knowledge Map")
+
+        cols = st.columns(5)
+
+        for i, (domain, score) in enumerate(scores.items()):
+
+            with cols[i]:
+
+                st.metric(
+                    f"{curriculum[domain]['icon']} {domain}",
+                    f"{score}%"
+                )
+
+                st.caption(get_status(score))
+
+        st.divider()
+
+        st.subheader("🎯 Recommended Starting Point")
+
+        st.info(
+            f"""
+            **{curriculum[recommended_domain]['icon']}
+            {recommended_module}**
+
+            Your current results suggest that this is the
+            most useful place to begin your personalised journey.
+            """
+        )
+
+        st.write(
+            f"**Why?** Your score in "
+            f"**{recommended_domain}** is "
+            f"**{scores[recommended_domain]}%**."
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            if st.button(
+                "📚 View My Roadmap",
+                type="primary",
+                use_container_width=True
+            ):
+
+                st.session_state.page = "roadmap"
+                st.rerun()
+
+        with col2:
+
+            if st.button(
+                "🔄 Retake Diagnostic",
+                use_container_width=True
+            ):
+
+                reset_diagnostic()
+                st.rerun()
+
+
+# ============================================================
+# ROADMAP
+# ============================================================
+
+elif st.session_state.page == "roadmap":
+
+    st.title("📚 My Personalised AI Roadmap")
+
+    st.write(
+        """
+        Your complete AI learning journey is organised into five
+        connected learning domains.
+        """
     )
 
-weakest_topic = ordered_topics[0]
+    st.divider()
 
-st.session_state.current_topic = weakest_topic
+    domain_scores = st.session_state.domain_scores
 
-st.divider()
+    domain_order = list(curriculum.keys())
 
-st.subheader(
-    "🎯 Your Recommended Focus"
-)
+    for position, domain in enumerate(domain_order):
 
-st.info(
-    f"Your tutor recommends starting with "
-    f"**{weakest_topic}** because this is currently "
-    "your weakest area."
-)
+        info = curriculum[domain]
 
-st.write(
-    "The tutor will automatically adjust the difficulty "
-    "of your learning activities based on your answers."
-)
+        score = domain_scores.get(domain, 0)
 
-if st.button(
-    "🤖 Start My Adaptive Lesson"
-):
+        if score >= 80:
 
-    st.session_state.tutor_started = True
+            status = "✅ Strong"
 
-    st.rerun()
+        elif score >= 50:
+
+            status = "🟡 Developing"
+
+        elif score > 0:
+
+            status = "🔴 Needs Practice"
+
+        else:
+
+            status = "🔒 Not Assessed"
+
+        with st.container(border=True):
+
+            col1, col2, col3 = st.columns([1, 5, 2])
+
+            with col1:
+
+                st.markdown(
+                    f"# {info['icon']}"
+                )
+
+            with col2:
+
+                st.subheader(
+                    f"{position + 1}. {domain}"
+                )
+
+                st.write(
+                    f"{len(info['modules'])} learning modules"
+                )
+
+            with col3:
+
+                st.write(status)
+
+                if domain in domain_scores:
+
+                    st.write(f"**{score}%**")
+
+            st.progress(score / 100)
+
+            st.write("**Modules:**")
+
+            for module in info["modules"]:
+
+                st.write(f"• {module}")
+
+    st.divider()
+
+    st.subheader("🎯 Your Current Recommendation")
+
+    if st.session_state.recommended_domain:
+
+        st.success(
+            f"Start with **{st.session_state.recommended_module}** "
+            f"inside **{st.session_state.recommended_domain}**."
+        )
+
+    else:
+
+        st.info(
+            "Complete the diagnostic to receive a personalised recommendation."
+        )
+
+    if st.button("🧪 Retake Diagnostic"):
+
+        reset_diagnostic()
+        st.rerun()
