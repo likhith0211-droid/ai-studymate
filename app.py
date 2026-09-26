@@ -10,7 +10,464 @@ st.set_page_config(
     page_title="AI Learn",
     page_icon="🎓",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="collapsed"
+)
+
+
+# =========================================================
+# GLOBAL CSS
+# =========================================================
+
+st.markdown(
+    """
+    <style>
+
+    /* ---------- GLOBAL ---------- */
+
+    .stApp {
+        background: #ffffff;
+        color: #344454;
+    }
+
+    .block-container {
+        max-width: 1200px;
+        padding-top: 0.5rem;
+        padding-bottom: 3rem;
+    }
+
+    header[data-testid="stHeader"] {
+        background: white;
+    }
+
+    footer {
+        visibility: hidden;
+    }
+
+    /* Hide Streamlit default decoration */
+    [data-testid="stDecoration"] {
+        display: none;
+    }
+
+    /* ---------- HEADER ---------- */
+
+    .ai-header {
+        height: 72px;
+        border-bottom: 1px solid #e8edf2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 8px;
+        margin-bottom: 10px;
+    }
+
+    .ai-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ai-logo {
+        width: 44px;
+        height: 44px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .ai-brand-name {
+        font-size: 27px;
+        font-weight: 700;
+        color: #344454;
+        letter-spacing: -0.5px;
+    }
+
+    .ai-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ai-gift {
+        width: 42px;
+        height: 42px;
+        border: 1px solid #e2e8ee;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    /* ---------- HERO ---------- */
+
+    .hero-section {
+        min-height: 470px;
+        display: flex;
+        align-items: center;
+        padding: 55px 0 35px 0;
+    }
+
+    .hero-left {
+        padding: 25px 20px 25px 0;
+    }
+
+    .hero-title {
+        font-size: 58px;
+        line-height: 1.04;
+        font-weight: 800;
+        letter-spacing: -2px;
+        color: #344454;
+        margin-bottom: 22px;
+    }
+
+    .hero-title span {
+        color: #344454;
+    }
+
+    .hero-subtitle {
+        font-size: 20px;
+        line-height: 1.55;
+        color: #637282;
+        max-width: 570px;
+        margin-bottom: 22px;
+    }
+
+    .hero-highlight {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #637282;
+        max-width: 570px;
+        padding: 17px 20px;
+        background: #f5f9fc;
+        border-left: 4px solid #19b889;
+        border-radius: 8px;
+    }
+
+    .hero-highlight strong {
+        color: #344454;
+    }
+
+    /* ---------- VISUAL ---------- */
+
+    .learning-visual {
+        position: relative;
+        height: 430px;
+        width: 100%;
+        min-width: 450px;
+    }
+
+    .visual-main-circle {
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: #eaf4ff;
+        left: 50%;
+        top: 70px;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 105px;
+        box-shadow: 0 18px 45px rgba(52, 68, 84, 0.10);
+    }
+
+    .visual-small {
+        position: absolute;
+        width: 82px;
+        height: 82px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        box-shadow: 0 10px 30px rgba(52, 68, 84, 0.12);
+    }
+
+    .visual-one {
+        background: #e9f8f2;
+        left: 8%;
+        top: 55px;
+    }
+
+    .visual-two {
+        background: #fff4df;
+        right: 7%;
+        top: 105px;
+    }
+
+    .visual-three {
+        background: #f0ebff;
+        right: 12%;
+        bottom: 45px;
+    }
+
+    .floating-card {
+        position: absolute;
+        padding: 13px 18px;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(52, 68, 84, 0.13);
+        font-size: 14px;
+        font-weight: 700;
+        color: #344454;
+    }
+
+    .card-ai {
+        left: 2%;
+        bottom: 72px;
+    }
+
+    .card-progress {
+        right: 0;
+        top: 35px;
+    }
+
+    .card-python {
+        left: 25%;
+        bottom: 5px;
+    }
+
+    /* ---------- PROFILE ---------- */
+
+    .profile-section {
+        margin-top: 25px;
+        padding: 38px;
+        background: #f8fafc;
+        border-radius: 20px;
+        border: 1px solid #e9eef3;
+    }
+
+    .profile-title {
+        font-size: 28px;
+        font-weight: 750;
+        color: #344454;
+        margin-bottom: 8px;
+    }
+
+    .profile-description {
+        color: #687786;
+        font-size: 16px;
+        margin-bottom: 28px;
+    }
+
+    /* ---------- FOUNDATION ---------- */
+
+    .foundation-section {
+        text-align: center;
+        padding: 65px 0 25px 0;
+    }
+
+    .foundation-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #344454;
+        margin-bottom: 10px;
+    }
+
+    .foundation-description {
+        color: #687786;
+        font-size: 17px;
+        margin-bottom: 30px;
+    }
+
+    .foundation-card {
+        background: white;
+        border: 1px solid #e5ebf0;
+        border-radius: 15px;
+        padding: 24px 10px;
+        min-height: 125px;
+        box-shadow: 0 5px 18px rgba(52, 68, 84, 0.05);
+    }
+
+    .foundation-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+
+    .foundation-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #344454;
+    }
+
+    /* ---------- BUTTONS ---------- */
+
+    .stButton > button {
+        border-radius: 8px;
+        min-height: 44px;
+        font-weight: 700;
+        border: 1px solid #344454;
+    }
+
+    /* ---------- DIAGNOSTIC ---------- */
+
+    .diagnostic-header {
+        padding: 30px 0 20px 0;
+    }
+
+    .diagnostic-title {
+        font-size: 38px;
+        font-weight: 800;
+        color: #344454;
+    }
+
+    .diagnostic-subtitle {
+        color: #687786;
+        font-size: 16px;
+        margin-top: 8px;
+    }
+
+    .question-card {
+        background: #ffffff;
+        border: 1px solid #e2e8ee;
+        border-radius: 14px;
+        padding: 22px;
+        margin-bottom: 18px;
+        box-shadow: 0 4px 15px rgba(52, 68, 84, 0.04);
+    }
+
+    .question-number {
+        font-size: 13px;
+        font-weight: 700;
+        color: #19a879;
+        margin-bottom: 8px;
+    }
+
+    .question-text {
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.45;
+        color: #344454;
+    }
+
+    /* ---------- SCORE CARD ---------- */
+
+    .score-header {
+        text-align: center;
+        background: #f5f9fc;
+        border-radius: 20px;
+        padding: 35px 20px;
+        margin-bottom: 30px;
+    }
+
+    .score-header-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #344454;
+    }
+
+    .overall-score {
+        font-size: 58px;
+        font-weight: 800;
+        color: #19a879;
+        margin: 12px 0;
+    }
+
+    .score-subtitle {
+        color: #687786;
+    }
+
+    .subject-card {
+        border: 1px solid #e3e9ee;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        background: white;
+    }
+
+    .subject-name {
+        font-size: 18px;
+        font-weight: 750;
+        color: #344454;
+        margin-bottom: 10px;
+    }
+
+    .score-number {
+        font-size: 24px;
+        font-weight: 800;
+        color: #344454;
+    }
+
+    .recommendation {
+        margin-top: 25px;
+        background: #f0faf6;
+        border: 1px solid #ccefe1;
+        border-radius: 15px;
+        padding: 25px;
+    }
+
+    .recommendation-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #344454;
+        margin-bottom: 8px;
+    }
+
+    /* ---------- ROADMAP ---------- */
+
+    .roadmap-card {
+        border: 1px solid #e2e8ee;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        background: white;
+    }
+
+    .roadmap-number {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #344454;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+
+    .roadmap-title {
+        font-size: 19px;
+        font-weight: 800;
+        color: #344454;
+    }
+
+    .roadmap-text {
+        color: #687786;
+        margin-top: 7px;
+        line-height: 1.5;
+    }
+
+    /* ---------- MOBILE ---------- */
+
+    @media (max-width: 800px) {
+
+        .hero-section {
+            min-height: auto;
+        }
+
+        .hero-title {
+            font-size: 43px;
+        }
+
+        .learning-visual {
+            min-width: 0;
+            margin-top: 20px;
+        }
+
+        .visual-main-circle {
+            width: 210px;
+            height: 210px;
+        }
+
+        .profile-section {
+            padding: 22px;
+        }
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
 )
 
 
@@ -18,942 +475,344 @@ st.set_page_config(
 # CONSTANTS
 # =========================================================
 
+SUBJECTS = [
+    "Python",
+    "Mathematics & Statistics",
+    "Machine Learning",
+    "Deep Learning",
+    "Generative AI"
+]
+
 LOGO_URL = (
     "https://raw.githubusercontent.com/"
     "likhith0211-droid/ai-studymate/main/"
     "0f6577fe444ba6b1365cd00394ee581e.jpg"
 )
 
-SUBJECTS = [
-    "Python",
-    "Mathematics & Statistics",
-    "Machine Learning",
-    "Deep Learning",
-    "Generative AI",
-]
-
-
-# =========================================================
-# CSS
-# =========================================================
-
-st.markdown(
-    """
-<style>
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-}
-
-.stApp {
-    background: #ffffff;
-}
-
-/* Remove Streamlit top padding */
-.block-container {
-    padding-top: 0.8rem;
-    padding-bottom: 3rem;
-    max-width: 1250px;
-}
-
-/* Hide Streamlit branding */
-#MainMenu {
-    visibility: hidden;
-}
-
-footer {
-    visibility: hidden;
-}
-
-header {
-    visibility: hidden;
-}
-
-/* ================= HEADER ================= */
-
-.ai-header {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0 18px 0;
-    border-bottom: 1px solid #e8edf2;
-    margin-bottom: 30px;
-}
-
-.ai-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.ai-logo {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid #edf1f5;
-}
-
-.ai-brand-name {
-    font-size: 25px;
-    font-weight: 700;
-    color: #344454;
-    letter-spacing: -0.5px;
-}
-
-.ai-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.ai-gift {
-    width: 44px;
-    height: 44px;
-    border: 1px solid #e2e8ee;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-}
-
-/* ================= HERO ================= */
-
-.hero-section {
-    padding: 48px 0 35px 0;
-}
-
-.hero-title {
-    font-size: 58px;
-    line-height: 1.05;
-    font-weight: 800;
-    color: #344454;
-    letter-spacing: -2px;
-    margin-bottom: 20px;
-}
-
-.hero-title span {
-    color: #344454;
-}
-
-.hero-subtitle {
-    font-size: 20px;
-    line-height: 1.55;
-    color: #667482;
-    max-width: 650px;
-    margin-bottom: 18px;
-}
-
-.hero-highlight {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #536170;
-    max-width: 650px;
-}
-
-.hero-highlight strong {
-    color: #00a878;
-}
-
-/* ================= VISUAL ================= */
-
-.visual-wrapper {
-    min-height: 440px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.visual-main-circle {
-    width: 270px;
-    height: 270px;
-    border-radius: 50%;
-    background: #eef8ff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 110px;
-    position: relative;
-}
-
-.visual-small {
-    position: absolute;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 42px;
-    background: white;
-    box-shadow: 0 10px 30px rgba(40, 60, 80, 0.12);
-}
-
-.visual-one {
-    top: 35px;
-    right: 80px;
-}
-
-.visual-two {
-    bottom: 55px;
-    left: 75px;
-}
-
-.visual-three {
-    bottom: 25px;
-    right: 55px;
-}
-
-.floating-card {
-    position: absolute;
-    padding: 12px 18px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 28px rgba(40, 60, 80, 0.12);
-    font-size: 14px;
-    font-weight: 700;
-    color: #344454;
-}
-
-.card-ai {
-    top: 100px;
-    left: 20px;
-}
-
-.card-progress {
-    top: 25px;
-    right: 5px;
-}
-
-.card-python {
-    bottom: 80px;
-    right: 5px;
-}
-
-/* ================= PROFILE ================= */
-
-.profile-section {
-    margin-top: 15px;
-    padding: 30px;
-    border: 1px solid #e5ebf0;
-    border-radius: 18px;
-    background: #ffffff;
-    box-shadow: 0 8px 30px rgba(30, 50, 70, 0.05);
-}
-
-.profile-title {
-    font-size: 26px;
-    font-weight: 800;
-    color: #344454;
-    margin-bottom: 8px;
-}
-
-.profile-description {
-    font-size: 15px;
-    color: #71808e;
-    margin-bottom: 25px;
-}
-
-/* Streamlit labels */
-
-.stSelectbox label,
-.stTextInput label {
-    color: #344454 !important;
-    font-weight: 600 !important;
-}
-
-/* ================= BUTTONS ================= */
-
-.stButton > button {
-    border-radius: 9px;
-    min-height: 46px;
-    font-weight: 700;
-    border: 1px solid #344454;
-    transition: all 0.2s ease;
-}
-
-.stButton > button:hover {
-    transform: translateY(-1px);
-}
-
-/* ================= FOUNDATIONS ================= */
-
-.foundation-section {
-    margin-top: 60px;
-    margin-bottom: 30px;
-}
-
-.foundation-title {
-    text-align: center;
-    font-size: 30px;
-    font-weight: 800;
-    color: #344454;
-    margin-bottom: 10px;
-}
-
-.foundation-description {
-    text-align: center;
-    font-size: 16px;
-    color: #71808e;
-    margin-bottom: 28px;
-}
-
-.foundation-card {
-    text-align: center;
-    padding: 25px 12px;
-    border: 1px solid #e5ebf0;
-    border-radius: 15px;
-    background: white;
-    min-height: 130px;
-    box-shadow: 0 5px 18px rgba(40, 60, 80, 0.04);
-}
-
-.foundation-icon {
-    font-size: 32px;
-    margin-bottom: 8px;
-}
-
-.foundation-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: #344454;
-}
-
-/* ================= DIAGNOSTIC ================= */
-
-.page-title {
-    font-size: 36px;
-    font-weight: 800;
-    color: #344454;
-    margin-bottom: 8px;
-}
-
-.page-description {
-    color: #71808e;
-    font-size: 16px;
-    margin-bottom: 25px;
-}
-
-.question-card {
-    padding: 22px;
-    margin-bottom: 18px;
-    border: 1px solid #e5ebf0;
-    border-radius: 14px;
-    background: #ffffff;
-    box-shadow: 0 4px 16px rgba(40, 60, 80, 0.04);
-}
-
-.question-number {
-    font-size: 13px;
-    font-weight: 700;
-    color: #00a878;
-    margin-bottom: 7px;
-}
-
-.question-text {
-    font-size: 17px;
-    font-weight: 700;
-    color: #344454;
-    line-height: 1.5;
-}
-
-/* ================= SCORE CARD ================= */
-
-.score-hero {
-    text-align: center;
-    padding: 35px;
-    border-radius: 20px;
-    background: #f5faf8;
-    border: 1px solid #dfeee8;
-    margin-bottom: 30px;
-}
-
-.score-label {
-    font-size: 14px;
-    font-weight: 700;
-    color: #71808e;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.score-number {
-    font-size: 64px;
-    font-weight: 800;
-    color: #344454;
-    margin: 5px 0;
-}
-
-.score-subtitle {
-    color: #71808e;
-    font-size: 15px;
-}
-
-.subject-score-card {
-    padding: 22px;
-    border: 1px solid #e5ebf0;
-    border-radius: 15px;
-    margin-bottom: 16px;
-    background: white;
-}
-
-.subject-name {
-    font-weight: 700;
-    color: #344454;
-    font-size: 17px;
-    margin-bottom: 8px;
-}
-
-.progress-background {
-    width: 100%;
-    height: 10px;
-    border-radius: 10px;
-    background: #edf1f4;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    border-radius: 10px;
-    background: #00a878;
-}
-
-.subject-score {
-    margin-top: 8px;
-    color: #5e6c79;
-    font-size: 14px;
-}
-
-.recommendation {
-    margin-top: 28px;
-    padding: 24px;
-    border-radius: 15px;
-    background: #f7f9fb;
-    border: 1px solid #e4e9ee;
-}
-
-.recommendation-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: #344454;
-}
-
-.recommendation-subject {
-    font-size: 26px;
-    font-weight: 800;
-    color: #00a878;
-    margin: 7px 0;
-}
-
-/* ================= ROADMAP ================= */
-
-.roadmap-card {
-    padding: 22px;
-    margin-bottom: 15px;
-    border: 1px solid #e5ebf0;
-    border-radius: 14px;
-    background: white;
-}
-
-.roadmap-number {
-    font-size: 13px;
-    font-weight: 700;
-    color: #00a878;
-}
-
-.roadmap-name {
-    font-size: 20px;
-    font-weight: 800;
-    color: #344454;
-    margin: 5px 0;
-}
-
-.roadmap-score {
-    color: #71808e;
-    font-size: 14px;
-}
-
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
 
 # =========================================================
 # QUESTION BANK
-# 3 UNIQUE QUESTIONS PER SUBJECT PER LEVEL
+#
+# Format:
+# question, options, correct_index
+#
+# There are separate questions for each level.
+# We randomly choose 3 from each subject.
+# Therefore 15 questions are shown at once.
 # =========================================================
 
 QUESTION_BANK = {
 
-    "Python": {
+    "Beginner": {
 
-        "Beginner": [
-            {
-                "q": "Which Python data type is used to store a sequence of characters?",
-                "options": ["str", "int", "float", "bool"],
-                "answer": "str",
-            },
-            {
-                "q": "What does len([10, 20, 30]) return?",
-                "options": ["2", "3", "4", "30"],
-                "answer": "3",
-            },
-            {
-                "q": "Which keyword is used to define a function in Python?",
-                "options": ["func", "define", "def", "function"],
-                "answer": "def",
-            },
+        "Python": [
+            ("Which symbol is commonly used to start a comment in Python?",
+             ["//", "#", "<!--", "/*"], 1),
+
+            ("Which of these is a Python data type?",
+             ["Boolean", "Markup", "Selector", "Element"], 0),
+
+            ("What does len([10, 20, 30]) return?",
+             ["2", "3", "4", "30"], 1),
+
+            ("Which keyword is used to define a function in Python?",
+             ["function", "func", "def", "define"], 2),
+
+            ("Which structure stores multiple ordered values in Python?",
+             ["list", "condition", "module", "operator"], 0),
+
+            ("What value represents a logical true condition in Python?",
+             ["TRUE", "True", "trueValue", "Yes"], 1),
         ],
 
-        "Intermediate": [
-            {
-                "q": "What is the output of [x * 2 for x in range(3)]?",
-                "options": ["[0, 2, 4]", "[2, 4, 6]", "[0, 1, 2]", "[1, 2, 3]"],
-                "answer": "[0, 2, 4]",
-            },
-            {
-                "q": "Which Python structure stores key-value pairs?",
-                "options": ["Tuple", "Dictionary", "Set", "List"],
-                "answer": "Dictionary",
-            },
-            {
-                "q": "What does a Python decorator primarily allow you to do?",
-                "options": [
-                    "Modify or extend function behavior",
-                    "Create database tables",
-                    "Compile Python into machine code",
-                    "Delete unused variables",
-                ],
-                "answer": "Modify or extend function behavior",
-            },
+        "Mathematics & Statistics": [
+            ("What is the mean of 2, 4 and 6?",
+             ["2", "4", "6", "12"], 1),
+
+            ("What is the probability of getting heads from a fair coin?",
+             ["0", "0.25", "0.5", "1"], 2),
+
+            ("Which measure represents the middle value of an ordered dataset?",
+             ["Mean", "Median", "Range", "Variance"], 1),
+
+            ("What is 5 squared?",
+             ["10", "15", "20", "25"], 3),
+
+            ("What does a larger standard deviation generally indicate?",
+             ["Less variation", "More variation", "No data", "More samples only"], 1),
+
+            ("Which operation is represented by 3 × 4?",
+             ["Addition", "Subtraction", "Multiplication", "Division"], 2),
         ],
 
-        "Advanced": [
-            {
-                "q": "What is the main purpose of a generator function using yield?",
-                "options": [
-                    "Produce values lazily",
-                    "Create a new class",
-                    "Encrypt values",
-                    "Run code in parallel automatically",
-                ],
-                "answer": "Produce values lazily",
-            },
-            {
-                "q": "Why can using a mutable default argument in a Python function cause unexpected behavior?",
-                "options": [
-                    "The object is reused across function calls",
-                    "Python converts it into a tuple",
-                    "The function cannot accept arguments",
-                    "The object is always copied",
-                ],
-                "answer": "The object is reused across function calls",
-            },
-            {
-                "q": "What does the Python 'with' statement commonly help manage?",
-                "options": [
-                    "Resources such as files",
-                    "CPU clock speed",
-                    "Python package versions",
-                    "Network routing tables",
-                ],
-                "answer": "Resources such as files",
-            },
-        ],
-    },
+        "Machine Learning": [
+            ("What is machine learning mainly used for?",
+             ["Learning patterns from data", "Replacing electricity", "Writing HTML only", "Managing files only"], 0),
 
-    "Mathematics & Statistics": {
+            ("What is a training dataset?",
+             ["Data used to train a model", "Only final predictions", "A programming language", "A database password"], 0),
 
-        "Beginner": [
-            {
-                "q": "What is the mean of 2, 4, 6, and 8?",
-                "options": ["4", "5", "6", "20"],
-                "answer": "5",
-            },
-            {
-                "q": "What is the probability of getting heads when tossing a fair coin once?",
-                "options": ["0", "0.25", "0.5", "1"],
-                "answer": "0.5",
-            },
-            {
-                "q": "Which measure describes the middle value of an ordered dataset?",
-                "options": ["Mean", "Median", "Range", "Variance"],
-                "answer": "Median",
-            },
+            ("Which is an example of supervised learning?",
+             ["Learning from labelled examples", "Random guessing", "Compressing a file", "Drawing a chart manually"], 0),
+
+            ("What is a model in machine learning?",
+             ["A learned representation used to make predictions", "A computer monitor", "A spreadsheet only", "A keyboard layout"], 0),
+
+            ("Which task is classification?",
+             ["Predicting whether an email is spam", "Predicting tomorrow's exact temperature", "Sorting files alphabetically", "Adding two numbers"], 0),
+
+            ("What is a feature?",
+             ["An input variable used by a model", "The final prediction only", "A model password", "A programming error"], 0),
         ],
 
-        "Intermediate": [
-            {
-                "q": "If two events are independent, which statement is true?",
-                "options": [
-                    "P(A and B) = P(A)P(B)",
-                    "P(A and B) = P(A) + P(B)",
-                    "P(A) = P(B) always",
-                    "They cannot occur together",
-                ],
-                "answer": "P(A and B) = P(A)P(B)",
-            },
-            {
-                "q": "What does variance measure?",
-                "options": [
-                    "Spread of values around the mean",
-                    "The largest value only",
-                    "The number of observations",
-                    "The median of the dataset",
-                ],
-                "answer": "Spread of values around the mean",
-            },
-            {
-                "q": "In linear algebra, the dot product of two vectors produces what?",
-                "options": [
-                    "A scalar",
-                    "A matrix only",
-                    "A probability distribution",
-                    "A polynomial",
-                ],
-                "answer": "A scalar",
-            },
+        "Deep Learning": [
+            ("What is a neural network inspired by?",
+             ["Networks of biological neurons", "Computer keyboards", "Databases", "Web browsers"], 0),
+
+            ("What is a neuron in a neural network?",
+             ["A computational unit", "A file type", "A database table", "A web page"], 0),
+
+            ("What is an activation function used for?",
+             ["Introducing non-linearity", "Storing files", "Creating passwords", "Installing Python"], 0),
+
+            ("What does a neural network learn during training?",
+             ["Parameters or weights", "Monitor brightness", "File names", "Keyboard shortcuts"], 0),
+
+            ("What is an epoch?",
+             ["One complete pass through the training data", "A single neuron", "A dataset column", "A programming language"], 0),
+
+            ("What is a loss function used for?",
+             ["Measuring prediction error", "Drawing neural networks", "Creating folders", "Loading images only"], 0),
         ],
 
-        "Advanced": [
-            {
-                "q": "What does the gradient of a multivariable function represent?",
-                "options": [
-                    "Direction of greatest increase",
-                    "Always the minimum value",
-                    "The function's variance",
-                    "The number of variables",
-                ],
-                "answer": "Direction of greatest increase",
-            },
-            {
-                "q": "If a p-value is very small under a chosen significance level, what is commonly concluded?",
-                "options": [
-                    "Reject the null hypothesis",
-                    "Accept every possible hypothesis",
-                    "The sample mean is zero",
-                    "The experiment must be repeated",
-                ],
-                "answer": "Reject the null hypothesis",
-            },
-            {
-                "q": "Why is matrix multiplication important in neural networks?",
-                "options": [
-                    "It represents transformations between layers",
-                    "It removes all model parameters",
-                    "It guarantees zero training error",
-                    "It replaces the loss function",
-                ],
-                "answer": "It represents transformations between layers",
-            },
+        "Generative AI": [
+            ("What is Generative AI designed to do?",
+             ["Generate new content", "Only store databases", "Only sort files", "Only calculate averages"], 0),
+
+            ("What does LLM stand for?",
+             ["Large Language Model", "Linear Learning Machine", "Language Logic Module", "Large Logic Memory"], 0),
+
+            ("What can an LLM generate?",
+             ["Text", "Only electricity", "Only database tables", "Only images"], 0),
+
+            ("What is a prompt?",
+             ["An instruction or input given to an AI model", "A computer cable", "A database", "A Python package"], 0),
+
+            ("What are tokens used for in language models?",
+             ["Representing pieces of text", "Storing electricity", "Connecting monitors", "Creating folders"], 0),
+
+            ("What is an AI chatbot?",
+             ["A system designed to interact through conversation", "A graphics card", "A database server only", "A spreadsheet formula"], 0),
         ],
     },
 
-    "Machine Learning": {
 
-        "Beginner": [
-            {
-                "q": "What is supervised learning trained on?",
-                "options": [
-                    "Labeled examples",
-                    "Only random numbers",
-                    "Unlabeled images only",
-                    "No training data",
-                ],
-                "answer": "Labeled examples",
-            },
-            {
-                "q": "Which task predicts a continuous numerical value?",
-                "options": [
-                    "Regression",
-                    "Classification",
-                    "Clustering",
-                    "Association",
-                ],
-                "answer": "Regression",
-            },
-            {
-                "q": "What is a feature in a machine learning dataset?",
-                "options": [
-                    "An input variable",
-                    "The final prediction only",
-                    "The model name",
-                    "The training algorithm",
-                ],
-                "answer": "An input variable",
-            },
+    "Intermediate": {
+
+        "Python": [
+            ("What does a list comprehension primarily provide?",
+             ["A concise way to create lists", "A way to compile Python", "A database connection", "A replacement for classes"], 0),
+
+            ("What is the main difference between a list and a tuple?",
+             ["Lists are mutable while tuples are immutable", "Tuples always contain strings", "Lists cannot contain numbers", "There is no difference"], 0),
+
+            ("What does a Python dictionary store?",
+             ["Key-value pairs", "Only ordered numbers", "Only functions", "Only Boolean values"], 0),
+
+            ("What does *args allow a function to receive?",
+             ["A variable number of positional arguments", "Only one keyword argument", "Only strings", "Only lists"], 0),
+
+            ("What is the purpose of exception handling?",
+             ["Handling runtime errors gracefully", "Making code execute twice", "Deleting variables", "Increasing screen resolution"], 0),
+
+            ("What does a class primarily define?",
+             ["A blueprint for creating objects", "A database connection only", "A loop", "A file extension"], 0),
         ],
 
-        "Intermediate": [
-            {
-                "q": "Why is a validation set commonly used?",
-                "options": [
-                    "To tune or compare model choices",
-                    "To replace the training set",
-                    "To guarantee perfect predictions",
-                    "To remove all features",
-                ],
-                "answer": "To tune or compare model choices",
-            },
-            {
-                "q": "What is overfitting?",
-                "options": [
-                    "A model learns training-specific patterns too closely",
-                    "A model has no parameters",
-                    "A model refuses to train",
-                    "A model always predicts the mean",
-                ],
-                "answer": "A model learns training-specific patterns too closely",
-            },
-            {
-                "q": "Which metric is commonly used for binary classification?",
-                "options": [
-                    "F1 score",
-                    "Mean squared error only",
-                    "R-squared only",
-                    "Euclidean distance only",
-                ],
-                "answer": "F1 score",
-            },
+        "Mathematics & Statistics": [
+            ("What does variance measure?",
+             ["The average squared deviation from the mean", "The middle observation", "The number of samples", "The maximum value only"], 0),
+
+            ("What does correlation measure?",
+             ["The strength and direction of association between variables", "The number of rows", "The median only", "The sample size only"], 0),
+
+            ("What is a probability distribution?",
+             ["A description of possible outcomes and their probabilities", "A programming loop", "A neural network layer", "A database schema"], 0),
+
+            ("What does a derivative describe?",
+             ["A rate of change", "A probability only", "A sample count", "A matrix dimension"], 0),
+
+            ("What is a matrix?",
+             ["A rectangular arrangement of values", "A probability distribution only", "A Python loop", "A neural network optimizer"], 0),
+
+            ("What is the purpose of normalization in many ML workflows?",
+             ["Putting features onto comparable scales", "Removing all rows", "Changing labels randomly", "Deleting outliers automatically"], 0),
         ],
 
-        "Advanced": [
-            {
-                "q": "Why can feature scaling matter for gradient-based optimization?",
-                "options": [
-                    "Different feature scales can distort optimization steps",
-                    "It guarantees no overfitting",
-                    "It removes the need for training",
-                    "It converts classification into regression",
-                ],
-                "answer": "Different feature scales can distort optimization steps",
-            },
-            {
-                "q": "What is the purpose of regularization?",
-                "options": [
-                    "Penalize overly complex models",
-                    "Increase every model parameter",
-                    "Remove the test set",
-                    "Guarantee a higher training score",
-                ],
-                "answer": "Penalize overly complex models",
-            },
-            {
-                "q": "In a decision tree, what does a split attempt to achieve?",
-                "options": [
-                    "Create child groups with improved predictive purity",
-                    "Increase the number of missing values",
-                    "Remove the target variable",
-                    "Randomly shuffle labels",
-                ],
-                "answer": "Create child groups with improved predictive purity",
-            },
-        ],
-    },
+        "Machine Learning": [
+            ("What is overfitting?",
+             ["When a model learns training data too specifically and generalizes poorly", "When a model has no parameters", "When data is missing", "When training is impossible"], 0),
 
-    "Deep Learning": {
+            ("Why is a validation set commonly used?",
+             ["To evaluate choices during model development", "To permanently store passwords", "To replace training data entirely", "To increase file size"], 0),
 
-        "Beginner": [
-            {
-                "q": "What is the basic computational unit commonly used in a neural network?",
-                "options": ["Neuron", "Database", "Compiler", "Router"],
-                "answer": "Neuron",
-            },
-            {
-                "q": "What is an activation function used for?",
-                "options": [
-                    "Introduce non-linearity",
-                    "Store datasets permanently",
-                    "Download models",
-                    "Create database indexes",
-                ],
-                "answer": "Introduce non-linearity",
-            },
-            {
-                "q": "What does CNN commonly stand for in deep learning?",
-                "options": [
-                    "Convolutional Neural Network",
-                    "Central Numeric Node",
-                    "Computer Network Number",
-                    "Continuous Neural Notation",
-                ],
-                "answer": "Convolutional Neural Network",
-            },
+            ("What is precision?",
+             ["The fraction of predicted positives that are actually positive", "The fraction of all samples that are positive", "The number of features", "The training duration"], 0),
+
+            ("What is recall?",
+             ["The fraction of actual positives that are correctly identified", "The number of negative samples", "The model size", "The number of training epochs"], 0),
+
+            ("What does feature engineering involve?",
+             ["Creating or transforming useful input variables", "Deleting the target variable", "Changing the programming language", "Removing the model"], 0),
+
+            ("What is unsupervised learning?",
+             ["Learning patterns from data without target labels", "Learning only from labelled data", "Learning without any data", "Learning only from reinforcement signals"], 0),
         ],
 
-        "Intermediate": [
-            {
-                "q": "What is backpropagation used for?",
-                "options": [
-                    "Computing gradients for parameter updates",
-                    "Creating test datasets",
-                    "Compressing images only",
-                    "Removing neural network layers",
-                ],
-                "answer": "Computing gradients for parameter updates",
-            },
-            {
-                "q": "What does an optimizer such as Adam primarily update?",
-                "options": [
-                    "Model parameters",
-                    "The dataset labels",
-                    "The operating system",
-                    "The user's browser",
-                ],
-                "answer": "Model parameters",
-            },
-            {
-                "q": "Why are convolutional layers useful for images?",
-                "options": [
-                    "They can learn local spatial patterns",
-                    "They eliminate all parameters",
-                    "They convert every image into text",
-                    "They require no training",
-                ],
-                "answer": "They can learn local spatial patterns",
-            },
+        "Deep Learning": [
+            ("What is backpropagation used for?",
+             ["Computing gradients to update neural network parameters", "Creating datasets", "Compressing images", "Choosing usernames"], 0),
+
+            ("What does a learning rate control?",
+             ["The step size of parameter updates", "The number of classes", "The dataset size", "The image resolution"], 0),
+
+            ("Why are CNNs commonly useful for images?",
+             ["They can learn spatial patterns using convolutional filters", "They only process text", "They require no training", "They remove all image information"], 0),
+
+            ("What is dropout used for?",
+             ["Reducing over-reliance on particular neurons during training", "Increasing the number of labels", "Creating datasets", "Removing the loss function"], 0),
+
+            ("What does an optimizer do?",
+             ["Updates model parameters to reduce the loss", "Creates the training labels", "Displays graphs only", "Stores images"], 0),
+
+            ("What is a batch?",
+             ["A subset of training examples processed together", "A neural network output", "A type of activation function", "A programming language"], 0),
         ],
 
-        "Advanced": [
-            {
-                "q": "What problem can residual connections help with in very deep networks?",
-                "options": [
-                    "Improving gradient flow",
-                    "Removing the loss function",
-                    "Eliminating training data",
-                    "Guaranteeing zero inference time",
-                ],
-                "answer": "Improving gradient flow",
-            },
-            {
-                "q": "Why can batch normalization help neural network training?",
-                "options": [
-                    "It normalizes intermediate activations during training",
-                    "It removes all model weights",
-                    "It replaces backpropagation",
-                    "It guarantees generalization",
-                ],
-                "answer": "It normalizes intermediate activations during training",
-            },
-            {
-                "q": "What is the main idea behind attention in neural networks?",
-                "options": [
-                    "Weight the relevance of different input positions",
-                    "Delete irrelevant training examples permanently",
-                    "Remove every hidden layer",
-                    "Replace numerical computation with rules",
-                ],
-                "answer": "Weight the relevance of different input positions",
-            },
+        "Generative AI": [
+            ("What is an embedding?",
+             ["A numerical representation of information in a vector space", "A database password", "A Python loop", "A model license"], 0),
+
+            ("What is RAG designed to combine?",
+             ["Retrieval of relevant information with generation", "Two programming languages", "Two databases only", "Image compression and audio"], 0),
+
+            ("Why are tokens important in LLMs?",
+             ["They are the units processed by the language model", "They determine monitor size", "They replace GPUs", "They store user passwords"], 0),
+
+            ("What does context window refer to?",
+             ["The amount of input context a model can consider", "The size of a computer screen", "The model's training budget", "The number of GPUs"], 0),
+
+            ("What is prompt engineering?",
+             ["Designing inputs to guide model behavior", "Training a GPU", "Writing operating systems", "Compressing datasets"], 0),
+
+            ("What is fine-tuning?",
+             ["Further training a pretrained model on a targeted dataset", "Deleting the pretrained model", "Changing the GPU", "Removing tokens"], 0),
         ],
     },
 
-    "Generative AI": {
 
-        "Beginner": [
-            {
-                "q": "What does an LLM primarily model?",
-                "options": [
-                    "Patterns in language",
-                    "Only image pixels",
-                    "Computer hardware temperature",
-                    "Network cables",
-                ],
-                "answer": "Patterns in language",
-            },
-            {
-                "q": "What is a prompt?",
-                "options": [
-                    "Input instructions or context given to a model",
-                    "A database table",
-                    "A GPU driver",
-                    "A programming language",
-                ],
-                "answer": "Input instructions or context given to a model",
-            },
-            {
-                "q": "What is generative AI designed to do?",
-                "options": [
-                    "Generate new content",
-                    "Only sort existing files",
-                    "Only calculate averages",
-                    "Only store databases",
-                ],
-                "answer": "Generate new content",
-            },
+    "Advanced": {
+
+        "Python": [
+            ("What is the key benefit of a generator compared with constructing a complete list?",
+             ["It can produce values lazily and reduce memory usage", "It always runs faster", "It stores every value twice", "It removes the need for iteration"], 0),
+
+            ("What does a Python decorator generally allow you to do?",
+             ["Modify or extend callable behavior without changing its core definition", "Convert Python into C", "Delete a class", "Prevent all exceptions"], 0),
+
+            ("Why can mutable default arguments cause unexpected behavior in Python functions?",
+             ["The default object is created once and reused across calls", "Python copies it on every call", "Mutable objects cannot be passed to functions", "Defaults are always global variables"], 0),
+
+            ("What is the purpose of __init__ in a typical Python class?",
+             ["Initialize a newly created object's state", "Destroy the object", "Compile the class", "Import external modules"], 0),
+
+            ("What is the primary role of an iterator's __next__ method?",
+             ["Return the next available value or raise StopIteration", "Create a new class", "Sort a list", "Open a database"], 0),
+
+            ("Why is vectorized NumPy computation often faster than explicit Python loops?",
+             ["Many operations execute in optimized compiled numerical code", "Python loops are always parallel", "NumPy removes numerical operations", "NumPy stores no data"], 0),
         ],
 
-        "Intermediate": [
-            {
-                "q": "What is an embedding?",
-                "options": [
-                    "A numerical representation of information",
-                    "A physical computer component",
-                    "A database password",
-                    "A model deployment server",
-                ],
-                "answer": "A numerical representation of information",
-            },
-            {
-                "q": "What is RAG commonly used for?",
-                "options": [
-                    "Grounding generation with retrieved information",
-                    "Increasing monitor resolution",
-                    "Replacing all model parameters",
-                    "Removing user context",
-                ],
-                "answer": "Grounding generation with retrieved information",
-            },
-            {
-                "q": "What is a token in an LLM context?",
-                "options": [
-                    "A unit of text processed by the model",
-                    "A physical GPU core",
-                    "A database row",
-                    "A network packet only",
-                ],
-                "answer": "A unit of text processed by the model",
-            },
+        "Mathematics & Statistics": [
+            ("Why is the gradient important in gradient-based optimization?",
+             ["It indicates the direction of steepest local increase of a differentiable function", "It directly gives the global minimum", "It is always a probability", "It represents dataset size"], 0),
+
+            ("What does covariance indicate?",
+             ["How two variables vary together", "The exact causal effect of one variable", "The number of observations", "The median of both variables"], 0),
+
+            ("Why can correlation not by itself establish causation?",
+             ["Association can arise from confounding or other relationships without a causal mechanism", "Correlation only works on text", "Correlation is always zero", "Causation requires no data"], 0),
+
+            ("What does an eigenvector represent for a matrix transformation?",
+             ["A direction whose orientation is preserved up to scaling", "A guaranteed zero vector", "A probability distribution", "A dataset label"], 0),
+
+            ("What is the purpose of a loss landscape in optimization?",
+             ["It describes how the objective value changes across parameter values", "It stores training examples", "It replaces the optimizer", "It determines GPU memory"], 0),
+
+            ("Why can standardization help gradient-based models?",
+             ["Features on comparable scales can make optimization better conditioned", "It guarantees zero training error", "It removes the need for data", "It guarantees no overfitting"], 0),
         ],
 
-        "Advanced": [
-            {
-                "q": "Why can retrieval improve factual grounding in an LLM application?",
-                "options": [
-                    "Relevant external information can be supplied as context",
-                    "It permanently changes the model weights",
-                    "It guarantees every generated statement is true",
-                    "It removes the need for prompts",
-                ],
-                "answer": "Relevant external information can be supplied as context",
-            },
-            {
-                "q": "What is the purpose of fine-tuning a language model?",
-                "options": [
-                    "Adapt model behavior using additional training",
-                    "Increase internet bandwidth",
-                    "Replace the tokenizer with a database",
-                    "Remove all learned representations",
-                ],
-                "answer": "Adapt model behavior using additional training",
-            },
-            {
-                "q": "Why does context length matter in an LLM application?",
-                "options": [
-                    "It limits how much input context the model can process at once",
-                    "It determines the user's internet speed",
-                    "It guarantees factual accuracy",
-                    "It determines GPU brand",
-                ],
-                "answer": "It limits how much input context the model can process at once",
-            },
+        "Machine Learning": [
+            ("Why does regularization often improve generalization?",
+             ["It constrains model complexity and can reduce fitting to noise", "It always increases training accuracy", "It removes the training set", "It guarantees perfect predictions"], 0),
+
+            ("What is data leakage?",
+             ["Information unavailable at prediction time accidentally influences model training", "A missing dataset file", "A slow GPU", "A model with too few layers"], 0),
+
+            ("Why can accuracy be misleading on a highly imbalanced dataset?",
+             ["A model can achieve high accuracy by mostly predicting the majority class", "Accuracy cannot be calculated on classification", "Imbalanced data always gives 50% accuracy", "Accuracy measures regression only"], 0),
+
+            ("What is cross-validation primarily used for?",
+             ["Estimating model performance across multiple train-validation splits", "Increasing the number of labels", "Removing all features", "Replacing the test set permanently"], 0),
+
+            ("What is the bias-variance tradeoff about?",
+             ["Balancing systematic error from overly simple assumptions against sensitivity to training data", "Balancing CPU and RAM", "Choosing between Python and Java", "Selecting image resolution"], 0),
+
+            ("Why should a final test set normally remain untouched during model selection?",
+             ["Repeated use can leak information and make its estimate optimistic", "The test set cannot contain labels", "It is always smaller than training data", "Models cannot be evaluated twice"], 0),
         ],
-    },
+
+        "Deep Learning": [
+            ("Why can deep networks suffer from vanishing gradients?",
+             ["Repeated multiplication through layers can make gradients become extremely small", "The dataset becomes empty", "The GPU stops storing weights", "The loss becomes a probability"], 0),
+
+            ("What is the role of attention in Transformer architectures?",
+             ["It lets representations weight relationships among tokens based on their relevance", "It removes all tokens", "It replaces the training data", "It guarantees factual outputs"], 0),
+
+            ("Why are residual connections useful in deep networks?",
+             ["They provide shorter paths for information and gradients through layers", "They eliminate all parameters", "They guarantee no overfitting", "They remove activation functions"], 0),
+
+            ("What does batch normalization generally do?",
+             ["Normalizes intermediate activations using batch statistics during training", "Removes all network layers", "Guarantees zero loss", "Creates labels automatically"], 0),
+
+            ("Why can increasing model depth sometimes hurt performance?",
+             ["Optimization difficulties and degradation can arise despite increased representational capacity", "More layers always reduce available data", "Deep networks cannot use gradients", "Depth prevents training completely"], 0),
+
+            ("What is the main purpose of an attention mask in autoregressive language modeling?",
+             ["Preventing a token from using information from future positions", "Removing all punctuation", "Increasing vocabulary size", "Changing the optimizer"], 0),
+        ],
+
+        "Generative AI": [
+            ("Why can retrieval improve a generative AI system's factual grounding?",
+             ["The model can condition generation on relevant external information", "Retrieval guarantees every answer is correct", "It eliminates the language model", "It prevents all hallucinations automatically"], 0),
+
+            ("What is a key limitation of embeddings?",
+             ["Similarity in vector space does not guarantee exact semantic or factual equivalence", "Embeddings can only represent numbers", "Embeddings cannot be stored", "Embeddings always contain the original document verbatim"], 0),
+
+            ("Why can a larger context window still fail to produce a correct answer?",
+             ["More available context does not guarantee correct retrieval, reasoning, or interpretation", "Context windows contain no text", "Large context prevents generation", "The model stops using tokens"], 0),
+
+            ("What is the purpose of chunking in a RAG pipeline?",
+             ["Breaking source material into retrievable units that can be indexed and retrieved", "Encrypting documents", "Training the GPU", "Deleting metadata"], 0),
+
+            ("Why might fine-tuning be inappropriate when the main problem is access to changing factual information?",
+             ["Fine-tuning does not inherently provide continuously updated external knowledge", "Fine-tuning cannot change model behavior", "Fine-tuning only works on images", "Fine-tuning removes the context window"], 0),
+
+            ("What is temperature commonly used to control in text generation?",
+             ["The randomness of token selection", "The GPU temperature", "The context-window size", "The embedding dimension"], 0),
+        ],
+    }
 }
 
 
@@ -968,7 +827,6 @@ defaults = {
     "diagnostic_answers": {},
     "scores": {},
     "overall_score": 0,
-    "roadmap": [],
 }
 
 for key, value in defaults.items():
@@ -987,64 +845,85 @@ def status_for_score(score):
         return "Developing"
     elif score < 100:
         return "Intermediate"
-    return "Strong"
+    else:
+        return "Strong"
 
 
-def build_diagnostic(level):
+def make_diagnostic(level):
     """
-    Select exactly 3 different questions from each subject.
+    Select exactly 3 unique questions from each subject.
     Total = 15 questions.
     """
 
-    questions = []
+    selected = []
 
     for subject in SUBJECTS:
-        available = QUESTION_BANK[subject][level]
 
-        selected = random.sample(available, 3)
+        bank = QUESTION_BANK[level][subject]
 
-        for item in selected:
-            shuffled_options = item["options"].copy()
-            random.shuffle(shuffled_options)
+        # Randomly select 3 different questions.
+        chosen = random.sample(bank, 3)
 
-            questions.append(
-                {
-                    "subject": subject,
-                    "question": item["q"],
-                    "options": shuffled_options,
-                    "answer": item["answer"],
-                }
-            )
+        for question, options, correct_index in chosen:
+            selected.append({
+                "subject": subject,
+                "question": question,
+                "options": options,
+                "correct": correct_index
+            })
 
-    random.shuffle(questions)
+    # Shuffle the complete 15-question test
+    random.shuffle(selected)
 
-    return questions
+    return selected
 
 
 def calculate_scores():
-    subject_correct = {subject: 0 for subject in SUBJECTS}
-
-    for index, question in enumerate(st.session_state.diagnostic_questions):
-        selected = st.session_state.diagnostic_answers.get(index)
-
-        if selected == question["answer"]:
-            subject_correct[question["subject"]] += 1
-
     scores = {}
 
     for subject in SUBJECTS:
-        scores[subject] = round(
-            (subject_correct[subject] / 3) * 100
+
+        subject_questions = [
+            q for q in st.session_state.diagnostic_questions
+            if q["subject"] == subject
+        ]
+
+        correct = 0
+
+        for q_index, q in enumerate(st.session_state.diagnostic_questions):
+
+            if q["subject"] != subject:
+                continue
+
+            answer = st.session_state.diagnostic_answers.get(q_index)
+
+            if answer == q["correct"]:
+                correct += 1
+
+        total = len(subject_questions)
+
+        if total > 0:
+            scores[subject] = round((correct / total) * 100)
+        else:
+            scores[subject] = 0
+
+    st.session_state.scores = scores
+
+    if scores:
+        st.session_state.overall_score = round(
+            sum(scores.values()) / len(scores)
         )
+    else:
+        st.session_state.overall_score = 0
 
-    return scores
 
+def start_diagnostic():
+    level = st.session_state.profile["level"]
 
-def create_roadmap(scores):
-    return sorted(
-        SUBJECTS,
-        key=lambda subject: scores.get(subject, 0)
-    )
+    st.session_state.diagnostic_questions = make_diagnostic(level)
+    st.session_state.diagnostic_answers = {}
+
+    st.session_state.page = "diagnostic"
 
 
 # =========================================================
@@ -1058,24 +937,30 @@ def render_header():
         <div class="ai-header">
 
             <div class="ai-brand">
+
                 <img
                     class="ai-logo"
                     src="{LOGO_URL}"
+                    alt="AI Learn logo"
                 >
+
                 <div class="ai-brand-name">
                     AI Learn
                 </div>
+
             </div>
 
             <div class="ai-header-actions">
+
                 <div class="ai-gift">
                     🎁
                 </div>
+
             </div>
 
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 
@@ -1089,7 +974,7 @@ def home_page():
 
     # ---------------- HERO ----------------
 
-    col1, col2 = st.columns([1.05, 0.95], gap="large")
+    col1, col2 = st.columns([1.05, 0.95])
 
     with col1:
 
@@ -1097,33 +982,37 @@ def home_page():
             """
             <div class="hero-section">
 
-                <div class="hero-title">
-                    Learn AI.<br>
-                    <span>Your way.</span>
-                </div>
+                <div class="hero-left">
 
-                <div class="hero-subtitle">
-                    Build your AI skills with a personalised
-                    learning journey that adapts to your
-                    knowledge, goals and pace.
-                </div>
+                    <div class="hero-title">
+                        Learn AI.<br>
+                        <span>Your way.</span>
+                    </div>
 
-                <div class="hero-highlight">
-                    <strong>AI Learn</strong> helps you discover
-                    what you know, identify what to learn next,
-                    and build practical AI skills step by step.
+                    <div class="hero-subtitle">
+                        Build your AI skills with a personalised
+                        learning journey that adapts to your
+                        knowledge, goals and pace.
+                    </div>
+
+                    <div class="hero-highlight">
+                        <strong>AI Learn</strong> helps you discover
+                        what you know, identify what to learn next,
+                        and build practical AI skills step by step.
+                    </div>
+
                 </div>
 
             </div>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
     with col2:
 
         st.markdown(
             """
-            <div class="visual-wrapper">
+            <div class="learning-visual">
 
                 <div class="visual-main-circle">
                     🤖
@@ -1155,8 +1044,10 @@ def home_page():
 
             </div>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
+
+    st.divider()
 
     # ---------------- PROFILE ----------------
 
@@ -1175,32 +1066,31 @@ def home_page():
 
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
-    # We put the actual Streamlit inputs immediately below
-    # the visual profile heading.
+    st.write("")
 
     name = st.text_input(
         "Your Name",
-        placeholder="Enter your name",
-        key="home_name",
+        placeholder="Enter your name"
     )
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
 
     with col1:
+
         level = st.selectbox(
             "Current AI Level",
             [
                 "Beginner",
                 "Intermediate",
-                "Advanced",
-            ],
-            key="home_level",
+                "Advanced"
+            ]
         )
 
     with col2:
+
         goal = st.selectbox(
             "What is your main goal?",
             [
@@ -1208,52 +1098,48 @@ def home_page():
                 "Build AI projects",
                 "Prepare for a job",
                 "Learn Generative AI",
-                "Learn AI Agents",
-            ],
-            key="home_goal",
+                "Learn AI Agents"
+            ]
         )
 
-    with col3:
-        study_time = st.selectbox(
-            "How much time can you study daily?",
-            [
-                "15 minutes",
-                "30 minutes",
-                "1 hour",
-                "2+ hours",
-            ],
-            key="home_time",
-        )
+    study_time = st.selectbox(
+        "How much time can you study daily?",
+        [
+            "15 minutes",
+            "30 minutes",
+            "1 hour",
+            "2+ hours"
+        ]
+    )
 
     st.write("")
 
-    start_col1, start_col2, start_col3 = st.columns([1, 1, 1])
+    start_col1, start_col2, start_col3 = st.columns([1, 2, 1])
 
     with start_col2:
 
-        if st.button(
-            "🚀 Start My AI Journey",
-            use_container_width=True,
+        start = st.button(
+            "🚀 Start AI Journey",
             type="primary",
-        ):
+            use_container_width=True
+        )
 
-            if not name.strip():
-                st.error("Please enter your name first.")
-                return
+    if start:
+
+        if not name.strip():
+
+            st.warning("Please enter your name first.")
+
+        else:
 
             st.session_state.profile = {
                 "name": name.strip(),
                 "level": level,
                 "goal": goal,
-                "study_time": study_time,
+                "study_time": study_time
             }
 
-            st.session_state.diagnostic_questions = build_diagnostic(level)
-            st.session_state.diagnostic_answers = {}
-            st.session_state.scores = {}
-            st.session_state.overall_score = 0
-
-            st.session_state.page = "diagnostic"
+            start_diagnostic()
 
             st.rerun()
 
@@ -1274,20 +1160,20 @@ def home_page():
 
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
-    foundation_data = [
+    foundation_cols = st.columns(5)
+
+    foundations = [
         ("🐍", "Python"),
         ("📐", "Mathematics & Statistics"),
         ("🤖", "Machine Learning"),
         ("🧠", "Deep Learning"),
-        ("✨", "Generative AI"),
+        ("✨", "Generative AI")
     ]
 
-    cols = st.columns(5)
-
-    for col, (icon, name_text) in zip(cols, foundation_data):
+    for col, (icon, name_) in zip(foundation_cols, foundations):
 
         with col:
 
@@ -1300,12 +1186,12 @@ def home_page():
                     </div>
 
                     <div class="foundation-name">
-                        {name_text}
+                        {name_}
                     </div>
 
                 </div>
                 """,
-                unsafe_allow_html=True,
+                unsafe_allow_html=True
             )
 
 
@@ -1315,43 +1201,52 @@ def home_page():
 
 def diagnostic_page():
 
-    st.markdown(
-        """
-        <div class="page-title">
-            🎯 AI Knowledge Assessment
-        </div>
-
-        <div class="page-description">
-            Answer all 15 questions. Your answers will be
-            evaluated after you submit the assessment.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    render_header()
 
     profile = st.session_state.profile
 
+    st.markdown(
+        f"""
+        <div class="diagnostic-header">
+
+            <div class="diagnostic-title">
+                AI Diagnostic Assessment
+            </div>
+
+            <div class="diagnostic-subtitle">
+                Hi {profile.get("name", "Learner")} 👋
+                Answer all 15 questions to help AI Learn
+                understand your current knowledge.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     st.info(
-        f"Assessment level: {profile.get('level', 'Beginner')}  •  "
-        f"15 questions  •  3 questions from each foundation"
+        f"Level selected: {profile.get('level', 'Beginner')} • "
+        "3 questions from each of the 5 AI foundations."
     )
 
     questions = st.session_state.diagnostic_questions
 
     if not questions:
-        st.warning("No diagnostic has been created yet.")
+
+        st.error("No diagnostic questions found. Please return to Home.")
+
         if st.button("Go to Home"):
             st.session_state.page = "home"
             st.rerun()
+
         return
 
     # IMPORTANT:
-    # All questions are displayed at once.
-    # No topic/subject name is displayed.
-
+    # Form prevents Streamlit from rerunning the page
+    # after every radio selection.
     with st.form("diagnostic_form"):
 
-        for index, question in enumerate(questions):
+        for index, q in enumerate(questions):
 
             st.markdown(
                 f"""
@@ -1362,68 +1257,68 @@ def diagnostic_page():
                     </div>
 
                     <div class="question-text">
-                        {question["question"]}
+                        {q["question"]}
                     </div>
 
                 </div>
                 """,
-                unsafe_allow_html=True,
+                unsafe_allow_html=True
             )
 
-            selected = st.radio(
-                "Select your answer",
-                question["options"],
+            # No subject/topic is displayed here.
+            answer = st.radio(
+                "Select your answer:",
+                q["options"],
                 index=None,
-                key=f"diagnostic_answer_{index}",
-                label_visibility="collapsed",
+                key=f"diagnostic_q_{index}",
+                label_visibility="collapsed"
             )
 
-            st.session_state.diagnostic_answers[index] = selected
-
-        st.write("")
+            st.write("")
 
         submitted = st.form_submit_button(
-            "Submit Assessment →",
-            use_container_width=True,
+            "✅ Submit Diagnostic",
             type="primary",
+            use_container_width=True
         )
 
     if submitted:
 
         unanswered = []
 
-        for index in range(15):
+        answers = {}
+
+        for index, q in enumerate(questions):
+
             answer = st.session_state.get(
-                f"diagnostic_answer_{index}"
+                f"diagnostic_q_{index}"
             )
 
             if answer is None:
                 unanswered.append(index + 1)
 
-            st.session_state.diagnostic_answers[index] = answer
+            else:
+                answers[index] = q["options"].index(answer)
 
         if unanswered:
 
-            st.error(
+            st.warning(
                 "Please answer all 15 questions before submitting. "
-                f"Unanswered questions: {', '.join(map(str, unanswered))}"
+                f"Missing question(s): {', '.join(map(str, unanswered))}"
             )
 
-            return
+        else:
 
-        scores = calculate_scores()
+            # Store answers silently.
+            st.session_state.diagnostic_answers = answers
 
-        st.session_state.scores = scores
+            # Calculate scores only now.
+            calculate_scores()
 
-        st.session_state.overall_score = round(
-            sum(scores.values()) / len(scores)
-        )
+            # Move directly to Score Card.
+            st.session_state.page = "score"
 
-        st.session_state.roadmap = create_roadmap(scores)
-
-        st.session_state.page = "score_card"
-
-        st.rerun()
+            st.rerun()
 
 
 # =========================================================
@@ -1432,41 +1327,31 @@ def diagnostic_page():
 
 def score_card_page():
 
+    render_header()
+
     scores = st.session_state.scores
+    overall = st.session_state.overall_score
 
     if not scores:
+
         st.warning("Please complete the diagnostic first.")
 
-        if st.button("Start Diagnostic"):
+        if st.button("Go to Home"):
+
             st.session_state.page = "home"
             st.rerun()
 
         return
 
-    overall = st.session_state.overall_score
-
-    st.markdown(
-        """
-        <div class="page-title">
-            🎓 Your AI Learning Score Card
-        </div>
-
-        <div class="page-description">
-            Here is your current AI knowledge profile.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
     st.markdown(
         f"""
-        <div class="score-hero">
+        <div class="score-header">
 
-            <div class="score-label">
-                Overall Score
+            <div class="score-header-title">
+                🎓 YOUR AI LEARNING SCORE CARD
             </div>
 
-            <div class="score-number">
+            <div class="overall-score">
                 {overall}%
             </div>
 
@@ -1476,46 +1361,66 @@ def score_card_page():
 
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
+
+    # ---------------- SUBJECT SCORES ----------------
 
     for subject in SUBJECTS:
 
-        score = scores[subject]
+        score = scores.get(subject, 0)
         status = status_for_score(score)
 
         st.markdown(
             f"""
-            <div class="subject-score-card">
+            <div class="subject-card">
 
                 <div class="subject-name">
                     {subject}
                 </div>
 
-                <div class="progress-background">
-                    <div
-                        class="progress-fill"
-                        style="width:{score}%"
-                    ></div>
+                <div class="score-number">
+                    {score}%
                 </div>
 
-                <div class="subject-score">
-                    <strong>{score}%</strong>
-                    &nbsp; • &nbsp;
-                    {status}
+                <div style="
+                    margin-top:10px;
+                    height:10px;
+                    background:#e9eef2;
+                    border-radius:20px;
+                    overflow:hidden;
+                ">
+
+                    <div style="
+                        width:{score}%;
+                        height:100%;
+                        background:#19b889;
+                        border-radius:20px;
+                    "></div>
+
+                </div>
+
+                <div style="
+                    margin-top:8px;
+                    color:#687786;
+                    font-size:14px;
+                ">
+                    Status: <strong>{status}</strong>
                 </div>
 
             </div>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
-    weakest = min(
-        SUBJECTS,
-        key=lambda subject: scores[subject]
+    # ---------------- RECOMMENDATION ----------------
+
+    weakest_subject = min(
+        scores,
+        key=scores.get
     )
 
-    weakest_score = scores[weakest]
+    weakest_score = scores[weakest_subject]
 
     st.markdown(
         f"""
@@ -1525,21 +1430,27 @@ def score_card_page():
                 🎯 Recommended Starting Point
             </div>
 
-            <div class="recommendation-subject">
-                {weakest} — {weakest_score}%
+            <div style="
+                font-size:24px;
+                font-weight:800;
+                color:#344454;
+                margin-bottom:8px;
+            ">
+                {weakest_subject} — {weakest_score}%
             </div>
 
             <div style="
-                color:#71808e;
-                line-height:1.6;
+                color:#687786;
+                line-height:1.5;
             ">
-                Build your foundation here before moving
-                deeper into advanced AI topics.
+                AI Learn will prioritise this area in your
+                personalised learning journey before moving
+                you toward more advanced topics.
             </div>
 
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
     st.write("")
@@ -1550,9 +1461,10 @@ def score_card_page():
 
         if st.button(
             "🗺️ View My Personalised Roadmap",
-            use_container_width=True,
             type="primary",
+            use_container_width=True
         ):
+
             st.session_state.page = "roadmap"
             st.rerun()
 
@@ -1560,15 +1472,15 @@ def score_card_page():
 
         if st.button(
             "🔄 Retake Diagnostic",
-            use_container_width=True,
+            use_container_width=True
         ):
 
             level = st.session_state.profile.get(
                 "level",
-                "Beginner",
+                "Beginner"
             )
 
-            st.session_state.diagnostic_questions = build_diagnostic(
+            st.session_state.diagnostic_questions = make_diagnostic(
                 level
             )
 
@@ -1585,100 +1497,141 @@ def score_card_page():
 
 def roadmap_page():
 
+    render_header()
+
     scores = st.session_state.scores
 
     if not scores:
-        st.warning("Complete the diagnostic first.")
 
-        if st.button("Go Home"):
-            st.session_state.page = "home"
-            st.rerun()
+        st.warning("Complete your diagnostic first.")
 
         return
 
-    roadmap = create_roadmap(scores)
-
     st.markdown(
         """
-        <div class="page-title">
-            🗺️ Your Personalised AI Roadmap
-        </div>
+        <div class="diagnostic-header">
 
-        <div class="page-description">
-            Your learning path is ordered from the areas
-            that currently need the most attention.
+            <div class="diagnostic-title">
+                🗺️ Your Personalised AI Roadmap
+            </div>
+
+            <div class="diagnostic-subtitle">
+                Your roadmap starts with the areas that need
+                the most attention and gradually moves upward.
+            </div>
+
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
-    for index, subject in enumerate(roadmap):
+    ordered_subjects = sorted(
+        SUBJECTS,
+        key=lambda subject: scores.get(subject, 0)
+    )
 
-        score = scores[subject]
+    descriptions = {
+
+        "Python":
+            "Build programming fundamentals, data structures, functions, OOP, NumPy and Pandas.",
+
+        "Mathematics & Statistics":
+            "Strengthen statistics, probability, linear algebra, calculus and gradients.",
+
+        "Machine Learning":
+            "Learn supervised learning, unsupervised learning, preprocessing, evaluation and model improvement.",
+
+        "Deep Learning":
+            "Progress through neural networks, backpropagation, CNNs, sequence models and Transformers.",
+
+        "Generative AI":
+            "Learn LLMs, tokens, embeddings, prompting, RAG, fine-tuning concepts and modern generative AI."
+    }
+
+    for number, subject in enumerate(
+        ordered_subjects,
+        start=1
+    ):
+
+        score = scores.get(subject, 0)
 
         st.markdown(
             f"""
             <div class="roadmap-card">
 
                 <div class="roadmap-number">
-                    STEP {index + 1}
+                    {number}
                 </div>
 
-                <div class="roadmap-name">
+                <div class="roadmap-title">
                     {subject}
                 </div>
 
-                <div class="roadmap-score">
-                    Current score: {score}% •
-                    Status: {status_for_score(score)}
+                <div class="roadmap-text">
+                    Current score: <strong>{score}%</strong>
+                    <br><br>
+                    {descriptions[subject]}
                 </div>
 
             </div>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
     st.write("")
 
     if st.button(
         "← Back to Score Card",
-        use_container_width=True,
+        use_container_width=True
     ):
-        st.session_state.page = "score_card"
+
+        st.session_state.page = "score"
         st.rerun()
 
 
 # =========================================================
-# SIDEBAR
+# SIDEBAR NAVIGATION
 # =========================================================
 
 with st.sidebar:
 
-    st.markdown("## 🎓 AI Learn")
+    st.markdown(
+        """
+        ## 🎓 AI Learn
 
-    if st.button("🏠 Home", use_container_width=True):
+        Your personalised AI learning journey.
+        """
+    )
+
+    if st.button(
+        "🏠 Home",
+        use_container_width=True
+    ):
+
         st.session_state.page = "home"
         st.rerun()
 
     if st.session_state.scores:
 
         if st.button(
-            "🎓 Score Card",
-            use_container_width=True,
+            "📊 Score Card",
+            use_container_width=True
         ):
-            st.session_state.page = "score_card"
+
+            st.session_state.page = "score"
             st.rerun()
 
         if st.button(
             "🗺️ Roadmap",
-            use_container_width=True,
+            use_container_width=True
         ):
+
             st.session_state.page = "roadmap"
             st.rerun()
 
 
 # =========================================================
-# PAGE ROUTER
+# PAGE ROUTING
 # =========================================================
 
 if st.session_state.page == "home":
@@ -1689,7 +1642,7 @@ elif st.session_state.page == "diagnostic":
 
     diagnostic_page()
 
-elif st.session_state.page == "score_card":
+elif st.session_state.page == "score":
 
     score_card_page()
 
@@ -1700,4 +1653,4 @@ elif st.session_state.page == "roadmap":
 else:
 
     st.session_state.page = "home"
-    st.rerun()
+    home_page()
