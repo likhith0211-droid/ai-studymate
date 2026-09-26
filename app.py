@@ -2,7 +2,7 @@ import streamlit as st
 import random
 
 # ============================================================
-# PAGE CONFIG
+# PAGE CONFIGURATION
 # ============================================================
 
 st.set_page_config(
@@ -46,68 +46,82 @@ for key, value in DEFAULTS.items():
 
 
 # ============================================================
-# QUESTION BANKS
+# QUESTION BANK
 # ============================================================
 
 QUESTION_BANK = {
 
+    # ========================================================
+    # PYTHON
+    # ========================================================
+
     "Python": {
 
         "Beginner": [
+
             {
                 "id": "py_b1",
                 "question": "Which symbol is used to create a comment in Python?",
                 "options": ["#", "//", "/*", "--"],
                 "answer": "#"
             },
+
             {
                 "id": "py_b2",
                 "question": "Which of the following is a Python data type?",
                 "options": ["list", "table", "recordset", "document"],
                 "answer": "list"
             },
+
             {
                 "id": "py_b3",
                 "question": "What is the output type of the expression 10 > 5?",
                 "options": ["Boolean", "String", "Integer", "List"],
                 "answer": "Boolean"
             },
+
             {
                 "id": "py_b4",
                 "question": "Which keyword is used to define a function in Python?",
                 "options": ["def", "function", "fun", "define"],
                 "answer": "def"
             },
+
             {
                 "id": "py_b5",
                 "question": "Which collection stores multiple values in an ordered and changeable form?",
                 "options": ["List", "Tuple", "Set", "Dictionary"],
                 "answer": "List"
             },
+
             {
                 "id": "py_b6",
                 "question": "Which function is commonly used to display output in Python?",
                 "options": ["print()", "display()", "show()", "output()"],
                 "answer": "print()"
             },
+
             {
                 "id": "py_b7",
                 "question": "Which operator is used for exponentiation in Python?",
                 "options": ["**", "^", "//", "%%"],
                 "answer": "**"
             },
+
             {
                 "id": "py_b8",
                 "question": "Which value represents the absence of a value in Python?",
                 "options": ["None", "NullValue", "Empty", "Void"],
                 "answer": "None"
             },
+
             {
                 "id": "py_b9",
                 "question": "Which statement is used to repeat code while a condition remains true?",
                 "options": ["while", "repeat", "loop", "during"],
                 "answer": "while"
             },
+
             {
                 "id": "py_b10",
                 "question": "Which brackets are used to create a Python list?",
@@ -117,6 +131,7 @@ QUESTION_BANK = {
         ],
 
         "Intermediate": [
+
             {
                 "id": "py_i1",
                 "question": "What does a Python dictionary primarily store?",
@@ -128,6 +143,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Key-value pairs"
             },
+
             {
                 "id": "py_i2",
                 "question": "What does list comprehension provide?",
@@ -139,6 +155,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "A concise way to create lists"
             },
+
             {
                 "id": "py_i3",
                 "question": "What is the purpose of try/except?",
@@ -150,12 +167,14 @@ QUESTION_BANK = {
                 ],
                 "answer": "Handle exceptions"
             },
+
             {
                 "id": "py_i4",
                 "question": "Which Python structure is immutable?",
                 "options": ["Tuple", "List", "Dictionary", "Set"],
                 "answer": "Tuple"
             },
+
             {
                 "id": "py_i5",
                 "question": "What does *args allow a function to accept?",
@@ -167,6 +186,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Variable positional arguments"
             },
+
             {
                 "id": "py_i6",
                 "question": "What is the purpose of a Python virtual environment?",
@@ -178,6 +198,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Isolate project dependencies"
             },
+
             {
                 "id": "py_i7",
                 "question": "What does the map() function generally do?",
@@ -189,6 +210,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Apply a function to elements of an iterable"
             },
+
             {
                 "id": "py_i8",
                 "question": "What is a lambda in Python?",
@@ -200,6 +222,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "An anonymous function"
             },
+
             {
                 "id": "py_i9",
                 "question": "What does inheritance allow in object-oriented Python?",
@@ -211,6 +234,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "A class to derive behavior from another class"
             },
+
             {
                 "id": "py_i10",
                 "question": "Which library is primarily used for numerical arrays in Python?",
@@ -220,6 +244,7 @@ QUESTION_BANK = {
         ],
 
         "Advanced": [
+
             {
                 "id": "py_a1",
                 "question": "What is the key difference between a shallow copy and a deep copy?",
@@ -231,6 +256,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "A shallow copy can share nested objects, while a deep copy recursively copies them"
             },
+
             {
                 "id": "py_a2",
                 "question": "What problem can mutable default function arguments cause in Python?",
@@ -242,6 +268,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "The same mutable object can persist across function calls"
             },
+
             {
                 "id": "py_a3",
                 "question": "What is the main purpose of a generator?",
@@ -253,6 +280,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Produce values lazily instead of storing them all at once"
             },
+
             {
                 "id": "py_a4",
                 "question": "What does the Python GIL primarily affect?",
@@ -264,29 +292,37 @@ QUESTION_BANK = {
                 ],
                 "answer": "Execution of Python bytecode by multiple threads in the standard CPython implementation"
             },
+
             {
                 "id": "py_a5",
                 "question": "What is a decorator commonly used for?",
                 "options": [
-                    "Modify or extend function/class behavior without changing its core definition",
+                    "Modify or extend function or class behavior without changing its core definition",
                     "Create database tables",
                     "Allocate GPU memory",
                     "Convert Python into Java"
                 ],
-                "answer": "Modify or extend function/class behavior without changing its core definition"
+                "answer": "Modify or extend function or class behavior without changing its core definition"
             }
         ]
     },
 
+
+    # ========================================================
+    # MATHEMATICS & STATISTICS
+    # ========================================================
+
     "Mathematics & Statistics": {
 
         "Beginner": [
+
             {
                 "id": "math_b1",
                 "question": "What is the mean of 2, 4, and 6?",
                 "options": ["4", "3", "6", "12"],
                 "answer": "4"
             },
+
             {
                 "id": "math_b2",
                 "question": "What does probability measure?",
@@ -298,6 +334,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "The likelihood of an event"
             },
+
             {
                 "id": "math_b3",
                 "question": "What is the median?",
@@ -309,6 +346,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "The middle value after sorting"
             },
+
             {
                 "id": "math_b4",
                 "question": "What does variance measure?",
@@ -320,6 +358,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "How spread out values are"
             },
+
             {
                 "id": "math_b5",
                 "question": "What is the value of 2²?",
@@ -329,6 +368,7 @@ QUESTION_BANK = {
         ],
 
         "Intermediate": [
+
             {
                 "id": "math_i1",
                 "question": "What does standard deviation represent?",
@@ -340,6 +380,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "The typical spread of values around the mean"
             },
+
             {
                 "id": "math_i2",
                 "question": "What is correlation used to describe?",
@@ -351,6 +392,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "The strength and direction of association between variables"
             },
+
             {
                 "id": "math_i3",
                 "question": "What does a probability of 0 represent?",
@@ -362,6 +404,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "An impossible event"
             },
+
             {
                 "id": "math_i4",
                 "question": "What does a normal distribution typically look like?",
@@ -373,6 +416,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Bell-shaped and symmetric"
             },
+
             {
                 "id": "math_i5",
                 "question": "What is the purpose of a derivative?",
@@ -387,6 +431,7 @@ QUESTION_BANK = {
         ],
 
         "Advanced": [
+
             {
                 "id": "math_a1",
                 "question": "Why is the gradient important in machine learning optimization?",
@@ -398,6 +443,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "It indicates the direction of greatest increase of a function"
             },
+
             {
                 "id": "math_a2",
                 "question": "What does a covariance matrix describe?",
@@ -409,6 +455,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Variances and pairwise covariances among variables"
             },
+
             {
                 "id": "math_a3",
                 "question": "What is the intuition behind Bayes' theorem?",
@@ -420,6 +467,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Update a probability using new evidence"
             },
+
             {
                 "id": "math_a4",
                 "question": "What does an eigenvector represent in linear algebra?",
@@ -431,6 +479,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "A direction that is scaled by a matrix transformation"
             },
+
             {
                 "id": "math_a5",
                 "question": "Why can a high-dimensional feature space be problematic for some algorithms?",
@@ -445,9 +494,15 @@ QUESTION_BANK = {
         ]
     },
 
+
+    # ========================================================
+    # MACHINE LEARNING
+    # ========================================================
+
     "Machine Learning": {
 
         "Beginner": [
+
             {
                 "id": "ml_b1",
                 "question": "What is supervised learning?",
@@ -459,6 +514,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Learning from labelled examples"
             },
+
             {
                 "id": "ml_b2",
                 "question": "What is a training dataset used for?",
@@ -470,6 +526,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Teaching a model patterns from data"
             },
+
             {
                 "id": "ml_b3",
                 "question": "Which is a classification task?",
@@ -481,6 +538,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Predicting whether an email is spam"
             },
+
             {
                 "id": "ml_b4",
                 "question": "Which is a regression task?",
@@ -492,6 +550,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Predicting house price"
             },
+
             {
                 "id": "ml_b5",
                 "question": "Why do we split data into training and testing sets?",
@@ -506,6 +565,7 @@ QUESTION_BANK = {
         ],
 
         "Intermediate": [
+
             {
                 "id": "ml_i1",
                 "question": "What is overfitting?",
@@ -517,6 +577,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "When a model learns training data too closely and performs poorly on new data"
             },
+
             {
                 "id": "ml_i2",
                 "question": "What is cross-validation used for?",
@@ -528,6 +589,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Estimate model performance across different data splits"
             },
+
             {
                 "id": "ml_i3",
                 "question": "What does feature scaling help with?",
@@ -539,6 +601,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Putting numeric features on comparable scales"
             },
+
             {
                 "id": "ml_i4",
                 "question": "What does regularization generally do?",
@@ -550,6 +613,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Penalizes model complexity"
             },
+
             {
                 "id": "ml_i5",
                 "question": "What is precision in classification?",
@@ -564,6 +628,7 @@ QUESTION_BANK = {
         ],
 
         "Advanced": [
+
             {
                 "id": "ml_a1",
                 "question": "A model has very low training error but high validation error. What is the most likely issue?",
@@ -575,6 +640,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Overfitting"
             },
+
             {
                 "id": "ml_a2",
                 "question": "Why can data leakage produce misleadingly strong validation results?",
@@ -586,6 +652,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Information unavailable at prediction time leaks into training or validation"
             },
+
             {
                 "id": "ml_a3",
                 "question": "What is the bias-variance tradeoff concerned with?",
@@ -597,6 +664,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Balancing systematic error and sensitivity to training data"
             },
+
             {
                 "id": "ml_a4",
                 "question": "Why might accuracy be misleading for a highly imbalanced classification dataset?",
@@ -608,6 +676,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "A model can achieve high accuracy by mostly predicting the majority class"
             },
+
             {
                 "id": "ml_a5",
                 "question": "What does ROC-AUC generally measure?",
@@ -622,9 +691,15 @@ QUESTION_BANK = {
         ]
     },
 
+
+    # ========================================================
+    # DEEP LEARNING
+    # ========================================================
+
     "Deep Learning": {
 
         "Beginner": [
+
             {
                 "id": "dl_b1",
                 "question": "What is an artificial neural network inspired by?",
@@ -636,6 +711,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Networks of biological neurons"
             },
+
             {
                 "id": "dl_b2",
                 "question": "What is an activation function used for?",
@@ -647,6 +723,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Introduce non-linearity"
             },
+
             {
                 "id": "dl_b3",
                 "question": "What is a neural network weight?",
@@ -658,6 +735,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "A parameter learned during training"
             },
+
             {
                 "id": "dl_b4",
                 "question": "What is an epoch?",
@@ -669,6 +747,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "One complete pass through the training dataset"
             },
+
             {
                 "id": "dl_b5",
                 "question": "What is a loss function?",
@@ -683,6 +762,7 @@ QUESTION_BANK = {
         ],
 
         "Intermediate": [
+
             {
                 "id": "dl_i1",
                 "question": "What does backpropagation compute?",
@@ -694,6 +774,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Gradients of the loss with respect to model parameters"
             },
+
             {
                 "id": "dl_i2",
                 "question": "Why are CNNs effective for many image tasks?",
@@ -705,6 +786,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "They exploit local spatial patterns using convolution"
             },
+
             {
                 "id": "dl_i3",
                 "question": "What does dropout help reduce?",
@@ -716,6 +798,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Overfitting"
             },
+
             {
                 "id": "dl_i4",
                 "question": "What is the role of an optimizer such as Adam?",
@@ -727,6 +810,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Update model parameters using gradients"
             },
+
             {
                 "id": "dl_i5",
                 "question": "What is vanishing gradient?",
@@ -741,6 +825,7 @@ QUESTION_BANK = {
         ],
 
         "Advanced": [
+
             {
                 "id": "dl_a1",
                 "question": "Why can residual connections help very deep neural networks?",
@@ -752,6 +837,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "They provide shorter paths for information and gradient flow"
             },
+
             {
                 "id": "dl_a2",
                 "question": "What is the purpose of batch normalization?",
@@ -763,6 +849,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Normalize intermediate activations to improve training behavior"
             },
+
             {
                 "id": "dl_a3",
                 "question": "Why can softmax be used for multiclass classification?",
@@ -774,6 +861,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "It converts logits into normalized class probabilities"
             },
+
             {
                 "id": "dl_a4",
                 "question": "What problem can an excessively large learning rate cause?",
@@ -785,6 +873,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Training can overshoot useful regions and fail to converge"
             },
+
             {
                 "id": "dl_a5",
                 "question": "What is attention designed to help a model do?",
@@ -799,9 +888,15 @@ QUESTION_BANK = {
         ]
     },
 
+
+    # ========================================================
+    # GENERATIVE AI
+    # ========================================================
+
     "Generative AI": {
 
         "Beginner": [
+
             {
                 "id": "gen_b1",
                 "question": "What does Generative AI primarily do?",
@@ -813,6 +908,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Generate new content"
             },
+
             {
                 "id": "gen_b2",
                 "question": "What does LLM stand for?",
@@ -824,6 +920,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Large Language Model"
             },
+
             {
                 "id": "gen_b3",
                 "question": "What is a prompt?",
@@ -835,6 +932,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "An instruction or input given to an AI model"
             },
+
             {
                 "id": "gen_b4",
                 "question": "What is an AI chatbot designed to do?",
@@ -846,6 +944,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Interact with users using natural language"
             },
+
             {
                 "id": "gen_b5",
                 "question": "What is an embedding?",
@@ -860,6 +959,7 @@ QUESTION_BANK = {
         ],
 
         "Intermediate": [
+
             {
                 "id": "gen_i1",
                 "question": "What is RAG?",
@@ -871,6 +971,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Retrieval-Augmented Generation"
             },
+
             {
                 "id": "gen_i2",
                 "question": "Why are embeddings useful in semantic search?",
@@ -882,6 +983,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "They represent meaning in a numerical space"
             },
+
             {
                 "id": "gen_i3",
                 "question": "What is tokenization?",
@@ -893,6 +995,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Breaking text into tokens processed by a model"
             },
+
             {
                 "id": "gen_i4",
                 "question": "What is context in an LLM interaction?",
@@ -904,6 +1007,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Information provided to help the model generate a response"
             },
+
             {
                 "id": "gen_i5",
                 "question": "What is fine-tuning?",
@@ -918,6 +1022,7 @@ QUESTION_BANK = {
         ],
 
         "Advanced": [
+
             {
                 "id": "gen_a1",
                 "question": "Why can an LLM hallucinate?",
@@ -929,6 +1034,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "It can generate plausible text without having a guaranteed mechanism for factual verification"
             },
+
             {
                 "id": "gen_a2",
                 "question": "What is the key idea behind transformer self-attention?",
@@ -940,6 +1046,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Each token can assign different importance to other tokens when forming representations"
             },
+
             {
                 "id": "gen_a3",
                 "question": "Why does RAG often improve factual grounding?",
@@ -951,6 +1058,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "The model can condition generation on retrieved external information"
             },
+
             {
                 "id": "gen_a4",
                 "question": "What is temperature commonly used for in text generation?",
@@ -962,6 +1070,7 @@ QUESTION_BANK = {
                 ],
                 "answer": "Control the randomness of token selection"
             },
+
             {
                 "id": "gen_a5",
                 "question": "What is the main purpose of a system prompt?",
@@ -979,7 +1088,7 @@ QUESTION_BANK = {
 
 
 # ============================================================
-# STATUS FUNCTION
+# STATUS
 # ============================================================
 
 def get_status(score):
@@ -1009,7 +1118,6 @@ def create_new_diagnostic(level):
 
         available = QUESTION_BANK[subject][level]
 
-        # Avoid previously used questions when possible
         unused = [
             q for q in available
             if q["id"] not in st.session_state.used_question_ids
@@ -1017,17 +1125,21 @@ def create_new_diagnostic(level):
 
         if len(unused) >= 3:
             chosen = random.sample(unused, 3)
-
         else:
             chosen = random.sample(available, 3)
 
         for question in chosen:
 
-            st.session_state.used_question_ids.add(question["id"])
+            st.session_state.used_question_ids.add(
+                question["id"]
+            )
 
             question_copy = question.copy()
 
+            question_copy["subject"] = subject
+
             shuffled_options = question_copy["options"].copy()
+
             random.shuffle(shuffled_options)
 
             question_copy["options"] = shuffled_options
@@ -1063,13 +1175,17 @@ def calculate_scores():
 
         correct = 0
 
-        for q in subject_questions:
+        for question in subject_questions:
 
-            if q["selected"] == q["answer"]:
+            if question["selected"] == question["answer"]:
                 correct += 1
 
-        if subject_questions:
-            score = round((correct / len(subject_questions)) * 100)
+        if len(subject_questions) > 0:
+
+            score = round(
+                (correct / len(subject_questions)) * 100
+            )
+
         else:
             score = 0
 
@@ -1079,7 +1195,7 @@ def calculate_scores():
 
 
 # ============================================================
-# ROADMAP
+# CREATE ROADMAP
 # ============================================================
 
 def create_roadmap(scores):
@@ -1093,11 +1209,13 @@ def create_roadmap(scores):
 
     for subject, score in sorted_subjects:
 
-        roadmap.append({
-            "subject": subject,
-            "score": score,
-            "status": get_status(score)
-        })
+        roadmap.append(
+            {
+                "subject": subject,
+                "score": score,
+                "status": get_status(score)
+            }
+        )
 
     return roadmap
 
@@ -1108,21 +1226,44 @@ def create_roadmap(scores):
 
 def home_page():
 
+    # --------------------------------------------------------
+    # HERO SECTION
+    # --------------------------------------------------------
+
     st.markdown(
         """
-        <div style="text-align:center; padding:40px 10px 20px 10px;">
+        <div style="
+            text-align:center;
+            padding:45px 10px 30px 10px;
+        ">
 
-            <div style="font-size:56px;">🎓</div>
+            <div style="
+                font-size:56px;
+                margin-bottom:10px;
+            ">
+                🎓
+            </div>
 
-            <h1 style="font-size:42px; margin-bottom:5px;">
+            <h1 style="
+                font-size:42px;
+                margin:0;
+                padding:0;
+            ">
                 AI StudyMate
             </h1>
 
-            <p style="font-size:20px;">
+            <p style="
+                font-size:20px;
+                margin-top:10px;
+                margin-bottom:8px;
+            ">
                 Personalised AI Tutor for Learning AI
             </p>
 
-            <p style="font-size:16px;">
+            <p style="
+                font-size:16px;
+                margin-top:0;
+            ">
                 Learn AI through a personalised learning journey
                 designed around your current knowledge and goals.
             </p>
@@ -1134,16 +1275,27 @@ def home_page():
 
     st.divider()
 
+    # --------------------------------------------------------
+    # PROFILE
+    # --------------------------------------------------------
+
     st.subheader("👤 Tell us about yourself")
 
     name = st.text_input(
         "Your Name",
-        value=st.session_state.profile.get("name", "")
+        value=st.session_state.profile.get(
+            "name",
+            ""
+        )
     )
 
     level = st.selectbox(
         "Current AI Level",
-        ["Beginner", "Intermediate", "Advanced"],
+        [
+            "Beginner",
+            "Intermediate",
+            "Advanced"
+        ],
         index=[
             "Beginner",
             "Intermediate",
@@ -1179,6 +1331,10 @@ def home_page():
 
     st.write("")
 
+    # --------------------------------------------------------
+    # START BUTTON
+    # --------------------------------------------------------
+
     if st.button(
         "🚀 Start AI Journey",
         use_container_width=True
@@ -1190,6 +1346,9 @@ def home_page():
             "goal": goal,
             "study_time": study_time
         }
+
+        # Start a fresh diagnostic
+        st.session_state.used_question_ids = set()
 
         create_new_diagnostic(level)
 
@@ -1207,7 +1366,9 @@ def diagnostic_page():
     questions = st.session_state.questions
 
     if not questions:
+
         st.session_state.page = "home"
+
         st.rerun()
 
     current_index = st.session_state.current_question
@@ -1215,27 +1376,32 @@ def diagnostic_page():
     current_question = questions[current_index]
 
     # --------------------------------------------------------
-    # Progress
+    # HEADER
     # --------------------------------------------------------
-
-    st.progress(
-        current_index / len(questions)
-    )
-
-    st.caption(
-        f"Question {current_index + 1} of {len(questions)}"
-    )
 
     st.title("🧠 AI Diagnostic")
 
     st.write(
-        f"Level: **{st.session_state.profile.get('level', 'Beginner')}**"
+        f"Level selected: "
+        f"**{st.session_state.profile.get('level', 'Beginner')}**"
     )
+
+    st.caption(
+        f"Question {current_index + 1} "
+        f"of {len(questions)}"
+    )
+
+    progress_value = (
+        (current_index + 1) /
+        len(questions)
+    )
+
+    st.progress(progress_value)
 
     st.divider()
 
     # --------------------------------------------------------
-    # Question
+    # QUESTION
     # --------------------------------------------------------
 
     st.subheader(
@@ -1251,47 +1417,40 @@ def diagnostic_page():
 
     st.write("")
 
+    # --------------------------------------------------------
+    # NEXT BUTTON
+    # --------------------------------------------------------
+
     if st.button(
         "Next Question →",
         use_container_width=True,
         disabled=selected is None
     ):
 
+        # Save answer silently
         current_question["selected"] = selected
 
-        st.session_state.answers.append(selected)
+        st.session_state.answers.append(
+            selected
+        )
 
+        # More questions remain
         if current_index + 1 < len(questions):
 
             st.session_state.current_question += 1
 
             st.rerun()
 
+        # Diagnostic finished
         else:
-
-            # Add subject to questions if missing
-            for q in questions:
-
-                if q["id"].startswith("py_"):
-                    q["subject"] = "Python"
-
-                elif q["id"].startswith("math_"):
-                    q["subject"] = "Mathematics & Statistics"
-
-                elif q["id"].startswith("ml_"):
-                    q["subject"] = "Machine Learning"
-
-                elif q["id"].startswith("dl_"):
-                    q["subject"] = "Deep Learning"
-
-                elif q["id"].startswith("gen_"):
-                    q["subject"] = "Generative AI"
 
             scores = calculate_scores()
 
             st.session_state.domain_scores = scores
 
-            st.session_state.roadmap = create_roadmap(scores)
+            st.session_state.roadmap = create_roadmap(
+                scores
+            )
 
             st.session_state.diagnostic_complete = True
 
@@ -1309,25 +1468,38 @@ def score_card_page():
     scores = st.session_state.domain_scores
 
     if not scores:
+
         st.session_state.page = "home"
+
         st.rerun()
+
+    # --------------------------------------------------------
+    # OVERALL SCORE
+    # --------------------------------------------------------
 
     valid_scores = list(scores.values())
 
     overall_score = round(
-        sum(valid_scores) / len(valid_scores)
+        sum(valid_scores) /
+        len(valid_scores)
     )
+
+    # --------------------------------------------------------
+    # WEAKEST SUBJECT
+    # --------------------------------------------------------
 
     weakest_subject = min(
         scores,
         key=scores.get
     )
 
-    weakest_score = scores[weakest_subject]
+    weakest_score = scores[
+        weakest_subject
+    ]
 
-    # ========================================================
-    # HEADER
-    # ========================================================
+    # --------------------------------------------------------
+    # SCORE CARD HEADER
+    # --------------------------------------------------------
 
     st.markdown(
         f"""
@@ -1372,23 +1544,26 @@ def score_card_page():
         unsafe_allow_html=True
     )
 
-    # ========================================================
-    # SUBJECT SCORES
-    # ========================================================
+    # --------------------------------------------------------
+    # SUBJECT PERFORMANCE
+    # --------------------------------------------------------
 
     st.subheader("📊 Subject Performance")
 
     for subject in SUBJECTS:
 
-        score = scores.get(subject, 0)
+        score = scores.get(
+            subject,
+            0
+        )
 
         status = get_status(score)
 
         st.markdown(
             f"""
             <div style="
-                margin-top:18px;
-                margin-bottom:6px;
+                margin-top:20px;
+                margin-bottom:15px;
             ">
 
                 <div style="
@@ -1400,7 +1575,7 @@ def score_card_page():
 
                 <div style="
                     font-size:15px;
-                    margin-top:4px;
+                    margin-top:5px;
                 ">
                     {score}%
                 </div>
@@ -1410,7 +1585,7 @@ def score_card_page():
                     height:12px;
                     background:#e5e7eb;
                     border-radius:10px;
-                    margin-top:7px;
+                    margin-top:8px;
                     overflow:hidden;
                 ">
 
@@ -1426,7 +1601,7 @@ def score_card_page():
 
                 <div style="
                     font-size:14px;
-                    margin-top:5px;
+                    margin-top:6px;
                 ">
                     Status: <b>{status}</b>
                 </div>
@@ -1436,14 +1611,9 @@ def score_card_page():
             unsafe_allow_html=True
         )
 
-    # ========================================================
+    # --------------------------------------------------------
     # RECOMMENDED STARTING POINT
-    # ========================================================
-
-    st.markdown(
-        "<br>",
-        unsafe_allow_html=True
-    )
+    # --------------------------------------------------------
 
     st.divider()
 
@@ -1452,7 +1622,8 @@ def score_card_page():
         <div style="
             font-size:24px;
             font-weight:700;
-            margin-bottom:10px;
+            margin-top:15px;
+            margin-bottom:12px;
         ">
             🎯 Recommended Starting Point
         </div>
@@ -1489,9 +1660,9 @@ def score_card_page():
         unsafe_allow_html=True
     )
 
-    # ========================================================
-    # BUTTONS
-    # ========================================================
+    # --------------------------------------------------------
+    # ACTION BUTTONS
+    # --------------------------------------------------------
 
     col1, col2 = st.columns(2)
 
@@ -1526,7 +1697,7 @@ def score_card_page():
 
 
 # ============================================================
-# ROADMAP PAGE
+# PERSONALIZED ROADMAP
 # ============================================================
 
 def roadmap_page():
@@ -1546,7 +1717,9 @@ def roadmap_page():
     ):
 
         subject = item["subject"]
+
         score = item["score"]
+
         status = item["status"]
 
         st.markdown(
@@ -1584,6 +1757,8 @@ def roadmap_page():
             unsafe_allow_html=True
         )
 
+    st.write("")
+
     if st.button(
         "← Back to Score Card",
         use_container_width=True
@@ -1600,7 +1775,19 @@ def roadmap_page():
 
 with st.sidebar:
 
-    st.markdown("## 🎓 AI StudyMate")
+    st.markdown(
+        """
+        <div style="
+            text-align:center;
+            font-size:24px;
+            font-weight:700;
+            padding:10px;
+        ">
+            🎓 AI StudyMate
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.divider()
 
